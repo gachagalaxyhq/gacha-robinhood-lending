@@ -15,6 +15,9 @@ Built for the Arbitrum Open House Singapore Buildathon.
 **6 price certificates published** for real vaulted PSA 10 slabs.
 **Live borrow:** PSA 10 Rayquaza VMAX (cert 109308847) deposited, **$1,000 borrowed** against a $1,293 limit set by its certificate. [Borrow transaction](https://explorer.testnet.chain.robinhood.com/tx/0xd8910a2a6e58f3a9ecd2c15c7535fc2d63e79d09a951058524f4f4471c019491)
 
+## Live demo page
+`docs/index.html` is a single static page, with no backend, that reads certificates and positions live from Robinhood Chain and lets the depositor borrow, repay or withdraw through MetaMask. Serve `docs/` with GitHub Pages (Settings → Pages → Branch `main`, folder `/docs`).
+
 ## Architecture: two layers, one product
 ```
   PRIVACY LAYER (Horizen Vela TEE)                    LENDING LAYER (Robinhood Chain)
