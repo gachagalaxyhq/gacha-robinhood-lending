@@ -817,7 +817,7 @@
   <div class="hero">
     <div class="eyebrow">Card-backed lending · Testnet</div>
     <h1>Borrow against <span class="accent-word">graded cards</span><br/>on Robinhood Chain.</h1>
-    <p class="lede">Private appraisals from Horizen Vela. Onchain price certificates. Stablecoin loans.</p>
+    <p class="lede">Private appraisal engine built for Horizen Vela. Onchain price certificates. Stablecoin loans.</p>
   </div>
 </div>
 
@@ -922,6 +922,7 @@
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
         <span class="status-pill" id="dStatus"><span class="d"></span><span>…</span></span>
+        <button class="btn btn-outline btn-sm" id="claimBtn" hidden>Get a demo card</button>
         <button class="btn btn-outline btn-sm" id="depositBtn" hidden>Deposit card</button>
       </div>
     </div>
@@ -977,7 +978,7 @@
     <div class="how-col">
       <div class="how-num">01</div>
       <h3 class="how-title">Private pricing</h3>
-      <p class="how-desc">Horizen Vela enclave prices the card against private dealer comps. The raw comps never leave the enclave.</p>
+      <p class="how-desc">Our Horizen Vela app prices the card against private dealer comps inside an enclave, so the raw comps stay private. Tested locally today; live Vela deployment is in progress.</p>
       <span class="how-arrow">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </span>
@@ -1014,7 +1015,7 @@
       </div>
       <div class="contract">
         <div class="c-name">GradedCard</div>
-        <div class="c-addr"><a class="mono" href="https://explorer.testnet.chain.robinhood.com/address/0x2Ca223844D4D118Ee92509C6c4dbD81Cb5Be1CC8" target="_blank" rel="noopener" data-copy="0x2Ca223844D4D118Ee92509C6c4dbD81Cb5Be1CC8" style="color:inherit">0x2Ca2…1CC8</a>
+        <div class="c-addr"><a class="mono" href="https://explorer.testnet.chain.robinhood.com/address/0xDB6750f02192F670F93e592e4dd547fF10Ae46a5" target="_blank" rel="noopener" data-copy="0xDB6750f02192F670F93e592e4dd547fF10Ae46a5" style="color:inherit">0x2Ca2…1CC8</a>
           <button class="copy-btn" aria-label="Copy">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
           </button>
@@ -1030,7 +1031,7 @@
       </div>
       <div class="contract">
         <div class="c-name">CardLendingVault</div>
-        <div class="c-addr"><a class="mono" href="https://explorer.testnet.chain.robinhood.com/address/0xa9B03F4cB087d4D08d96E8e06887e362daE36400" target="_blank" rel="noopener" data-copy="0xa9B03F4cB087d4D08d96E8e06887e362daE36400" style="color:inherit">0xa9B0…6400</a>
+        <div class="c-addr"><a class="mono" href="https://explorer.testnet.chain.robinhood.com/address/0xca63dffB29376cff29B6DD38404B6c1d0105fc2A" target="_blank" rel="noopener" data-copy="0xca63dffB29376cff29B6DD38404B6c1d0105fc2A" style="color:inherit">0xa9B0…6400</a>
           <button class="copy-btn" aria-label="Copy">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
           </button>
@@ -1056,11 +1057,13 @@
   const EXPLORER = 'https://explorer.testnet.chain.robinhood.com';
   const A = {
     registry: '0x30dfBCA3978CE186e6107A93cedC7d2971d30950',
-    cards:    '0x2Ca223844D4D118Ee92509C6c4dbD81Cb5Be1CC8',
+    cards:    '0xDB6750f02192F670F93e592e4dd547fF10Ae46a5',
     usd:      '0x7e7f329325eAD4EC00807F08c5DC528cafeD77e1',
-    vault:    '0xa9B03F4cB087d4D08d96E8e06887e362daE36400',
+    vault:    '0xca63dffB29376cff29B6DD38404B6c1d0105fc2A',
   };
   const DEPLOY_BLOCK = 123079283;
+  const V2_BLOCK = 123121237;
+  const FAUCET = 'https://faucet.testnet.chain.robinhood.com';
   const META = {"109308847": {"tok": 1, "chip": "Rayquaza VMAX 218 \u00b7 Evolving Skies", "name": "Rayquaza VMAX", "num": "218/203", "set": "Evolving Skies", "year": 2021}, "118973623": {"tok": 2, "chip": "Pikachu & Zekrom GX SM168", "name": "Pikachu & Zekrom GX", "num": "SM168", "set": "SM Black Star Promo", "year": 2019}, "100863346": {"tok": 3, "chip": "Lugia V 186 \u00b7 Silver Tempest", "name": "Lugia V", "num": "186/195", "set": "Silver Tempest", "year": 2022}, "154790134": {"tok": 4, "chip": "Giratina VSTAR GG69 \u00b7 Crown Zenith", "name": "Giratina VSTAR", "num": "GG69/GG70", "set": "Crown Zenith", "year": 2023}, "153708045": {"tok": 5, "chip": "Rayquaza VMAX TG20", "name": "Rayquaza VMAX", "num": "TG20/TG30", "set": "Silver Tempest Trainer Gallery", "year": 2022}, "111992917": {"tok": 6, "chip": "Umbreon VMAX TG23", "name": "Umbreon VMAX", "num": "TG23/TG30", "set": "Brilliant Stars Trainer Gallery", "year": 2022}};
   const ORDER = ["109308847", "118973623", "100863346", "154790134", "153708045", "111992917"];
   const CONF = ['NONE', 'NARRATIVE', 'MODEST', 'REAL'];
@@ -1078,6 +1081,10 @@
     'function ownerOf(uint256) view returns (address)',
     'function getApproved(uint256) view returns (address)',
     'function approve(address,uint256)',
+    'function claimDemo(uint256) returns (uint256)',
+    'function demoCooldown() view returns (uint256)',
+    'event DemoClaimed(address indexed to,uint256 indexed tokenId,uint256 indexed index)',
+    'error DemoCooldown(uint256 availableAt)', 'error BadDemoIndex()',
   ];
   const VAULT_ABI = [
     'function positions(uint256) view returns (address owner,uint256 debt)',
@@ -1105,6 +1112,7 @@
   const usd = new ethers.Contract(A.usd, USD_ABI, ro);
 
   let account = null, signer = null, current = null, lookupSeq = 0;
+  let mine = {}; // cert -> my latest demo token id
 
   // ---------- formatting ----------
   const usdFromCents = c => '$' + Math.round(Number(c) / 100).toLocaleString('en-US');
@@ -1123,10 +1131,12 @@
   function errText(e) {
     if (e?.code === 'ACTION_REJECTED' || e?.info?.error?.code === 4001) return 'You cancelled the request in your wallet.';
     const name = e?.revert?.name || e?.errorName;
+    if (name === 'DemoCooldown') { const t = Number(e.revert.args[0]) - Math.floor(Date.now()/1000); return `One demo card per wallet every 10 minutes. Try again in ${Math.max(1, Math.ceil(t/60))} min.`; }
     const map = {
       NotOwner: 'Only the wallet that deposited this card can do that.',
       NotDeposited: 'This card is not in the vault yet.',
-      StaleAppraisal: 'The price certificate is older than 7 days, so new borrowing is paused until it is refreshed.',
+      BadDemoIndex: 'That demo card does not exist.',
+      StaleAppraisal: 'The price certificate is too old, so new borrowing is paused until it is refreshed.',
       NotEligible: 'This card is not eligible as collateral.',
       ExceedsLimit: 'That is more than the card can borrow right now.',
       OutstandingDebt: 'Repay the loan before withdrawing the card.',
@@ -1168,7 +1178,7 @@
       $('cert').classList.remove('is-loading');
       loadHistory(cert, seq);
       await refreshPosition();
-      if (history.replaceState) history.replaceState(null, '', '#' + cert);
+      try { history.replaceState(null, '', '#' + cert); } catch {}
     } catch (e) {
       if (seq !== lookupSeq) return;
       $('cert').classList.remove('is-loading');
@@ -1223,12 +1233,12 @@
   let pos = null;
   async function refreshPosition() {
     if (!current?.meta) { renderNoToken(); return; }
-    const id = current.meta.tok;
+    const id = mine[current.cert] ?? current.meta.tok;
     try {
       const [owner, p, limit, liq, maxAge] = await Promise.all([
         cards.ownerOf(id), vault.positions(id), vault.borrowLimit(id), vault.liquidationThreshold(id), vault.maxAppraisalAge(),
       ]);
-      pos = { id, holder: owner, inVault: owner.toLowerCase() === A.vault.toLowerCase(), depositor: p.owner, debt: p.debt, limit, liq, maxAge };
+      pos = { id, demo: id !== current.meta.tok, holder: owner, inVault: owner.toLowerCase() === A.vault.toLowerCase(), depositor: p.owner, debt: p.debt, limit, liq, maxAge };
       renderPosition();
     } catch (e) {
       notice($('txMsg'), 'err', `Could not read the vault: ${errText(e)}`);
@@ -1252,18 +1262,21 @@
 
     // step 1
     const dep = $('depositBtn'); dep.hidden = true;
+    $('claimBtn').hidden = !window.ethereum || pos.demo;
     if (pos.inVault) {
       $('dSub').textContent = `${meta.name} ${meta.num} is held by the lending vault, deposited by ${isDepositor ? 'you' : short(pos.depositor)}.`;
       setPill($('dStatus'), 'good', 'In vault');
     } else {
-      $('dSub').textContent = `Card token #${pos.id} is in wallet ${holdsCard ? '(yours)' : short(pos.holder)}. Its holder can deposit it to borrow.`;
+      $('dSub').textContent = holdsCard
+        ? `Your ${pos.demo ? 'demo ' : ''}card token #${pos.id} is in your wallet. Deposit it to borrow.`
+        : `Card token #${pos.id} is in wallet ${short(pos.holder)}. Get your own demo copy of this slab to try the full flow.`;
       setPill($('dStatus'), holdsCard ? 'pend' : '', holdsCard ? 'Ready' : 'Not deposited');
       if (holdsCard) dep.hidden = false;
     }
     // step 2
     $('lBig').textContent = usd6(pos.limit);
     $('lSub').textContent = stale
-      ? 'The certificate is older than 7 days, so the limit is 0 until it is refreshed.'
+      ? 'The certificate is too old, so the limit is 0 until it is refreshed.'
       : `From the certificate above: ${(Number(a.ltvBps) / 100).toFixed(0)}% LTV of the ${usdFromCents(a.fmvLow)} floor.`;
     // step 3
     const maxDollars = Math.floor(Number(ethers.formatUnits(available, 6)));
@@ -1289,7 +1302,8 @@
     $('pLiq').textContent = '$' + Math.round(Number(ethers.formatUnits(pos.liq, 6))).toLocaleString('en-US');
     // note
     $('bNoteText').innerHTML = !account
-      ? 'Anyone can read this position. To borrow, connect the wallet that deposited the card.'
+      ? `Anyone can read this position. To try it yourself, connect a wallet and tap Get a demo card. You need a little test ETH for gas: <a href="${FAUCET}" target="_blank" rel="noopener">Robinhood Chain faucet</a>.`
+      : pos.demo && isDepositor ? `Your demo card #${pos.id}, deposited by you. Borrowing sends test tUSD to your wallet.`
       : isDepositor ? `Connected as the depositor ${short(account)}. Borrowing sends test tUSD to your wallet.`
       : `Connected as ${short(account)}. This card's loan belongs to ${short(pos.depositor)}, so you can view it but not borrow against it.`;
   }
@@ -1325,6 +1339,7 @@
       signer = await bp.getSigner();
       account = acc;
       renderWallet();
+      await loadMine();
       if (current) await refreshPosition();
     } catch (e) { notice($('txMsg'), 'err', errText(e)); }
   }
@@ -1338,21 +1353,41 @@
 
   $('connectBtn').addEventListener('click', () => { if (!account) connect(); });
   if (window.ethereum) {
-    window.ethereum.on?.('accountsChanged', accs => { account = accs[0] || null; signer = null; renderWallet(); if (account) connect(); else if (current) refreshPosition(); });
+    window.ethereum.on?.('accountsChanged', accs => { account = accs[0] || null; signer = null; mine = {}; renderWallet(); if (account) connect(); else if (current) refreshPosition(); });
     window.ethereum.on?.('chainChanged', () => { if (account) connect(); });
   }
 
+  async function loadMine() {
+    mine = {};
+    if (!account) return;
+    try {
+      const logs = await cards.queryFilter(cards.filters.DemoClaimed(account), V2_BLOCK, 'latest');
+      for (const l of logs) { const c = ORDER[Number(l.args.index)]; if (c) mine[c] = Number(l.args.tokenId); }
+    } catch {}
+  }
+
+  $('claimBtn').addEventListener('click', async () => {
+    if (!account) { await connect(); if (!account) return; }
+    const cert = current.cert, index = ORDER.indexOf(cert);
+    const bal = await ro.getBalance(account);
+    if (bal === 0n) { notice($('txMsg'), 'err', `This wallet has no test ETH for gas. Get some free from the <a href="${FAUCET}" target="_blank" rel="noopener">Robinhood Chain faucet</a>, then try again.`); return; }
+    await send('Get demo card', () => cards.connect(signer).claimDemo(index), rc => {
+      for (const lg of rc.logs) { try { const p = cards.interface.parseLog(lg); if (p?.name === 'DemoClaimed') mine[cert] = Number(p.args.tokenId); } catch {} }
+    });
+  });
+
   // ---------- transactions ----------
-  async function send(label, fn) {
+  async function send(label, fn, onDone) {
     notice($('txMsg'), '', `${label}: confirm in your wallet…`);
     try {
       await ensureChain();
       const tx = await fn();
       notice($('txMsg'), '', `${label}: waiting for Robinhood Chain… ${txLink(tx.hash)}`);
-      await tx.wait();
+      const rc = await tx.wait();
       notice($('txMsg'), 'ok', `${label}: done. ${txLink(tx.hash)}`);
+      if (onDone) onDone(rc);
       await refreshPosition();
-      return true;
+      return rc;
     } catch (e) { notice($('txMsg'), 'err', `${label} failed. ${errText(e)}`); return false; }
   }
 
