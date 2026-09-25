@@ -1269,13 +1269,23 @@
     try {
       const readAll = rp => { const c = cards.connect(rp), v = vault.connect(rp);
         return Promise.all([c.ownerOf(id), v.positions(id), v.borrowLimit(id), v.liquidationThreshold(id), v.maxAppraisalAge()]); };
-      let r;
-      try { r = await readAll(ro); } catch (e1) { if (!walletRead) throw e1; r = await readAll(walletRead); }
+      // Public RPC nodes sometimes return an empty answer for a moment: retry quietly before giving up.
+      let r, lastErr;
+      for (let i = 0; i < 3 && !r; i++) {
+        try { r = await readAll(ro); } catch (e1) { lastErr = e1;
+          if (walletRead) { try { r = await readAll(walletRead); } catch (e2) { lastErr = e2; } }
+          if (!r) await new Promise(res => setTimeout(res, 1200));
+        }
+      }
+      if (!r) throw lastErr;
       const [owner, p, limit, liq, maxAge] = r;
       pos = { id, demo: id !== current.meta.tok, holder: owner, inVault: owner.toLowerCase() === A.vault.toLowerCase(), depositor: p.owner, debt: p.debt, limit, liq, maxAge };
       renderPosition();
+      if ($('txMsg').textContent.includes('Could not read the vault')) notice($('txMsg'), '', '');
     } catch (e) {
-      notice($('txMsg'), 'err', `Could not read the vault: ${errText(e)}`);
+      // Background refresh: keep the last good view instead of flashing an error.
+      if (pos && pos.id === id) return;
+      notice($('txMsg'), 'err', 'Could not reach Robinhood Chain for a moment. Refresh the page to try again.');
     }
   }
 
