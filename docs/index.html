@@ -1107,10 +1107,35 @@
 
   const $ = id => document.getElementById(id);
   const NET = ethers.Network.from(CHAIN_ID);
-  const ro = new ethers.FallbackProvider([
-    { provider: new ethers.JsonRpcProvider(RPC, NET, { staticNetwork: NET }), priority: 1, stallTimeout: 1500, weight: 1 },
-    { provider: new ethers.JsonRpcProvider(RPC_BACKUP, NET, { staticNetwork: NET }), priority: 2, stallTimeout: 1500, weight: 1 },
-  ], NET, { quorum: 1 });
+  // Read-only connection: main RPC, then backup RPC, then the connected wallet's own connection
+  // (some wallet browsers block direct RPC calls from web pages).
+  class HybridProvider extends ethers.JsonRpcApiProvider {
+    constructor() { super(NET, { staticNetwork: NET, batchMaxCount: 1 }); }
+    async _send(payload) {
+      const list = Array.isArray(payload) ? payload : [payload];
+      for (const url of [RPC, RPC_BACKUP]) {
+        try {
+          const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 8000);
+          const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: ctl.signal });
+          clearTimeout(t);
+          if (r.ok) { const j = await r.json(); return Array.isArray(j) ? j : [j]; }
+        } catch {}
+      }
+      if (window.ethereum) {
+        let cid = null; try { cid = parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16); } catch {}
+        if (cid === CHAIN_ID) {
+          const out = [];
+          for (const p of list) {
+            try { out.push({ id: p.id, result: await window.ethereum.request({ method: p.method, params: p.params }) }); }
+            catch (e) { out.push({ id: p.id, error: { code: e.code ?? -32000, message: e.message || 'wallet error', data: e.data } }); }
+          }
+          return out;
+        }
+      }
+      throw new Error('This browser is blocking Robinhood Chain. Turn off VPN or ad blocker, or connect your wallet on Robinhood Chain Testnet.');
+    }
+  }
+  const ro = new HybridProvider();
   const reg = new ethers.Contract(A.registry, REG_ABI, ro);
   const cards = new ethers.Contract(A.cards, CARD_ABI, ro);
   const vault = new ethers.Contract(A.vault, VAULT_ABI, ro);
