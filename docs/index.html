@@ -1236,13 +1236,16 @@
 
   // ---------- position ----------
   let pos = null;
+  let walletRead = null;
   async function refreshPosition() {
     if (!current?.meta) { renderNoToken(); return; }
     const id = mine[current.cert] ?? current.meta.tok;
     try {
-      const [owner, p, limit, liq, maxAge] = await Promise.all([
-        cards.ownerOf(id), vault.positions(id), vault.borrowLimit(id), vault.liquidationThreshold(id), vault.maxAppraisalAge(),
-      ]);
+      const readAll = rp => { const c = cards.connect(rp), v = vault.connect(rp);
+        return Promise.all([c.ownerOf(id), v.positions(id), v.borrowLimit(id), v.liquidationThreshold(id), v.maxAppraisalAge()]); };
+      let r;
+      try { r = await readAll(ro); } catch (e1) { if (!walletRead) throw e1; r = await readAll(walletRead); }
+      const [owner, p, limit, liq, maxAge] = r;
       pos = { id, demo: id !== current.meta.tok, holder: owner, inVault: owner.toLowerCase() === A.vault.toLowerCase(), depositor: p.owner, debt: p.debt, limit, liq, maxAge };
       renderPosition();
     } catch (e) {
@@ -1342,6 +1345,7 @@
       await ensureChain();
       const bp = new ethers.BrowserProvider(window.ethereum);
       signer = await bp.getSigner();
+      walletRead = bp; // wallet's own connection, used if the page cannot reach the chain directly
       account = acc;
       renderWallet();
       await loadMine();
@@ -1366,7 +1370,9 @@
     mine = {};
     if (!account) return;
     try {
-      const logs = await cards.queryFilter(cards.filters.DemoClaimed(account), V2_BLOCK, 'latest');
+      let logs;
+      try { logs = await cards.queryFilter(cards.filters.DemoClaimed(account), V2_BLOCK, 'latest'); }
+      catch (e1) { if (!walletRead) throw e1; logs = await cards.connect(walletRead).queryFilter(cards.filters.DemoClaimed(account), V2_BLOCK, 'latest'); }
       for (const l of logs) { const c = ORDER[Number(l.args.index)]; if (c) mine[c] = Number(l.args.tokenId); }
     } catch {}
   }
@@ -1374,7 +1380,8 @@
   $('claimBtn').addEventListener('click', async () => {
     if (!account) { await connect(); if (!account) return; }
     const cert = current.cert, index = ORDER.indexOf(cert);
-    const bal = await ro.getBalance(account);
+    let bal = 1n;
+    try { bal = await ro.getBalance(account); } catch { try { if (walletRead) bal = await walletRead.getBalance(account); } catch {} }
     if (bal === 0n) { notice($('txMsg'), 'err', `This wallet has no test ETH for gas. Get some free from the <a href="${FAUCET}" target="_blank" rel="noopener">Robinhood Chain faucet</a>, then try again.`); return; }
     await send('Get demo card', () => cards.connect(signer).claimDemo(index), rc => {
       for (const lg of rc.logs) { try { const p = cards.interface.parseLog(lg); if (p?.name === 'DemoClaimed') mine[cert] = Number(p.args.tokenId); } catch {} }
