@@ -1082,6 +1082,7 @@
     'function ownerOf(uint256) view returns (address)',
     'function getApproved(uint256) view returns (address)',
     'function approve(address,uint256)',
+    'function safeTransferFrom(address,address,uint256)',
     'function claimDemo(uint256) returns (uint256)',
     'function demoCooldown() view returns (uint256)',
     'event DemoClaimed(address indexed to,uint256 indexed tokenId,uint256 indexed index)',
@@ -1430,12 +1431,10 @@
 
   $('depositBtn').addEventListener('click', async () => {
     const id = pos.id;
-    const c = cards.connect(signer), v = vault.connect(signer);
-    const approved = await cards.getApproved(id);
-    if (approved.toLowerCase() !== A.vault.toLowerCase()) {
-      if (!await send('Approve card', () => c.approve(A.vault, id))) return;
-    }
-    await send('Deposit card', () => v.deposit(id));
+    // One step, no approval: send the card straight to the vault, which records the deposit.
+    // (Some wallets, like Trust Wallet, rewrite NFT approve() calls as token allowances and break them.)
+    const c = cards.connect(signer);
+    await send('Deposit card', () => c['safeTransferFrom(address,address,uint256)'](account, A.vault, id));
   });
 
   $('borrowBtn').addEventListener('click', async () => {
