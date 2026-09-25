@@ -1054,6 +1054,7 @@
 (() => {
   const CHAIN_ID = 46630, CHAIN_HEX = '0xb626';
   const RPC = 'https://rpc.testnet.chain.robinhood.com';
+  const RPC_BACKUP = 'https://46630.rpc.thirdweb.com'; // used automatically if the main RPC fails
   const EXPLORER = 'https://explorer.testnet.chain.robinhood.com';
   const A = {
     registry: '0x30dfBCA3978CE186e6107A93cedC7d2971d30950',
@@ -1105,7 +1106,11 @@
   ];
 
   const $ = id => document.getElementById(id);
-  const ro = new ethers.JsonRpcProvider(RPC, CHAIN_ID, { staticNetwork: true });
+  const NET = ethers.Network.from(CHAIN_ID);
+  const ro = new ethers.FallbackProvider([
+    { provider: new ethers.JsonRpcProvider(RPC, NET, { staticNetwork: NET }), priority: 1, stallTimeout: 1500, weight: 1 },
+    { provider: new ethers.JsonRpcProvider(RPC_BACKUP, NET, { staticNetwork: NET }), priority: 2, stallTimeout: 1500, weight: 1 },
+  ], NET, { quorum: 1 });
   const reg = new ethers.Contract(A.registry, REG_ABI, ro);
   const cards = new ethers.Contract(A.cards, CARD_ABI, ro);
   const vault = new ethers.Contract(A.vault, VAULT_ABI, ro);
@@ -1325,7 +1330,7 @@
       await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{
         chainId: CHAIN_HEX, chainName: 'Robinhood Chain Testnet',
         nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-        rpcUrls: [RPC], blockExplorerUrls: [EXPLORER],
+        rpcUrls: [RPC, RPC_BACKUP], blockExplorerUrls: [EXPLORER],
       }] });
     }
   }
