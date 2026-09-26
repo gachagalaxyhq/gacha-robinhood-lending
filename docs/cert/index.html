@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verified Value certificates · Gacha Galaxy</title><meta name="description" content="Onchain price certificates for graded cards on Robinhood Chain.">
+<meta property="og:title" content="Verified Value certificates · Gacha Galaxy"><meta property="og:description" content="Onchain price certificates for graded cards on Robinhood Chain."><meta property="og:url" content="https://gachagalaxyhq.github.io/gacha-robinhood-lending/cert/">
+<link rel="icon" href="../img/gg-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>
+:root{--canvas:#F7F5FB;--surface:#FFFFFF;--ink:#1B1424;--mute:#6E6479;--line:#E6E0EF;--purple:#7B3FE4;--deep:#532B7D;--glow:#A74CFF;--lilac:#F0E9FC;--green:#0E8A5F;--greenbg:#E3F4EC;--amber:#A86200;--amberbg:#FBF0DF;--red:#C2334D;--redbg:#FBE7EB}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--canvas);color:var(--ink);font-family:'Geist',system-ui,sans-serif;font-size:15px;line-height:1.45}
+a{color:inherit}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:980px;margin:0 auto;padding:22px 24px 18px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:700;font-size:18px;letter-spacing:-.01em}
+.brand img{width:52px;height:52px;border-radius:50%;display:block}
+.bar nav{display:flex;gap:18px;font-size:13.5px;color:var(--mute)}
+.bar nav a{text-decoration:none}.bar nav a:hover{color:var(--purple)}
+.wrap{max-width:980px;margin:0 auto;padding:0 24px 56px}
+.cert{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 1px 0 rgba(27,20,36,.04),0 24px 60px -24px rgba(83,43,125,.28);overflow:hidden}
+.status{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 28px;background:var(--greenbg);color:var(--green);font-size:13.5px;font-weight:600}
+.status.due{background:var(--amberbg);color:var(--amber)}.status.exp{background:var(--redbg);color:var(--red)}
+.status .l{display:flex;gap:10px;align-items:center}.status i{width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px rgba(14,138,95,.16);flex:none}
+.status .mono{font-size:11.5px;font-weight:500}
+.head{display:grid;grid-template-columns:160px 1fr 200px;gap:28px;padding:26px 28px;align-items:center}
+.head img.slab{width:100%;border-radius:8px;display:block;background:var(--canvas)}
+.eyebrow{font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--purple)}
+h1{font-size:23px;font-weight:600;letter-spacing:-.01em;margin-top:8px;line-height:1.25}
+.id{font:500 12px 'JetBrains Mono',monospace;color:var(--mute);margin-top:6px}
+.val{font-size:52px;font-weight:700;letter-spacing:-.035em;margin-top:14px;line-height:1}
+.range{font:500 12.5px 'JetBrains Mono',monospace;color:var(--mute);margin-top:7px}
+.dialw{text-align:center}
+.dial{--p:86;width:164px;height:164px;border-radius:50%;margin:0 auto;display:grid;place-items:center;position:relative;
+background:conic-gradient(from 200deg,var(--deep),var(--purple) calc(var(--p)*.58%),var(--glow) calc(var(--p)*1%),var(--line) calc(var(--p)*1%) 100%)}
+.dial::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px dashed var(--line)}
+.dial>div{width:134px;height:134px;border-radius:50%;background:var(--surface);display:grid;place-items:center;text-align:center}
+.dial b{font-size:48px;font-weight:700;letter-spacing:-.04em;display:block;line-height:1}
+.dial small{font:500 10px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.dialw p{font-weight:600;margin-top:12px;font-size:14px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.facts div{padding:15px 28px;border-right:1px solid var(--line)}.facts div:last-child{border-right:0}
+.facts small,.lbl{font:600 10px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.facts b{display:block;font-size:19px;font-weight:600;margin-top:4px}
+.sec{padding:20px 28px 0}
+.lbl{display:block;margin-bottom:10px;font-size:10.5px}
+.priv{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.priv>div{padding:14px 18px}
+.priv .sea{background:var(--lilac);border-left:1px solid var(--line)}
+.priv h4{font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.priv .pub h4{color:var(--green)}.priv .sea h4{color:var(--deep)}
+.priv ul{list-style:none;font-size:13.5px;line-height:1.8}
+.priv .sea li{color:var(--deep)}
+.priv .sea li::before{content:"";display:inline-block;width:64px;height:8px;border-radius:4px;background:repeating-linear-gradient(90deg,rgba(83,43,125,.35) 0 6px,transparent 6px 9px);margin-right:10px;vertical-align:middle}
+.rows{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:grid;grid-template-columns:190px 1fr auto;gap:14px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);font-size:13.5px}
+.row:last-child{border-bottom:0}
+.row .k{font:600 10px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.row .rv b{font-weight:600}
+.pill{font:600 11px 'Geist',sans-serif;padding:3px 10px;border-radius:99px;white-space:nowrap;background:var(--greenbg);color:var(--green)}
+.pill.soon{background:var(--lilac);color:var(--deep)}.pill.warn{background:var(--amberbg);color:var(--amber)}
+.track{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.v{border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-decoration:none;display:block;min-width:0}
+.v small{font:500 10px 'JetBrains Mono',monospace;color:var(--mute);letter-spacing:.04em;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v b{display:block;font-size:16px;font-weight:600;margin-top:4px}
+.v.now{border-color:var(--purple);background:var(--lilac)}.v.now small{color:var(--purple)}
+.v.next{opacity:.6}
+a.v:hover{border-color:var(--purple)}
+.foot{display:grid;grid-template-columns:104px 1fr auto;gap:20px;align-items:center;padding:22px 28px 24px}
+.qr{width:104px;height:104px;display:block;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px}
+.qr svg{width:100%;height:100%;display:block}
+.foot p{font-size:12.5px;color:var(--mute);line-height:1.55}.foot p b{color:var(--ink)}
+.foot p b.hv,.foot p b.rh,.pw b{color:var(--deep);font-weight:700}
+.btn{display:inline-block;font:600 13.5px 'Geist',sans-serif;color:#fff;background:var(--purple);border-radius:99px;padding:11px 18px;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--deep)}
+.pw{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:13px 28px;background:var(--lilac);border-top:1px solid var(--line);font-size:13px;color:var(--mute)}
+.pw img{width:26px;height:26px;border-radius:50%;display:block}.pw .dot{width:4px;height:4px;border-radius:50%;background:var(--mute)}
+.note{font:500 11.5px 'JetBrains Mono',monospace;color:var(--mute);margin-top:14px;line-height:1.6}
+.live{font:500 11.5px 'JetBrains Mono',monospace;color:var(--mute);margin-top:6px}
+.live.ok{color:var(--green)}.live.bad{color:var(--red)}
+/* index */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;text-decoration:none;display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center}
+.tile:hover{border-color:var(--purple)}
+.tile img{width:72px;border-radius:5px;display:block}
+.tile p{font-weight:600;font-size:14px;line-height:1.3}.tile .pr{font-size:21px;font-weight:700;margin-top:4px;letter-spacing:-.02em}
+.tile .id{margin-top:4px}
+.tag{display:inline-block;margin-top:8px;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--lilac);color:var(--deep)}
+.tag.hero{background:var(--purple);color:#fff}
+h2.page{font-size:30px;font-weight:700;letter-spacing:-.03em}
+.lede{color:var(--mute);margin-top:8px;max-width:62ch}
+@media (max-width:760px){
+ .bar{padding:16px 18px}.brand img{width:44px;height:44px}.bar nav{gap:12px;font-size:13px}
+ .wrap{padding:0 12px 40px}
+ .status{padding:11px 18px}
+ .head{grid-template-columns:96px 1fr;gap:16px;padding:20px 18px}
+ .dialw{grid-column:1/-1;display:flex;align-items:center;gap:18px;text-align:left;border-top:1px solid var(--line);padding-top:16px}
+ .dial{width:112px;height:112px;margin:0}.dial>div{width:90px;height:90px}.dial b{font-size:34px}.dial small{font-size:9px}
+ .dialw p{margin:0}
+ h1{font-size:18px}.val{font-size:40px;margin-top:10px}
+ .facts{grid-template-columns:1fr 1fr}.facts div{padding:12px 18px;border-bottom:1px solid var(--line)}.facts div:nth-child(2n){border-right:0}
+ .sec{padding:18px 18px 0}
+ .priv{grid-template-columns:1fr}.priv .sea{border-left:0;border-top:1px solid var(--line)}
+ .row{grid-template-columns:1fr auto;padding:11px 14px}.row .k{grid-column:1/-1}
+ .track{grid-template-columns:1fr 1fr}
+ .foot{grid-template-columns:84px 1fr;padding:18px}.qr{width:84px;height:84px}.foot .btn{grid-column:1/-1;text-align:center}
+ .grid{grid-template-columns:1fr}
+}
+</style></head><body><header class="bar"><a class="brand" href="../"><img src="../img/gg-logo.png" alt="Gacha Galaxy logo">Gacha Galaxy</a>
+<nav><a href="../cert/">All certificates</a><a href="../">Live demo</a></nav></header><main class="wrap"><h2 class="page">Verified Value certificates</h2>
+<p class="lede">Six real PSA 10 slabs, each with a price certificate stored on Robinhood Chain. Open one to see its value, confidence and history, and scan its QR code to share it.</p>
+<div class="grid"><a class="tile" href="109308847/"><img src="../img/109308847.jpg" alt=""><div><p>Rayquaza VMAX 218/203</p><p class="pr">$2,900</p><p class="id">PSA 10 · cert 109308847 · score 86</p><span class="tag hero">Real Vela output</span></div></a><a class="tile" href="118973623/"><img src="../img/118973623.jpg" alt=""><div><p>Pikachu &amp; Zekrom GX SM168</p><p class="pr">$3,200</p><p class="id">PSA 10 · cert 118973623 · score 87</p><span class="tag">Priced · Vela pending</span></div></a><a class="tile" href="100863346/"><img src="../img/100863346.jpg" alt=""><div><p>Lugia V 186/195</p><p class="pr">$1,331</p><p class="id">PSA 10 · cert 100863346 · score 89</p><span class="tag">Priced · Vela pending</span></div></a><a class="tile" href="154790134/"><img src="../img/154790134.jpg" alt=""><div><p>Giratina VSTAR GG69/GG70</p><p class="pr">$650</p><p class="id">PSA 10 · cert 154790134 · score 75</p><span class="tag">Priced · Vela pending</span></div></a><a class="tile" href="153708045/"><img src="../img/153708045.jpg" alt=""><div><p>Rayquaza VMAX TG20/TG30</p><p class="pr">$410</p><p class="id">PSA 10 · cert 153708045 · score 78</p><span class="tag">Priced · Vela pending</span></div></a><a class="tile" href="111992917/"><img src="../img/111992917.jpg" alt=""><div><p>Umbreon VMAX TG23/TG30</p><p class="pr">$275</p><p class="id">PSA 10 · cert 111992917 · score 88</p><span class="tag">Priced · Vela pending</span></div></a></div>
+<p class="note">Asking prices from public marketplace listings, not completed sales. Horizen Vela is tested locally, not yet live on Horizen's network.</p></main></body></html>
