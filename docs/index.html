@@ -160,6 +160,14 @@ th.r,td.r{text-align:right}td.m{font-family:'JetBrains Mono',monospace;font-size
 .demo-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:18px}
 .demo-head h2{font-size:24px;letter-spacing:-.025em;margin:8px 0 4px}
 .demo-head p{margin:0;color:var(--mute);font-size:14px;max-width:60ch}
+.demo-head h2{max-width:34ch}
+.model{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 18px 14px;margin-bottom:16px}
+.m-row{display:grid;grid-template-columns:80px minmax(0,1fr) minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.m-row span:first-child{font:500 11px 'JetBrains Mono',monospace;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.m-row span:last-child{color:var(--deep);font-weight:600}
+.m-head span{font-weight:600;font-size:12.5px}.m-head span:nth-child(2){color:var(--mute)}
+.m-note{margin:12px 0 0;font-size:12.5px;color:var(--mute)}.m-note a{color:var(--purple)}
+@media (max-width:640px){.m-row{grid-template-columns:58px minmax(0,1fr) minmax(0,1fr);gap:8px;font-size:12.5px}.model{padding:4px 12px 12px}}
 .borrow{border-radius:16px;overflow:hidden}
 .step{display:grid;grid-template-columns:48px 1fr auto;gap:16px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
 .step-num .n{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--lilac);color:var(--deep);font:600 12px 'JetBrains Mono',monospace}
@@ -273,7 +281,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
 <section id="how"><div class="container">
   <div class="sec-head"><div><div class="kicker">How it works</div><h2>From any platform to a loan, in five steps.</h2></div>
   <p>Each step says plainly what is live today and what is still being built.</p></div>
-  <ol class="flow"><li class="flow-step"><div class="fs-top"><span class="fs-n mono">01</span><span class="st ok">Live</span></div><h3>Any platform</h3><p>A graded slab listed on a public marketplace, identified by its PSA cert number.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step hl"><div class="fs-top"><span class="fs-n mono">02</span><span class="st warn">Tested locally</span></div><h3>Horizen Vela</h3><p>The appraisal engine prices it privately. Raw comps stay sealed; only the result comes out.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step hl"><div class="fs-top"><span class="fs-n mono">03</span><span class="st ok">Live</span></div><h3>Certificate</h3><p>A signed price certificate goes onchain: value, range, confidence, risk tier. One token per cert.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step"><div class="fs-top"><span class="fs-n mono">04</span><span class="st warn">Being built</span></div><h3>Chainlink</h3><p>The same certificate, readable in the Chainlink price-feed format that lending apps already use.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step"><div class="fs-top"><span class="fs-n mono">05</span><span class="st ok">Live on testnet</span></div><h3>Robinhood Chain</h3><p>A vault reads the certificate and lends stablecoins against the slab.</p></li></ol>
+  <ol class="flow"><li class="flow-step"><div class="fs-top"><span class="fs-n mono">01</span><span class="st ok">Live</span></div><h3>Any platform</h3><p>A graded slab listed on a public marketplace, identified by its PSA cert number.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step hl"><div class="fs-top"><span class="fs-n mono">02</span><span class="st warn">Tested locally</span></div><h3>Horizen Vela</h3><p>The appraisal engine prices it privately. Raw comps stay sealed; only the result comes out.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step hl"><div class="fs-top"><span class="fs-n mono">03</span><span class="st ok">Live</span></div><h3>Gacha Mark</h3><p>Your card's Gacha Mark goes onchain: value, range, confidence, risk tier. One token per cert.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step"><div class="fs-top"><span class="fs-n mono">04</span><span class="st warn">Being built</span></div><h3>Chainlink</h3><p>The same certificate, readable in the Chainlink price-feed format that lending apps already use.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step"><div class="fs-top"><span class="fs-n mono">05</span><span class="st ok">Live on testnet</span></div><h3>Robinhood Chain</h3><p>A vault reads the certificate and lends stablecoins against the slab.</p></li></ol>
 </div></section>
 
 <section id="problem"><div class="container">
@@ -334,7 +342,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     <div class="chips" id="chips"></div>
   </div>
   <div class="card cert" id="cert">
-    <div class="cert-strip"><span>Price certificate · <span id="cGrader">PSA</span> <b>Cert <span id="cCert">…</span></b></span><span>Robinhood Chain · Chain ID 46630</span></div>
+    <div class="cert-strip"><span>Gacha Mark · <span id="cGrader">PSA</span> <b>Cert <span id="cCert">…</span></b></span><span>Robinhood Chain · Chain ID 46630</span></div>
     <div class="cert-inner">
       <div>
         <div class="slab" id="slab"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
@@ -378,9 +386,17 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
 
 <main id="main"><section id="demo"><div class="container">
   <div class="demo">
-    <div class="demo-head"><div><div class="kicker">Live demo · testnet</div><h2>Borrow against a slab.</h2>
+    <div class="demo-head"><div><div class="kicker">Live demo · testnet</div><h2>Borrow against a card, the way Robinhood lets you borrow against Stock Tokens.</h2>
       <p>Pick a card above, get a free demo copy, deposit it and borrow test stablecoins (tUSD). Everything runs on Robinhood Chain testnet. No real money.</p></div>
       <span class="st ok">Works today</span></div>
+    <div class="model">
+      <div class="m-row m-head"><span></span><span>Robinhood Stock Tokens</span><span>Gacha Galaxy cards</span></div>
+      <div class="m-row"><span>Asset</span><span>A tokenized stock</span><span>A tokenized graded card</span></div>
+      <div class="m-row"><span>Price</span><span>Chainlink price feed</span><span>Gacha Mark (Vela, tested locally)</span></div>
+      <div class="m-row"><span>Use</span><span>Collateral to borrow</span><span>Collateral to borrow (50% LTV)</span></div>
+      <div class="m-row"><span>Chain</span><span>Robinhood Chain</span><span>Robinhood Chain testnet</span></div>
+      <p class="m-note">We use the same model for a new asset. We don't use Robinhood's tokens and we're not a Robinhood partner. <a href="https://docs.robinhood.com/chain/building-with-stock-tokens/" target="_blank" rel="noopener">How Stock Tokens work as collateral</a></p>
+    </div>
     <div class="card borrow" id="borrowCard">
       <div class="step"><div class="step-num"><span class="n">01</span></div>
         <div class="step-body"><div class="title">Deposit card</div><div class="sub" id="dSub">…</div></div>
@@ -586,8 +602,11 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   const txLink = h => `<a href="${EXPLORER}/tx/${h}" target="_blank" rel="noopener">${short(h)}</a>`;
   const setPill = (el, cls, text) => { el.className = 'status-pill ' + cls; el.lastElementChild.textContent = text; };
   const notice = (el, cls, html) => { el.innerHTML = html ? `<div class="notice ${cls}">${html}</div>` : ''; };
+  // Some wallets (seen with Trust Wallet) answer too early with an unreadable reply while their popup is still open.
+  const isWalletHiccup = e => e?.code === 'UNKNOWN_ERROR' || /could not coalesce/i.test(e?.shortMessage || e?.message || '');
   function errText(e) {
-    if (e?.code === 'ACTION_REJECTED' || e?.info?.error?.code === 4001) return 'You cancelled the request in your wallet.';
+    if (e?.code === 'ACTION_REJECTED' || e?.info?.error?.code === 4001) return 'You cancelled this in your wallet. Nothing was sent.';
+    if (isWalletHiccup(e)) return 'Your wallet did not finish this step. Check the wallet popup, then try again.';
     const name = e?.revert?.name || e?.errorName;
     if (name === 'DemoCooldown') { const t = Number(e.revert.args[0]) - Math.floor(Date.now()/1000); return `One demo card per wallet every 10 minutes. Try again in ${Math.max(1, Math.ceil(t/60))} min.`; }
     const map = {
@@ -893,13 +912,15 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     let bal = 1n;
     try { bal = await ro.getBalance(account); } catch { try { if (walletRead) bal = await walletRead.getBalance(account); } catch {} }
     if (bal === 0n) { notice($('txMsg'), 'err', `This wallet has no test ETH for gas. Get some free from the <a href="${FAUCET}" target="_blank" rel="noopener">Robinhood Chain faucet</a>, then try again.`); return; }
+    const had = mine[cert];
     await send('Get demo card', () => cards.connect(signer).claimDemo(index), rc => {
       for (const lg of rc.logs) { try { const p = cards.interface.parseLog(lg); if (p?.name === 'DemoClaimed') mine[cert] = Number(p.args.tokenId); } catch {} }
-    });
+    }, async () => { const keep = mine[cert]; await loadMine(); if (mine[cert] !== undefined && mine[cert] !== had) return true; if (keep !== undefined) mine[cert] = keep; return false; });
   });
 
   // ---------- transactions ----------
-  async function send(label, fn, onDone) {
+  // landed: optional read-only check that the step is on chain. Used when the wallet answers too early.
+  async function send(label, fn, onDone, landed) {
     notice($('txMsg'), '', `${label}: confirm in your wallet…`);
     try {
       await ensureChain();
@@ -910,7 +931,18 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
       if (onDone) onDone(rc);
       await refreshPosition();
       return rc;
-    } catch (e) { notice($('txMsg'), 'err', `${label} failed. ${errText(e)}`); return false; }
+    } catch (e) {
+      if (landed && isWalletHiccup(e)) {
+        notice($('txMsg'), '', `${label}: waiting for your wallet… Confirm in the wallet popup. This page will pick it up by itself.`);
+        const until = Date.now() + 120000;
+        while (Date.now() < until) {
+          await new Promise(r => setTimeout(r, 3000));
+          let ok = false; try { ok = await landed(); } catch {}
+          if (ok) { notice($('txMsg'), 'ok', `${label}: done. Confirmed on Robinhood Chain.`); await refreshPosition(); return true; }
+        }
+      }
+      notice($('txMsg'), 'err', `${label} failed. ${errText(e)}`); return false;
+    }
   }
 
   $('depositBtn').addEventListener('click', async () => {
@@ -918,7 +950,8 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     // One step, no approval: send the card straight to the vault, which records the deposit.
     // (Some wallets, like Trust Wallet, rewrite NFT approve() calls as token allowances and break them.)
     const c = cards.connect(signer);
-    await send('Deposit card', () => c['safeTransferFrom(address,address,uint256)'](account, A.vault, id));
+    await send('Deposit card', () => c['safeTransferFrom(address,address,uint256)'](account, A.vault, id), null,
+      async () => (await cards.ownerOf(id)).toLowerCase() === A.vault.toLowerCase());
   });
 
   $('borrowBtn').addEventListener('click', async () => {
@@ -926,7 +959,9 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     const dollars = Number($('amt').value.replace(/[^\d]/g, ''));
     if (!dollars) { notice($('txMsg'), 'err', 'Enter an amount above $0.'); return; }
     const amount = ethers.parseUnits(String(dollars), 6);
-    await send(`Borrow $${dollars.toLocaleString('en-US')}`, () => vault.connect(signer).borrow(pos.id, amount));
+    const id = pos.id, before = pos.debt;
+    await send(`Borrow $${dollars.toLocaleString('en-US')}`, () => vault.connect(signer).borrow(id, amount), null,
+      async () => (await vault.positions(id)).debt > before);
   });
 
   $('repayBtn').addEventListener('click', async () => {
@@ -934,11 +969,16 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     const bal = await usd.balanceOf(account);
     if (bal < debt) { notice($('txMsg'), 'err', `You need ${usd6(debt)} tUSD to repay, but this wallet holds ${usd6(bal)}.`); return; }
     const allowance = await usd.allowance(account, A.vault);
-    if (allowance < debt) { if (!await send('Approve tUSD', () => usd.connect(signer).approve(A.vault, debt))) return; }
-    await send('Repay loan', () => vault.connect(signer).repay(pos.id, debt));
+    const id = pos.id;
+    if (allowance < debt) { if (!await send('Approve tUSD', () => usd.connect(signer).approve(A.vault, debt), null,
+      async () => (await usd.allowance(account, A.vault)) >= debt)) return; }
+    await send('Repay loan', () => vault.connect(signer).repay(id, debt), null,
+      async () => (await vault.positions(id)).debt === 0n);
   });
 
-  $('withdrawBtn').addEventListener('click', () => send('Withdraw card', () => vault.connect(signer).withdraw(pos.id)));
+  $('withdrawBtn').addEventListener('click', () => { const id = pos.id;
+    return send('Withdraw card', () => vault.connect(signer).withdraw(id), null,
+      async () => (await cards.ownerOf(id)).toLowerCase() === account.toLowerCase()); });
 
   // ---------- footer copy buttons ----------
   document.querySelectorAll('.copy-btn').forEach(b => b.addEventListener('click', () => {
