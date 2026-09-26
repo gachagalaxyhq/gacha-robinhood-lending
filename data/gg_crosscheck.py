@@ -6,7 +6,7 @@ Uses the live app's public pages/endpoints (no key):
   /app/api/cards/<id>/snapshots/ -> 20-minute snapshot history (market_price, fmv, platform)
 
 We keep only listings at the SAME grade as the certificate (PSA 10), then compare
-Gacha Galaxy's oracle FMV with the appraisal band built from Collector Crypt data.
+Gacha Galaxy's oracle FMV with the appraisal band built from public marketplace listings.
 Price basis: the oracle FMV is Gacha Galaxy's own fair-value estimate; the ask is a live listing.
 Neither is a completed sale.
 """
@@ -41,7 +41,7 @@ for c in seed["cards"]:
             platform, grade = [x.strip() for x in src.split("/", 1)]
             try: ask, fmv = money(spans[-3]), money(spans[-2])
             except Exception: continue
-            rows.append(dict(ggCardId=gid, platform=platform, grade=grade, ask=ask, oracleFmv=fmv, url=href))
+            rows.append(dict(ggCardId=gid, platform="public marketplace", grade=grade, ask=ask, oracleFmv=fmv))
     def norm(g):  # "PSA GEM-MT 10" / "PSA 10" -> ("PSA", "10")
         m = re.match(r"\s*([A-Za-z]+).*?(\d+(?:\.\d)?)\s*$", g or "")
         return (m.group(1).upper(), m.group(2)) if m else (g, "")
@@ -54,7 +54,7 @@ for c in seed["cards"]:
     rec = dict(certId=c["certId"], name=c["name"], grade=want, appraisal=dict(low=lo, point=pt, high=hi),
                ggListingsSameGrade=len(same), ggOracleFmvMedian=med,
                ggOracleFmvRange=[min(ofmv), max(ofmv)] if ofmv else None,
-               ggPlatforms=sorted(set(r["platform"] for r in same)),
+               ggPlatforms=["public marketplaces"] if same else [],
                deltaVsPointPct=round((med - pt) / pt * 100, 1) if med else None,
                withinBand=(lo <= med <= hi) if med else None, listings=same)
     out.append(rec)

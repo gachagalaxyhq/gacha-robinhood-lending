@@ -51,7 +51,7 @@ Built for the Arbitrum Open House Singapore Buildathon.
 Reproduce: `go run ./cmd/vela2rh -cert 109308847 2>/dev/null | grep '^{' > a.json && python3 bridge/vela_to_registry.py a.json --grader PSA --registry <REGISTRY> --send`
 
 ## The problem
-Graded cards are a fast-growing real-world asset, and platforms such as Collector Crypt, Courtyard and Beezie already tokenize vaulted slabs. **You can't borrow against them**, because lenders have no trusted, neutral price. Appraisals today are manual, slow and based on trust.
+Graded cards are a fast-growing real-world asset, and several public marketplaces already tokenize vaulted slabs. **You can't borrow against them**, because lenders have no trusted, neutral price. Appraisals today are manual, slow and based on trust.
 
 ## How it works
 1. **AppraisalRegistry** stores a *price certificate* for each slab, keyed by grader + cert number: a fair-value band, a confidence tier, a risk tier and a max loan-to-value. Only the authorised Gacha Galaxy attester can publish.
@@ -64,8 +64,8 @@ Graded cards are a fast-growing real-world asset, and platforms such as Collecto
 
 ## Pricing data
 Each certificate blends two live sources (`data/blend.py`):
-- **Gacha Galaxy oracle**: fair values for same-grade listings across Courtyard, Collector Crypt and Beezie (`data/build_seed_gg.py`)
-- **Collector Crypt public API**: insured values and live asks for other vaulted slabs of the same card and grade (`data/build_seed.py`)
+- **Gacha Galaxy oracle**: fair values for same-grade public marketplace listings (`data/build_seed_gg.py`)
+- **Public marketplace listings**: insured values and live asks for other vaulted slabs of the same card and grade (`data/build_seed.py`)
 
 The Gacha Galaxy appraisal model: take the median, drop anything more than 60% away from it (sanity filter), then set the band from the spread, score confidence from the comp count and dispersion, and map that to a tier and LTV (A = 50%, B = 35%, C = 20%). Fewer than 3 comps means **ineligible**.
 
@@ -83,7 +83,7 @@ The Gacha Galaxy appraisal model: take the median, drop anything more than 60% a
 ## Repo layout
 ```
 src/ test/ script/   Robinhood Chain contracts (Foundry)
-data/                pricing scripts (Gacha Galaxy oracle + Collector Crypt)
+data/                pricing scripts (Gacha Galaxy oracle + public marketplace listings)
 bridge/              Vela appraisal -> AppraisalRegistry publisher
 privacy-vela/        confidential appraisal engine (Horizen Vela WASM app)
 ```

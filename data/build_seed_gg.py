@@ -1,14 +1,14 @@
 """
 PRIMARY data source: Gacha Galaxy's own live oracle (gachagalaxy.io/app, public, no key).
 
-  subject = a real vaulted slab (grader + cert number) from Collector Crypt's public API
+  subject = a real vaulted slab (grader + cert number) from public marketplace listings
   comps   = Gacha Galaxy oracle fair values for every live listing of the SAME card at the
-            SAME grade, across the marketplaces Gacha Galaxy tracks (Courtyard, Collector Crypt, Beezie...)
+            SAME grade, across the public marketplaces Gacha Galaxy tracks
 Appraisal = the Gacha Galaxy appraisal model (median, 60% sanity filter,
 confidence, tier, LTV). Cards with fewer than 3 same-grade comps come out INELIGIBLE (LTV 0):
 the engine refuses to lend on thin data.
 
-Cross-check: seed_cards_collectorcrypt.json (Collector Crypt insured values + asks).
+Cross-check: seed_cards_listings.json (public marketplace insured values + asks).
 Price basis: oracle fair values of live listings. NOT completed sales.
 """
 import re, html, json, time, urllib.request, datetime
@@ -58,7 +58,7 @@ def norm(g):
     return (m.group(1).upper(), m.group(2)) if m else (g, "")
 
 def main():
-    cc = {c["certId"]: c for c in json.load(open("seed_cards_collectorcrypt.json"))["cards"]}
+    cc = {c["certId"]: c for c in json.load(open("seed_cards_listings.json"))["cards"]}
     cards = []
     for cert, ids in MAP.items():
         s = cc[cert]
@@ -76,22 +76,22 @@ def main():
                 try: ask, fmv = money(spans[-3]), money(spans[-2])
                 except Exception: continue
                 comps.append(dict(kind="gg_oracle_fmv", cents=int(round(fmv * 100)), askCents=int(round(ask * 100)),
-                                  platform=platform, ggCardId=gid, url=href))
+                                  platform="public marketplace", ggCardId=gid))
         a = appraise([x["cents"] for x in comps])
         ca = s["appraisal"]
         cards.append(dict(name=s["name"], grader=s["grader"], certId=cert, grade=s["grade"], subjectNft=s["subjectNft"],
                           solscan=s["solscan"], priceSource="gacha_galaxy_oracle", comps=comps, appraisal=a,
-                          crossCheck=dict(source="collector_crypt", fmvLow=ca["fmvLow"], fmvPoint=ca["fmvPoint"], fmvHigh=ca["fmvHigh"],
+                          crossCheck=dict(source="marketplace_listings", fmvLow=ca["fmvLow"], fmvPoint=ca["fmvPoint"], fmvHigh=ca["fmvHigh"],
                                           gapPct=round((a["fmvPoint"] - ca["fmvPoint"]) / ca["fmvPoint"] * 100, 1))))
         print(f"{s['name'][:50]:50} comps={len(comps):2} (kept {a['keptCount']}) ${a['fmvLow']/100:,.0f}-${a['fmvHigh']/100:,.0f} "
               f"pt ${a['fmvPoint']/100:,.0f} {a['confidenceTier']:9} LTV {a['ltvBps']//100:2}% {a['riskTier']:6} "
-              f"max loan ${a['fmvLow']*a['ltvBps']/1e6:,.0f} | vs CC {cards[-1]['crossCheck']['gapPct']:+.1f}%")
+              f"max loan ${a['fmvLow']*a['ltvBps']/1e6:,.0f} | vs listings {cards[-1]['crossCheck']['gapPct']:+.1f}%")
 
-    json.dump(dict(source="Gacha Galaxy oracle (gachagalaxy.io/app) — same-grade live listings; subject slabs from Collector Crypt public API",
+    json.dump(dict(source="Gacha Galaxy oracle (gachagalaxy.io/app) — same-grade live listings; subject slabs from public marketplace listings",
                    priceBasis="Gacha Galaxy oracle fair values of live same-grade listings; NOT completed sales",
                    pulledAt=datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), scoring=CFG, cards=cards),
-              open("seed_cards.json", "w"), indent=2)
-    print("wrote seed_cards.json (primary: Gacha Galaxy oracle)")
+              open("seed_cards_gg.json", "w"), indent=2)
+    print("wrote seed_cards_gg.json (primary: Gacha Galaxy oracle)")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 """
-Build the Buildathon seed set from Collector Crypt's public marketplace API (no key needed).
+Build the Buildathon seed set from a public vaulted-slab marketplace API (no key needed).
+Set LISTINGS_API to the marketplace endpoint before running.
 
 For each target card we pull every vaulted slab of the same item + grade.
   subject  = one real slab (grader + cert number printed on the slab)
@@ -7,17 +8,17 @@ For each target card we pull every vaulted slab of the same item + grade.
              live ask if listed
 
 IMPORTANT, and stated in the README too:
-  these are Collector Crypt insured valuations and live asking prices,
-  NOT completed sales. Swap in sold comps (PokeTrace / TCG Price Lookup / PSA APR)
+  these are public marketplace insured valuations and live asking prices,
+  NOT completed sales. Swap in sold comps (graded sales data / PSA APR)
   once an API key is available. The appraisal maths below does not change.
 
 Valuation = Gacha Galaxy appraisal model (default scoring):
 median -> 60% deviation sanity filter -> median of kept -> band = +/- spread/2
 -> confidence score -> tier -> LTV.
 """
-import json, time, statistics, urllib.request, urllib.parse, datetime
+import os, json, time, statistics, urllib.request, urllib.parse, datetime
 
-API = "https://api.collectorcrypt.com/marketplace"
+API = os.environ["LISTINGS_API"]  # public marketplace endpoint, set in your shell
 UA = {"User-Agent": "gacha-galaxy-buildathon/1.0"}
 
 TARGETS = [
@@ -115,7 +116,7 @@ for search, item in TARGETS:
           f"FMV ${a.get('fmvLow',0)/100:,.0f}-${a.get('fmvHigh',0)/100:,.0f} (pt ${a.get('fmvPoint',0)/100:,.0f}) "
           f"{a['confidenceTier']} score={a.get('confidenceScore')} LTV={a['ltvBps']/100:.0f}% risk={a['riskTier']} rejected={a.get('rejectedCount',0)}")
 
-json.dump(dict(source="Collector Crypt public marketplace API (api.collectorcrypt.com/marketplace)",
+json.dump(dict(source="Public marketplace listings (vaulted slab marketplace API)",
                priceBasis="insured valuations + live asking prices of other vaulted slabs of the same item and grade; NOT completed sales",
-               pulledAt=pulled_at, scoring=CFG, cards=cards), open("seed_cards.json", "w"), indent=2)
-print("wrote seed_cards.json with", len(cards), "cards")
+               pulledAt=pulled_at, scoring=CFG, cards=cards), open("seed_cards_listings.json", "w"), indent=2)
+print("wrote seed_cards_listings.json with", len(cards), "cards")
