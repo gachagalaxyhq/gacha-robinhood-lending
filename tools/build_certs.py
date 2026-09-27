@@ -85,6 +85,9 @@ background:conic-gradient(from 200deg,var(--deep),var(--purple) calc(var(--p)*.5
 .priv .pub h4{color:var(--green)}.priv .sea h4{color:var(--deep)}
 .priv ul{list-style:none;font-size:13.5px;line-height:1.8}
 .priv .sea li{color:var(--deep)}
+.priv h4.nx{color:var(--mute);margin-top:12px}
+.priv ul.nx li{color:var(--mute)}
+.priv ul.nx li::before{background:none;border:1px dashed rgba(110,100,121,.5);height:6px}
 .priv .sea li::before{content:"";display:inline-block;width:64px;height:8px;border-radius:4px;background:repeating-linear-gradient(90deg,rgba(83,43,125,.35) 0 6px,transparent 6px 9px);margin-right:10px;vertical-align:middle}
 .rows{border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .row{display:grid;grid-template-columns:190px 1fr auto;gap:14px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line);font-size:13.5px}
@@ -230,11 +233,11 @@ def cert_page(c, sel):
     if hero:
         engine = '<b>Horizen Vela app</b>, run locally. Not yet live on Horizen\'s network.'
         engine_pill = '<span class="pill warn">Tested locally</span>'
-        sealed_h = "◆ Sealed in Horizen Vela, never leaves the enclave"
+        sealed_h = "◆ Sealed in Horizen Vela today (tested locally)"
     else:
         engine = '<b>Gacha Galaxy pricing model</b>. Horizen Vela run for this card is pending.'
         engine_pill = '<span class="pill soon">Vela pending</span>'
-        sealed_h = "◆ Sealed in Horizen Vela (pending for this card)"
+        sealed_h = "◆ Private today (Vela run pending for this card)"
     if c["txs"]:
         vs = ""
         n = len(c["txs"])
@@ -264,7 +267,7 @@ def cert_page(c, sel):
 <div class="dialw"><div class="dial" style="--p:{score}"><div><div><b>{score}</b><small>of 100</small></div></div></div><p>{conf}</p></div></div>
 <div class="facts"><div><small>Price points</small><b>{c['comps']}</b></div><div><small>Risk tier</small><b>A</b></div><div><small>Max loan ({c['ltv']//100}%)</small><b>{maxloan(c)}</b></div><div><small>One token per cert</small><b>Enforced</b></div></div>
 <div class="sec"><div class="priv"><div class="pub"><h4>● Public, anyone can check</h4><ul><li>Value, range and confidence</li><li>Risk tier and max loan</li><li>Who signed it, and when</li></ul></div>
-<div class="sea"><h4>{sealed_h}</h4><ul><li>Dealer prices</li><li>Platform inventory</li><li>Pricing model</li></ul></div></div></div>
+<div class="sea"><h4>{sealed_h}</h4><ul><li>Pricing model</li></ul><h4 class="nx">○ Next, with live Vela: partner data</h4><ul class="nx"><li>Dealer prices</li><li>Platform inventory</li></ul></div></div></div>
 <div class="sec"><span class="lbl">How this value was made</span><div class="rows">
 <div class="row"><span class="k">Pricing engine</span><span class="rv">{engine}</span>{engine_pill}</div>
 <div class="row"><span class="k">Attester (signed by)</span><span class="rv">Gacha Galaxy attester <span class="mono">0xfc8C…CA54</span>. Built to swap in the Vela enclave key.</span><span class="pill">Verified</span></div>
