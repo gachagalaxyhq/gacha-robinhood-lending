@@ -3,6 +3,8 @@
 Private collateral valuation for high-value graded collectible cards, built as a
 Horizen Vela WASM guest application.
 
+**Status:** tested locally in an emulated TEE (Docker). Testnet deployment requested via the Vela Production Testnet Deployment Intake. Vela v0.2.0.
+
 **What it does:** a lender or collector gets an attested appraisal (FMV band,
 confidence tier, collateral eligibility, LTV / risk tier) for a slabbed card —
 without the raw dealer comps, portfolio contents, or Gacha Galaxy's proprietary

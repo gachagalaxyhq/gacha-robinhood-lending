@@ -85,7 +85,7 @@ The Gacha Galaxy appraisal model: take the median, drop anything more than 60% a
 src/ test/ script/   Robinhood Chain contracts (Foundry)
 data/                pricing scripts (Gacha Galaxy oracle + public marketplace listings)
 bridge/              Vela appraisal -> AppraisalRegistry publisher
-privacy-vela/        confidential appraisal engine (Horizen Vela WASM app)
+vela/                Horizen Vela confidential appraisal engine (WASM guest app)
 ```
 
 ## Run it
