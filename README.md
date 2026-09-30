@@ -7,7 +7,7 @@
 ## Status
 | Component | Status |
 |---|---|
-| Price engine | LIVE: 24,542 cards, 1,071,940 price points, hourly (as of Sep 27, 2026) |
+| Price engine | Alpha release: 24,542 cards, 1,071,940 price points (as of Sep 27, 2026) |
 | Gacha Mark certificates | PRE-PRODUCTION on Robinhood Chain |
 | Clean Check (private cross-platform check) | DEPLOYING with Horizen |
 
