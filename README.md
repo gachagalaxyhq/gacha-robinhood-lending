@@ -27,7 +27,7 @@ Example: PSA 10 Rayquaza VMAX 218, Evolving Skies (cert 109308847).
   (never leaves the enclave) ─┘   result         (one certificate per graded card)
                                      │
                           relayed by us to Robinhood Chain,
-                          checkable by anyone against Horizen
+                          published by the Gacha Galaxy attester
 ```
 1. **Price engine** blends asking prices from 8 marketplaces into a fair-value band with a confidence score.
 2. **Clean Check** will run privately: it will flag a cert held on two platforms without exposing either platform's data.

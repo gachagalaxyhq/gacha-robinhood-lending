@@ -7,8 +7,8 @@ Horizen Vela WASM guest application.
 
 **What it does:** a lender or collector gets an attested appraisal (FMV band,
 confidence tier, collateral eligibility, LTV / risk tier) for a slabbed card —
-without the raw dealer comps, portfolio contents, or Gacha Galaxy's proprietary
-scoring logic ever leaving the enclave.
+without the raw dealer comps or portfolio contents ever leaving the enclave
+(the code is open source; only the state is confidential).
 
 ```
  Private inputs (never leave the enclave)        Attested output (public)
@@ -42,7 +42,7 @@ scoring logic ever leaving the enclave.
 | Enclave WASM build (`make build`, TinyGo 0.39) | ✅ `build/gacha_appraisal.wasm` (1.2 MB) |
 | WASM end-to-end in Wasmtime (`go test .`) | ✅ deploy → submit_comps → appraise → pledge → assess |
 | Vela engine vs pricing model, all 6 slabs | ✅ 6/6 identical (band, confidence, tier, LTV) |
-| **Real Vela output → bridge → Robinhood Chain** | ✅ [publish tx](https://explorer.testnet.chain.robinhood.com/tx/0xdf53ee76f0d8288d56aed73ed9e379f6ca9a7e4fb33d8f441fd704bad9c854ca); vault reads it, $1,293 limit |
+| **Gacha Galaxy model (Vela app, tested locally) → bridge → Robinhood Chain** | ✅ [publish tx](https://explorer.testnet.chain.robinhood.com/tx/0xdf53ee76f0d8288d56aed73ed9e379f6ca9a7e4fb33d8f441fd704bad9c854ca); vault reads it, $1,293 limit |
 
 Reproduce: `go run ./cmd/vela2rh -cert 109308847 2>/dev/null | grep '^{' > a.json && python3 bridge/vela_to_registry.py a.json --grader PSA --registry <REGISTRY> --send`
 

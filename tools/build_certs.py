@@ -276,9 +276,9 @@ def cert_page(c, sel):
 </div></div>
 <div class="sec"><span class="lbl">Value history · every version kept onchain</span><div class="track">{vs}</div></div>
 <div class="foot"><div class="qr" role="img" aria-label="QR code for this certificate">{qr_svg(url)}</div>
-<p><b>Scan to open this certificate.</b> Priced privately with <b class="hv">Horizen Vela</b>, stored on <b class="rh">Robinhood Chain</b>. Check the numbers yourself on the public registry.<span class="live" id="live" style="display:block">Checking Robinhood Chain…</span></p>
+<p><b>Scan to open this certificate.</b> Priced by the Gacha Galaxy model (the <b class="hv">Vela</b> app, tested locally), published by the Gacha Galaxy attester on <b class="rh">Robinhood Chain</b>. Check the numbers yourself on the public registry.<span class="live" id="live" style="display:block">Checking Robinhood Chain…</span></p>
 <a class="btn" href="{verify}" target="_blank" rel="noopener">Verify onchain</a></div>
-<div class="pw"><img src="{up}img/gg-logo.png" alt=""><span>Private pricing by <b>Horizen Vela</b></span><span class="dot"></span><span>Settled on <b>Robinhood Chain</b></span></div>
+<div class="pw"><img src="{up}img/gg-logo.png" alt=""><span>Built for <b>Horizen Vela</b> (tested locally)</span><span class="dot"></span><span>Settled on <b>Robinhood Chain</b></span></div>
 </article>
 <p class="note">Testnet demo on Robinhood Chain (chain ID 46630). Registry <a href="{EXPL}/address/{REG}" target="_blank" rel="noopener">{REG[:6]}…{REG[-4:]}</a>. Not financial advice.</p>
 </main>
@@ -290,7 +290,7 @@ def index_page():
     tiles = ""
     for c in CERTS:
         hero = c["cert"] == HERO
-        tag = '<span class="tag hero">Real Vela output</span>' if hero else '<span class="tag">Priced · Vela pending</span>'
+        tag = '<span class="tag hero">Gacha Galaxy model · tested locally</span>' if hero else '<span class="tag">Priced · Vela pending</span>'
         tiles += f'''<a class="tile" href="{c['cert']}/"><img src="{up}img/{c['cert']}.jpg" alt=""><div><p>{html.escape(c['name'])} {c['num']}</p><p class="pr">{usd(c['pt'])}</p><p class="id">PSA 10 · cert {c['cert']} · score {round(c['score']/10)}</p>{tag}</div></a>'''
     body = f'''{bar(up)}<main class="wrap"><h2 class="page">Verified Value certificates</h2>
 <p class="lede">Six real PSA 10 slabs, each with a price certificate stored on Robinhood Chain. Open one to see its value, confidence and history, and scan its QR code to share it.</p>
