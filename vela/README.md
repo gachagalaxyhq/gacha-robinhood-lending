@@ -1,3 +1,5 @@
+> **Moved.** The Vela app now lives in its own repo: https://github.com/gachagalaxyhq/gacha-vela-appraisal. That repo has the DO-324 fixes (01-08) and the reproducible production build. This folder is the earlier version, kept for reference.
+
 # Gacha Galaxy — Confidential Appraisal Engine (Vela WASM App)
 
 Private collateral valuation for high-value graded collectible cards, built as a
