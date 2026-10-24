@@ -17,9 +17,9 @@
 <section class="panel"><h2>Connection & chain checks</h2><p id="status" role="status" aria-live="polite">Not checked. Refresh uses public RPC only; wallet access is optional.</p><p id="wallet" class="address">Wallet not connected.</p><div class="actions"><button id="refresh" type="button">Refresh public status</button><button id="connect" class="secondary" type="button">Connect Trust Wallet</button><button id="disconnect" class="secondary" type="button">Forget connection</button></div><p class="fine">Accounts are requested only when you click Connect. Use Trust Wallet's browser or injected extension. No WalletConnect relay, external library, or automatic network switching.</p><p id="checked" class="fine">No live snapshot loaded.</p></section>
 <section class="panel"><h2>Live public snapshot</h2><div class="grid"><dl>
 <div><dt>Chain / block</dt><dd id="chain">Not checked</dd></div><div><dt>Contract code / owner / guardian / references</dt><dd id="checks">Not checked</dd></div><div><dt>Vault paused</dt><dd id="paused">Not checked</dd></div><div><dt>USDG decimals</dt><dd id="decimals">Not checked</dd></div>
-</dl><dl><div><dt>Expected owner's ETH</dt><dd id="eth">Not checked</dd></div><div><dt>Expected owner's USDG</dt><dd id="usdg">Not checked</dd></div><div><dt>Vault pool USDG balance</dt><dd id="pool">Not checked</dd></div><div><dt>Card token #1 owner</dt><dd id="token" class="address">Not checked</dd></div><div><dt>Token #1 debt</dt><dd id="debt">Unavailable — deployed debt ABI not verified.</dd></div></dl></div><p class="fine">Balances always refer to the saved owner, not an arbitrary connected account. A successful snapshot verifies only the listed reads at one block, not contract safety or spending authority.</p></section>
+</dl><dl><div><dt>Expected owner's ETH</dt><dd id="eth">Not checked</dd></div><div><dt>Expected owner's USDG</dt><dd id="usdg">Not checked</dd></div><div><dt>Vault pool USDG balance</dt><dd id="pool">Not checked</dd></div><div><dt>Card token #1 owner</dt><dd id="token" class="address">Not checked</dd></div><div><dt>Token #1 debt</dt><dd id="debt">Not checked — verified schema; refresh for debt.</dd></div></dl></div><p class="fine">Balances always refer to the saved owner, not an arbitrary connected account. A successful snapshot verifies only the listed reads at one block, not contract safety or spending authority.</p></section>
 <section class="panel"><h2>Saved mainnet configuration</h2><dl id="configList"></dl><p class="fine"><a href="https://docs.paxos.com/guides/stablecoin/usdg/mainnet">Official Paxos USDG address list</a> · JSON and recovery guide are included in the recovery ZIP. Configuration is also embedded in this HTML; no adjacent file is needed to open it.</p></section>
-<section class="panel"><h2>Recovery, not funding</h2><p class="note"><strong>Transaction controls deliberately unavailable pending deployed ABI verification.</strong> Local contract sources are outdated. No poolCap(), perCardCap(), stats(), or debt tuple decoding is assumed.</p><ol><li>Keep the original Trust Wallet recovery material offline. Never enter it into this page, a chat, a repository, or a website.</li><li>Compare the public owner address above with your wallet. Select Robinhood Chain mainnet, chain ID <code>4663</code> (<code>0x1237</code>), ETH, using the saved RPC below.</li><li>Open your saved HTML for public reads, or open a trusted HTTPS-hosted copy in Trust Wallet for optional account matching. If reads fail, no old live values remain valid; use the saved explorer links.</li></ol><p class="fine">The HTML works without this chat or a temporary server. Live reads still need internet and a reachable RPC that permits browser requests. Wallet injection may not work for local files. No hosting has been published by this change.</p></section>
+<section class="panel"><h2>Recovery, not funding</h2><p class="note"><strong>Transaction controls deliberately unavailable; this remains a read-only status page.</strong> Local contract sources are outdated. Debt uses the Sourcify exact-match ABI: positions(uint256) returns (address owner, uint256 debt). Runtime SHA-256 is checked before decoding. No transaction safety review is implied.</p><ol><li>Keep the original Trust Wallet recovery material offline. Never enter it into this page, a chat, a repository, or a website.</li><li>Compare the public owner address above with your wallet. Select Robinhood Chain mainnet, chain ID <code>4663</code> (<code>0x1237</code>), ETH, using the saved RPC below.</li><li>Open your saved HTML for public reads, or open a trusted HTTPS-hosted copy in Trust Wallet for optional account matching. If reads fail, no old live values remain valid; use the saved explorer links.</li></ol><p class="fine">The HTML works without this chat or a temporary server. Live reads still need internet and a reachable RPC that permits browser requests. Wallet injection may not work for local files. This read-only page is hosted on GitHub Pages; keep an independent saved copy.</p></section>
 <footer>Public information only. Never provide a private key or recovery phrase. No wallet permissions or live balances are saved.</footer>
 </main>
 <script id="pilot-config" type="application/json">
@@ -41,7 +41,9 @@
   "tokenId": "1",
   "usdgSource": "https://docs.paxos.com/guides/stablecoin/usdg/mainnet",
   "transactionsEnabled": false,
-  "debtSchemaVerified": false
+  "debtSchemaVerified": true,
+  "debtSchemaSource": "https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all",
+  "vaultRuntimeSHA256": "e9e012a1bc5dc65bb360584964158da67940510544233b004ae7c0836854c103"
 }
 </script>
 <script>
@@ -53,12 +55,13 @@
   const addressOK = a => /^0x[0-9a-fA-F]{40}$/.test(a);
   const word = raw => { if (!/^0x[0-9a-fA-F]{64}$/.test(raw)) throw Error('Malformed scalar return'); return raw.slice(2); };
   const addr = raw => { const w = word(raw); if (!/^0{24}/.test(w)) throw Error('Malformed address return'); return '0x' + w.slice(24); };
+  const position = raw => { if (!/^0x[0-9a-fA-F]{128}$/.test(raw)) throw Error('Malformed verified position return'); return {owner:addr('0x'+raw.slice(2,66)),debt:uint('0x'+raw.slice(66))}; };
   const uint = raw => BigInt('0x' + word(raw));
   const quantity = raw => { if (!/^0x(?:0|[1-9a-fA-F][0-9a-fA-F]*)$/.test(raw)) throw Error('Malformed RPC quantity'); return BigInt(raw); };
   const units = (value, decimals) => { const s = value.toString().padStart(decimals + 1,'0'); return decimals ? s.slice(0,-decimals) + '.' + s.slice(-decimals) : s; };
   const arg = a => a.slice(2).toLowerCase().padStart(64,'0');
   let epoch = 0, rpcId = 0, provider = null, account = null, bindings = [], connecting = false;
-  const fields = ['chain','checks','paused','decimals','eth','usdg','pool','token'];
+  const fields = ['chain','checks','paused','decimals','eth','usdg','pool','token','debt'];
   function clear(message) { epoch++; fields.forEach(id => { $(id).textContent = 'Unavailable'; }); $('checked').textContent = 'No valid live snapshot.'; $('status').textContent = message; return epoch; }
   function dropWallet() { for (const [p,event,handler] of bindings) { if (p.removeListener) p.removeListener(event,handler); } bindings = []; provider = null; account = null; $('wallet').textContent = 'Wallet not connected.'; }
   async function rpc(method, params) {
@@ -86,22 +89,29 @@
       const call = (to,data) => rpc('eth_call',[{to,data},block]);
       const codes = await Promise.all(['vault','registry','cards','usdg'].map(key => rpc('eth_getCode',[C[key],block])));
       if (codes.some(code => !/^0x(?:[0-9a-fA-F]{2})+$/.test(code) || /^0x0+$/.test(code))) throw Error('Missing or malformed contract code');
-      // Only scalar getters confirmed by public mainnet calls; no tuple ABI is assumed.
+      if (C.debtSchemaVerified !== true) throw Error('Debt schema not verified');
+      if (!globalThis.crypto || !globalThis.crypto.subtle) throw Error('Runtime hash verification unavailable');
+      const bytes = Uint8Array.from(codes[0].slice(2).match(/../g), b => parseInt(b,16));
+      const hash = Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',bytes)), b => b.toString(16).padStart(2,'0')).join('');
+      if (hash !== C.vaultRuntimeSHA256) throw Error('Verified vault runtime mismatch');
+      // ABI from Sourcify exact match, not inferred from return length or local source.
       const refs = await Promise.all(['0x8da5cb5b','0x452a9320','0x2977a4ad','0x58a4903f','0x7b103999'].map(s => call(C.vault,s)));
       ['owner','guardian','usdg','cards','registry'].forEach((key,i) => { if (!same(addr(refs[i]),C[key])) throw Error('Vault ' + key + ' mismatch'); });
-      const [pausedRaw,decimalRaw,ethRaw,usdgRaw,poolRaw,tokenRaw] = await Promise.all([
+      const [pausedRaw,decimalRaw,ethRaw,usdgRaw,poolRaw,tokenRaw,positionRaw] = await Promise.all([
         call(C.vault,'0x5c975abb'),call(C.usdg,'0x313ce567'),rpc('eth_getBalance',[C.owner,block]),
-        call(C.usdg,'0x70a08231'+arg(C.owner)),call(C.usdg,'0x70a08231'+arg(C.vault)),call(C.cards,'0x6352211e'+BigInt(C.tokenId).toString(16).padStart(64,'0'))]);
+        call(C.usdg,'0x70a08231'+arg(C.owner)),call(C.usdg,'0x70a08231'+arg(C.vault)),call(C.cards,'0x6352211e'+BigInt(C.tokenId).toString(16).padStart(64,'0')),call(C.vault,'0x99fbab88'+BigInt(C.tokenId).toString(16).padStart(64,'0'))]);
       const paused = uint(pausedRaw), decimals = uint(decimalRaw);
       if (paused > 1n) throw Error('Malformed paused flag');
       if (decimals !== BigInt(C.usdgDecimals) || decimals !== 6n) throw Error('USDG decimals mismatch');
-      const snapshot = {chain:C.chainId + ' / ' + quantity(block), checks:'Code present; owner, guardian & references match',paused:paused === 1n ? 'Yes — paused' : 'No',decimals:String(decimals),eth:units(quantity(ethRaw),18)+' ETH',usdg:units(uint(usdgRaw),6)+' USDG',pool:units(uint(poolRaw),6)+' USDG',token:addr(tokenRaw)};
+      const pos = position(positionRaw);
+      const debtText = units(pos.debt,6)+' USDG'+(same(pos.owner,'0x0000000000000000000000000000000000000000') ? ' · no deposited position' : ' · position owner '+pos.owner);
+      const snapshot = {debt:debtText,chain:C.chainId + ' / ' + quantity(block), checks:'Code present; owner, guardian & references match',paused:paused === 1n ? 'Yes — paused' : 'No',decimals:String(decimals),eth:units(quantity(ethRaw),18)+' ETH',usdg:units(uint(usdgRaw),6)+' USDG',pool:units(uint(poolRaw),6)+' USDG',token:addr(tokenRaw)};
       if (quantity(await rpc('eth_chainId',[])) !== BigInt(C.chainId)) throw Error('Public RPC network changed');
       if (p) await walletCheck(p,a);
       if (ticket !== epoch) return;
       for (const [id,value] of Object.entries(snapshot)) $(id).textContent = value;
       $('checked').textContent = 'Read at block ' + quantity(block) + ' · ' + new Date().toISOString() + ' · refresh before relying on it.';
-      $('status').textContent = paused === 1n ? 'Read checks passed, but vault is paused. Debt remains unverified. No transactions available.' : 'Listed read checks passed. Debt remains unverified. No transactions available.';
+      $('status').textContent = paused === 1n ? 'Read checks passed, but vault is paused. Debt read with verified schema and runtime. No transactions available.' : 'Listed read checks passed. Debt read with verified schema and runtime. No transactions available.';
     } catch (error) { if (ticket === epoch) { if (p) dropWallet(); clear('Status unavailable: ' + error.message + '. All live values cleared.'); } }
   }
   function chooseProvider() { const e = window.ethereum; const candidates = [window.trustwallet,...(e && Array.isArray(e.providers) ? e.providers : []),e]; return candidates.find(p => p && (p.isTrust || p.isTrustWallet) && typeof p.request === 'function'); }

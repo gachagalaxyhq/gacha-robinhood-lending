@@ -2,7 +2,7 @@
 
 This is a read-only status page, not a new vault and not a key-recovery tool.
 No deployment, transaction, signing, approval, funding, or borrowing is included.
-Transaction controls are deliberately unavailable pending deployed ABI verification.
+Transaction controls remain deliberately unavailable. Only verified, read-only debt display has been added.
 
 ## Save and reopen
 
@@ -35,17 +35,26 @@ Official USDG address reference: https://docs.paxos.com/guides/stablecoin/usdg/m
 
 ## What is checked, and what is not
 
-Each refresh checks the RPC chain before and after a block-pinned snapshot; nonempty code at vault/registry/cards/USDG; vault owner, guardian, loanAsset, cards and registry references; paused flag; USDG decimals; saved-owner ETH/USDG; vault USDG balance; and card #1 owner. Connected-wallet network/account are checked before and after reads. Any failure discards the entire snapshot. Code presence is not a bytecode audit, proxy/implementation verification, or proof of safety. A chain ID returned by an RPC is not independent proof the RPC is honest. Public reads disclose queried public addresses to the RPC provider.
+Each refresh checks the RPC chain before and after a block-pinned snapshot; nonempty code at vault/registry/cards/USDG; vault owner, guardian, loanAsset, cards and registry references; paused flag; USDG decimals; saved-owner ETH/USDG; vault USDG balance; card #1 owner; and token #1 position owner/debt using the verified schema. The vault runtime SHA-256 must match the verified deployment before position decoding. Browsers without Web Crypto fail closed. Connected-wallet network/account are checked before and after reads. Any failure discards the entire snapshot. Code presence is not a bytecode audit, proxy/implementation verification, or proof of safety. A chain ID returned by an RPC is not independent proof the RPC is honest. Public reads disclose queried public addresses to the RPC provider.
 
-The exact scalar read selectors in the HTML were recomputed from their named signatures and confirmed against public mainnet RPC on 2026-10-24. Standard balance/owner reads are strictly length-validated. Local contract sources are outdated and were not used as deployed ABI authority. No full deployed ABI was obtained from the public explorer response. `positions(uint256)` output layout is not verified, so **debt remains explicitly unavailable** (the previously reported zero is not promoted to a live read). No `stats()` tuple layout or `poolCap()` / `perCardCap()` is assumed. Before any future transaction UI, independently verify the deployed ABI/implementation, debt schema, permissions, limits and transaction semantics. A passing snapshot is not an all-clear for funding.
+The exact scalar read selectors in the HTML were recomputed from their named signatures and confirmed against public mainnet RPC on 2026-10-24. Standard balance/owner reads are strictly length-validated. Local contract sources are outdated and were not used as deployed ABI authority.
 
-## Hosting proposal — NOT published
+### Verified debt schema
 
-The existing repository is `gachagalaxyhq/gacha-robinhood-lending`. If its GitHub Pages setup serves `docs/`, the proposed route is `https://gachagalaxyhq.github.io/gacha-robinhood-lending/pilot/`. This change does not commit, push, enable Pages, publish that URL, or verify its availability. A future explicit deployment authorization is required. The recovery ZIP remains usable without that hosting; keep your own copies. Static hosting does not make a service permanent or restore lost keys.
+Authority: [Sourcify exact-match source, ABI and bytecode](https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all), chain 4663, match ID `56301548`, verified `2026-10-17T12:56:54Z`. Blockscout did not provide a verified ABI. Sourcify's creation and runtime bytes were compared with RPC deployment input and runtime; its recompiled runtime plus documented immutable substitutions also matched exactly. No independent local Solidity recompilation was performed.
 
-## Tests
+`positions(uint256) view returns (address owner, uint256 debt)`, selector `0x99fbab88`. Verified source declares `struct Position { address owner; uint256 debt; }`. Debt is a uint256 in the loan asset's base units; the configured USDG contract returns 6 decimals. The layout is not inferred from response length or zeros.
 
-From the repository root: `node --test test/lending-ui.test.cjs test/pilot-ui.test.cjs`.
-The original lending tests and pages are untouched. Pilot tests execute the real inline JavaScript with mocked DOM, RPC and wallet providers; they do not prove actual Trust Wallet/browser compatibility or chain safety.
+Expected deployed runtime SHA-256: `e9e012a1bc5dc65bb360584964158da67940510544233b004ae7c0836854c103`. Each refresh hashes the block-pinned vault runtime before decoding. The return must contain exactly two ABI words with valid address padding. Wrong runtime, malformed returns or read failures clear all live fields, including debt. There is no cached debt fallback.
 
-From the extracted ZIP: `node --test test/pilot-ui.test.cjs` (pilot files are under `docs/pilot/`).
+At investigation block `96632730` (`0x5c27f9a`), token #1 had zero position owner and zero debt; card ownership was the saved owner. This is historical evidence, not a cached live value or proof of current debt. No `stats()` tuple or `poolCap()` / `perCardCap()` is used. Before any future transaction UI, separately review permissions, limits and transaction semantics. A passing snapshot is not an all-clear for funding or a contract safety audit.
+
+## Hosting and independent copies
+
+GitHub Pages serves `main` / `docs` at https://gachagalaxyhq.github.io/gacha-robinhood-lending/pilot/. Keep independent recovery copies: static hosting does not make a service permanent or restore lost keys. Earlier recovery ZIPs do not automatically receive this update.
+
+## Verification and tests
+
+The debt-display candidate passed 36 Node mock-harness tests covering the real inline JavaScript: nonzero debt, malformed ABI returns, wrong runtime hash, chain/account mismatch, read failures, stale-value clearing and wallet events. Test/evidence files are intentionally not published in this docs-only update. The original lending pages and tests are untouched.
+
+Mock tests and a page screenshot do not prove Trust Wallet compatibility. No real wallet connection, signing, approvals, transactions, funding or contract deployment is part of this update. Live reads require internet, RPC availability, browser CORS permission and Web Crypto.

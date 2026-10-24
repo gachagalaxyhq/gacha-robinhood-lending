@@ -16,5 +16,7 @@
   "tokenId": "1",
   "usdgSource": "https://docs.paxos.com/guides/stablecoin/usdg/mainnet",
   "transactionsEnabled": false,
-  "debtSchemaVerified": false
+  "debtSchemaVerified": true,
+  "debtSchemaSource": "https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all",
+  "vaultRuntimeSHA256": "e9e012a1bc5dc65bb360584964158da67940510544233b004ae7c0836854c103"
 }
