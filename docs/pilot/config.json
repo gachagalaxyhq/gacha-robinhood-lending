@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "chainId": 4663,
+  "chainHex": "0x1237",
+  "network": "Robinhood Chain mainnet",
+  "rpc": "https://rpc.mainnet.chain.robinhood.com",
+  "explorer": "https://robinhoodchain.blockscout.com",
+  "nativeSymbol": "ETH",
+  "owner": "0xD77C34899858088DE6888F36fA46e2d6468F4Ca5",
+  "guardian": "0xD77C34899858088DE6888F36fA46e2d6468F4Ca5",
+  "registry": "0x2A585396dd0248A060045b3f557076fB1B4Cb0eb",
+  "cards": "0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653",
+  "vault": "0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23",
+  "usdg": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+  "usdgDecimals": 6,
+  "tokenId": "1",
+  "usdgSource": "https://docs.paxos.com/guides/stablecoin/usdg/mainnet",
+  "transactionsEnabled": false,
+  "debtSchemaVerified": false
+}
