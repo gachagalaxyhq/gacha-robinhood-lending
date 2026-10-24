@@ -152,7 +152,7 @@ td{padding:10px 16px;border-bottom:1px solid var(--line);vertical-align:middle}t
 tr:hover td{background:#FCFBFE}
 th.r,td.r{text-align:right}td.m{font-family:'JetBrains Mono',monospace;font-size:13px}
 .rowlink{display:flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none}
-.rowlink img{width:34px;border-radius:3px}
+.rowlink img{width:34px;aspect-ratio:505/840;object-fit:contain;flex:none;border-radius:3px}
 .rowlink small{display:block;font-size:12px;color:var(--mute)}
 .open{font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap}
 /* demo */
@@ -503,7 +503,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   const min=(...v)=>v.reduce((a,b)=>a<b?a:b), head=(cap,debt)=>cap>debt?cap-debt:0n;
   const actionIDs=['depositBtn','borrowBtn','approveUsdBtn','repayBtn','withdrawBtn'];
   let account=null, wallet=null, signer=null, current=null, pos=null, epoch=0, lookupSeq=0, refreshSeq=0;
-  let busy=false, connecting=false, pending=null, bindings=[], rpcID=0;
+  let busy=false, connecting=false, pending=null, bindings=[], rpcID=0, refreshing=0;
   let receiptBusy=false, pollTimer=null, pollGeneration=0, receiptFallback=false, networkNeeded=false, suspended=false;
   const activeReads=new Set();
   function stopPolling(){++pollGeneration;clearTimeout(pollTimer);pollTimer=null;}
@@ -517,14 +517,19 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   const valid=c=>c.epoch===epoch&&c.lookupSeq===lookupSeq&&c.current===current&&c.account===account&&c.wallet===wallet;
   const message=t=>{$('txMsg').textContent=t;};
   const errorText=e=>e?.code===4001||e?.code==='ACTION_REJECTED'?'Cancelled in wallet.':String(e?.shortMessage||e?.message||'Request failed.');
+  async function bounded(read,ms,text,onTimeout=()=>{}){let timer;try{return await Promise.race([Promise.resolve().then(read),new Promise((_,reject)=>{timer=setTimeout(()=>{onTimeout();reject(Error(text));},ms);})]);}finally{clearTimeout(timer);}}
   async function rpc(method,params=[]) {
     if(!['eth_chainId','eth_blockNumber','eth_getBlockByNumber','eth_getCode','eth_getStorageAt','eth_call','eth_getTransactionReceipt','eth_getTransactionByHash'].includes(method)) throw Error('Read-only RPC method required');
-    const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),15000),id=++rpcID;activeReads.add(ctl);
-    try {const r=await fetch(C.rpc,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',signal:ctl.signal,body:JSON.stringify({jsonrpc:'2.0',id,method,params})});
-      if(!r.ok)throw Error('RPC HTTP '+r.status);const b=await r.json();if(b.id!==id||b.jsonrpc!=='2.0'||b.error)throw Error(b.error?.message||'Malformed RPC response');return b.result;
-    }finally{clearTimeout(timer);activeReads.delete(ctl);}
+    const ctl=new AbortController(),id=++rpcID;activeReads.add(ctl);
+    try {return await bounded(async()=>{const r=await fetch(C.rpc,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',signal:ctl.signal,body:JSON.stringify({jsonrpc:'2.0',id,method,params})});
+       if(!r.ok)throw Error('RPC HTTP '+r.status);const b=await r.json();if(b.id!==id||b.jsonrpc!=='2.0'||b.error)throw Error(b.error?.message||'Malformed RPC response');return b.result;
+    },15000,'RPC timed out: '+method,()=>ctl.abort());}finally{activeReads.delete(ctl);}
   }
-  const ro=new ethers.JsonRpcProvider(C.rpc,4663,{staticNetwork:true,batchMaxCount:1,cacheTimeout:-1});
+  // Contract calls must use the same bounded, cancellable, read-only transport as verification.
+  class ReadProvider extends ethers.JsonRpcProvider {
+    async _send(payload){return Promise.all((Array.isArray(payload)?payload:[payload]).map(async p=>({jsonrpc:'2.0',id:p.id,result:await rpc(p.method,p.params)})));}
+  }
+  const ro=new ReadProvider(C.rpc,4663,{staticNetwork:true,batchMaxCount:1,cacheTimeout:-1});
   const reg=new ethers.Contract(A.registry,C.abi.registry,ro), cards=new ethers.Contract(A.cards,[...C.abi.cards,'function safeTransferFrom(address,address,uint256)'],ro), vault=new ethers.Contract(A.vault,C.abi.vault,ro);
   const usd=new ethers.Contract(A.usd,['function decimals() view returns(uint8)','function balanceOf(address) view returns(uint256)','function allowance(address,address) view returns(uint256)','function approve(address,uint256) returns(bool)'],ro);
   const assets=new ethers.Contract(A.usd,['function globalTransferSettings() view returns(uint40 referenceTime,uint32 maturityPeriod,bool partnerSignedRegistrationsEnabled,bytes10 __gap_remaining,bool paused)'],ro);
@@ -589,7 +594,10 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     $('cUpdated').textContent = `Updated ${ago(a.appraisedAt)} · by ${short(a.attester)}`;
     const img = $('slabImg');
     if (meta) {
-      img.src = `img/${cert}.jpg`; img.alt = `PSA 10 slab: ${meta.name} ${meta.num}, cert ${cert}`; img.hidden = false; $('slabLabel').hidden = true;
+      img.onload=()=>{img.hidden=false;$('slabLabel').hidden=true;};img.onerror=()=>{img.hidden=true;$('slabLabel').hidden=false;};
+      img.alt = `PSA 10 slab: ${meta.name} ${meta.num}, cert ${cert}`;
+      const src=`img/${cert}.jpg`;if(img.getAttribute('src')!==src){img.hidden=true;$('slabLabel').hidden=false;img.src=src;}
+      if(img.complete&&img.naturalWidth>0){img.hidden=false;$('slabLabel').hidden=true;}
     } else { img.hidden = true; $('slabLabel').hidden = false; }
   }
 
@@ -598,7 +606,8 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     clearPosition('Refreshing verified mainnet snapshot…');const seq=refreshSeq,c=ctx();
     if(!current)return false;
     if(current.cert!=='109308847'){clearPosition('Reference certificate only. This mainnet pilot supports token #1 (PSA 109308847).');return false;}
-    try{if(wallet&&account)await identity(c);const block=await rpc('eth_blockNumber'),header=await rpc('eth_getBlockByNumber',[block,false]);
+    ++refreshing;
+    try{return await bounded(async()=>{if(wallet&&account)await identity(c);const block=await rpc('eth_blockNumber'),header=await rpc('eth_getBlockByNumber',[block,false]);
       if(!header||header.number!==block||!/^0x[\da-f]{64}$/i.test(header.hash))throw Error('Invalid block header');
       await verify(block);const o={blockTag:block};
       const [holder,p,card,key,demo,allowDemo,paused,maxAge,perCard,totalCap,totalDebt,pool,approved,operator,status,available,limit,liq,asset]=await Promise.all([
@@ -618,7 +627,8 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
       const final=await rpc('eth_getBlockByNumber',[block,false]);if(final?.hash!==header.hash)throw Error('Snapshot block changed');
       if(wallet&&account)await identity(c);if(!valid(c)||seq!==refreshSeq)return false;
       current.a=a;renderCert();pos={id:'1',holder,depositor:p.owner,debt:p.debt,inVault,fresh,eligible,paused,held,demoBlocked,assetPaused:asset.paused,limit,liq,pool,poolHead,perCard,totalCap,totalDebt,balance,allowance,approved:same(approved,A.vault)||operator,available:expectedAvailable,potential:restricted?0n:min(cardHead,poolHead,pool),restricted,block,checked:Date.now()};renderPosition();return true;
-    }catch(e){if(valid(c)&&seq===refreshSeq){clearPosition('Live verification failed. Actions disabled: '+errorText(e));}return false;}
+    },25000,'Mainnet snapshot timed out. Use Refresh live status to retry.');
+    }catch(e){if(valid(c)&&seq===refreshSeq){clearPosition('Live verification failed. Actions disabled: '+errorText(e));}return false;}finally{--refreshing;}
   }
   function renderPosition(){if(!pos){lock();return;}lock();const own=!!signer&&same(pos.holder,account),depositor=!!signer&&pos.inVault&&same(pos.depositor,account),blocked=busy||connecting||receiptBusy||!!pending;
     $('dSub').textContent=pos.inVault?'Token #1 deposited by '+(depositor?'you':pos.depositor):'Token #1 held by '+(own?'you':pos.holder)+'. No demo copies on mainnet.';
@@ -676,7 +686,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   document.querySelectorAll('.copy-btn').forEach(b=>b.addEventListener('click',()=>{const a=b.parentElement.querySelector('[data-copy]');if(a)navigator.clipboard?.writeText(a.dataset.copy);}));
   window.addEventListener('pagehide',()=>{suspended=true;clearInterval(refreshTimer);drop('Page hidden. Refresh and reconnect to validate.');});
   window.addEventListener('pageshow',e=>{if(e.persisted){suspended=false;drop('Restored page. Refresh and reconnect before using cached values.');refreshTimer=setInterval(autoRefresh,30000);}});
-  const autoRefresh=()=>{if(!suspended&&!busy&&!connecting&&!pending&&!receiptBusy&&current)refreshPosition();};
+  const autoRefresh=()=>{if(!suspended&&!busy&&!connecting&&!pending&&!receiptBusy&&!refreshing&&current)return refreshPosition();};
   let refreshTimer=null;
   // start
   renderWallet();$('amt').value='0.000001';$('certInput').value='109308847';lookup('109308847');
@@ -686,6 +696,8 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
 
 </script>
 <script>
+// Six small local references: do not leave zero-height lazy images waiting offscreen.
+document.querySelectorAll('.rowlink img').forEach(img=>{img.loading='eager';});
 (() => { const c = document.getElementById('cCert'), a = document.getElementById('cShare');
   const ok = ["109308847","118973623","100863346","154790134","153708045","111992917"];
   const upd = () => { const v = c.textContent.trim(); a.href = ok.includes(v) ? 'cert/' + v + '/' : 'cert/'; };
