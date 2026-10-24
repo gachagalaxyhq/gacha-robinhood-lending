@@ -448,9 +448,8 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   window.GG_WALLETS = () => {
     const out = [], add = p => { if (ok(p) && !out.includes(p)) out.push(p); };
     const eth = window.ethereum;
-    // v1 path first: window.ethereum, unless it is clearly a different wallet (then Trust Wallet goes first).
-    const ethIsOther = eth && !isTrust(eth) && (eth.isMetaMask || eth.isCoinbaseWallet || eth.isRabby || eth.isBraveWallet || eth.isPhantom);
-    if (eth && !ethIsOther) add(eth);
+    // Prefer an explicit Trust provider to an unmarked window.ethereum wrapper.
+    if (isTrust(eth)) add(eth);
     add(window.trustwallet?.ethereum); add(window.trustwallet);
     announced.filter(a => /trust/i.test(a.info?.rdns || '') || /trust/i.test(a.info?.name || '')).forEach(a => add(a.provider));
     (eth?.providers || []).filter(isTrust).forEach(add);
@@ -535,15 +534,17 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   function amount(text){if(!/^(0|[1-9]\d*)(\.\d{1,6})?$/.test(text))throw Error('Use a positive USDG amount with at most six decimals.');const n=ethers.parseUnits(text,6);if(n<=0n||n>=(1n<<256n)-1n)throw Error('Amount out of range');return n;}
   async function identity(c){if(!valid(c)||!wallet||!account)throw Error('Connect wallet again.');const chain=await wallet.request({method:'eth_chainId'}),accounts=await wallet.request({method:'eth_accounts'});if(!valid(c))throw Error('Session changed.');if(BigInt(chain)!==4663n||!same(accounts?.[0],c.account)){drop('Wallet account/network changed. Reconnect on mainnet.');throw Error('Wallet account/network changed. Reconnect on mainnet.');}}
   function drop(text){++epoch;account=null;signer=null;for(const [p,e,h]of bindings)p.removeListener?.(e,h);bindings=[];wallet=null;window.GG_CONNECTED=false;clearPosition(text);renderWallet();}
-  function hook(p){for(const e of ['accountsChanged','chainChanged','disconnect']){const h=()=>drop('Wallet changed. Actions disabled; reconnect explicitly.');p.on?.(e,h);bindings.push([p,e,h]);}}
+  function hook(p,onAccounts){for(const e of ['accountsChanged','chainChanged','disconnect']){const h=value=>{if(e==='accountsChanged'&&onAccounts?.(value))return;drop('Wallet changed. Actions disabled; reconnect explicitly.');if(connecting)message('Wallet changed during connection. Reconnect explicitly after the request settles.');};p.on?.(e,h);bindings.push([p,e,h]);}}
   function renderWallet(){$('connectBtn').textContent=account?short(account)+' · reconnect':'Connect wallet';$('connectBtn').disabled=busy||connecting;}
   async function connect(){
     if(connecting||busy)return;connecting=true;drop('Connecting wallet…');lock();const ticket=epoch;
     const p=window.GG_WALLET||window.ethereum;
-    try{if(!p)throw Error('No injected wallet. Open in a wallet browser.');wallet=p;hook(p);message('Waiting for wallet permission. Do not click again; the request remains locked until the wallet answers.');
-      const accounts=await p.request({method:'eth_requestAccounts'});if(ticket!==epoch)return;
+    let authorizing=true,announcedAccount=null;
+    try{if(!p)throw Error('No injected wallet. Open in a wallet browser.');wallet=p;hook(p,accounts=>{if(!authorizing||!Array.isArray(accounts)||!ethers.isAddress(accounts[0]))return false;announcedAccount=accounts[0];return true;});message('Waiting for wallet permission. Do not click again; the request remains locked until the wallet answers.');
+      const accounts=await p.request({method:'eth_requestAccounts'});authorizing=false;if(ticket!==epoch)return;
       if(!ethers.isAddress(accounts?.[0]))throw Error('No valid wallet account');account=accounts[0];
-      const c=ctx();await identity(c);signer=await new ethers.BrowserProvider(p).getSigner(account);if(!valid(c))return;window.GG_CONNECTED=true;message('Connected. Mainnet uses real USDG and ETH gas.');
+      if(announcedAccount&&!same(announcedAccount,account))throw Error('Wallet account changed during authorization. Reconnect explicitly.');
+      const c=ctx();await identity(c);const nextSigner=await new ethers.BrowserProvider(p).getSigner(account);if(!valid(c))return;await identity(c);if(!valid(c))return;signer=nextSigner;window.GG_CONNECTED=true;message('Connected. Mainnet uses real USDG and ETH gas.');
     }catch(e){if(ticket===epoch){drop('Connection unavailable. Select mainnet, then reconnect.');message(errorText(e));}}
     finally{connecting=false;renderWallet();if(current&&!busy&&!pending)await refreshPosition();}
   }
