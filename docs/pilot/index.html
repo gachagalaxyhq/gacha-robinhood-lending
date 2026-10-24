@@ -18,6 +18,8 @@
 <section class="panel"><h2>Live public snapshot</h2><div class="grid"><dl>
 <div><dt>Chain / block</dt><dd id="chain">Not checked</dd></div><div><dt>Contract code / owner / guardian / references</dt><dd id="checks">Not checked</dd></div><div><dt>Vault paused</dt><dd id="paused">Not checked</dd></div><div><dt>USDG decimals</dt><dd id="decimals">Not checked</dd></div>
 </dl><dl><div><dt>Expected owner's ETH</dt><dd id="eth">Not checked</dd></div><div><dt>Expected owner's USDG</dt><dd id="usdg">Not checked</dd></div><div><dt>Vault pool USDG balance</dt><dd id="pool">Not checked</dd></div><div><dt>Card token #1 owner</dt><dd id="token" class="address">Not checked</dd></div><div><dt>Token #1 debt</dt><dd id="debt">Not checked — verified schema; refresh for debt.</dd></div></dl></div><p class="fine">Balances always refer to the saved owner, not an arbitrary connected account. A successful snapshot verifies only the listed reads at one block, not contract safety or spending authority.</p></section>
+<section class="panel" aria-labelledby="readinessTitle"><h2 id="readinessTitle">Flow readiness — read only</h2><p>Prerequisites for the saved owner and token #1, not instructions to approve, deposit or fund.</p><dl>
+<div><dt>NFT custody and deposited position</dt><dd id="readyCustody">Unknown — refresh required</dd></div><div><dt>NFT approvals and repayment allowance</dt><dd id="readyApprovals">Unknown — refresh required</dd></div><div><dt>Appraisal and restrictions</dt><dd id="readyAppraisal">Unknown — refresh required</dd></div><div><dt>Caps, liquidity and availability</dt><dd id="readyCaps">Unknown — refresh required</dd></div><div><dt>Current flow blockers</dt><dd id="readyBlockers">Unknown — refresh required</dd></div></dl><p class="fine">All reads use one block. Runtime hashes and the USDG implementation slot are checked before decoding. Missing or failed checks are unknown, never zero. No amount or transaction is selected. USDG freezes, upgrades, physical custody, gas sufficiency and future execution are not certified; a clear prerequisite list is not an all-clear.</p></section>
 <section class="panel"><h2>Saved mainnet configuration</h2><dl id="configList"></dl><p class="fine"><a href="https://docs.paxos.com/guides/stablecoin/usdg/mainnet">Official Paxos USDG address list</a> · JSON and recovery guide are included in the recovery ZIP. Configuration is also embedded in this HTML; no adjacent file is needed to open it.</p></section>
 <section class="panel"><h2>Recovery, not funding</h2><p class="note"><strong>Transaction controls deliberately unavailable; this remains a read-only status page.</strong> Local contract sources are outdated. Debt uses the Sourcify exact-match ABI: positions(uint256) returns (address owner, uint256 debt). Runtime SHA-256 is checked before decoding. No transaction safety review is implied.</p><ol><li>Keep the original Trust Wallet recovery material offline. Never enter it into this page, a chat, a repository, or a website.</li><li>Compare the public owner address above with your wallet. Select Robinhood Chain mainnet, chain ID <code>4663</code> (<code>0x1237</code>), ETH, using the saved RPC below.</li><li>Open your saved HTML for public reads, or open a trusted HTTPS-hosted copy in Trust Wallet for optional account matching. If reads fail, no old live values remain valid; use the saved explorer links.</li></ol><p class="fine">The HTML works without this chat or a temporary server. Live reads still need internet and a reachable RPC that permits browser requests. Wallet injection may not work for local files. This read-only page is hosted on GitHub Pages; keep an independent saved copy.</p></section>
 <footer>Public information only. Never provide a private key or recovery phrase. No wallet permissions or live balances are saved.</footer>
@@ -43,7 +45,244 @@
   "transactionsEnabled": false,
   "debtSchemaVerified": true,
   "debtSchemaSource": "https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all",
-  "vaultRuntimeSHA256": "e9e012a1bc5dc65bb360584964158da67940510544233b004ae7c0836854c103"
+  "vaultRuntimeSHA256": "e9e012a1bc5dc65bb360584964158da67940510544233b004ae7c0836854c103",
+  "readinessSchema": {
+    "approved": {
+      "contract": "cards",
+      "selector": "0x081812fc",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "address"
+        }
+      ]
+    },
+    "operator": {
+      "contract": "cards",
+      "selector": "0xe985e9c5",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "certKey": {
+      "contract": "cards",
+      "selector": "0xc5471120",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bytes32"
+        }
+      ]
+    },
+    "demo": {
+      "contract": "cards",
+      "selector": "0x22b4191f",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "allowance": {
+      "contract": "usdg",
+      "selector": "0xdd62ed3e",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "assetSettings": {
+      "contract": "usdg",
+      "selector": "0x5b9d419e",
+      "outputs": [
+        {
+          "name": "referenceTime",
+          "type": "uint40"
+        },
+        {
+          "name": "maturityPeriod",
+          "type": "uint32"
+        },
+        {
+          "name": "partnerSignedRegistrationsEnabled",
+          "type": "bool"
+        },
+        {
+          "name": "__gap_remaining",
+          "type": "bytes10"
+        },
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    "maxAge": {
+      "contract": "vault",
+      "selector": "0x4e941b01",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "allowDemo": {
+      "contract": "vault",
+      "selector": "0xcf256ae7",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "perCard": {
+      "contract": "vault",
+      "selector": "0x8da731d9",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "totalCap": {
+      "contract": "vault",
+      "selector": "0x226b6408",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "totalDebt": {
+      "contract": "vault",
+      "selector": "0xfc7b9c18",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "borrowStatus": {
+      "contract": "vault",
+      "selector": "0x0367b498",
+      "outputs": [
+        {
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "name": "available",
+          "type": "uint256"
+        }
+      ]
+    },
+    "available": {
+      "contract": "vault",
+      "selector": "0x8c99df5b",
+      "outputs": [
+        {
+          "name": "avail",
+          "type": "uint256"
+        }
+      ]
+    },
+    "exists": {
+      "contract": "registry",
+      "selector": "0x38a699a4",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "held": {
+      "contract": "vault",
+      "selector": "0x77ecc1aa",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "appraisal": {
+      "contract": "registry",
+      "selector": "0x5fbb5a81",
+      "outputs": [
+        {
+          "name": "fmvLow",
+          "type": "uint64"
+        },
+        {
+          "name": "fmvPoint",
+          "type": "uint64"
+        },
+        {
+          "name": "fmvHigh",
+          "type": "uint64"
+        },
+        {
+          "name": "ltvBps",
+          "type": "uint16"
+        },
+        {
+          "name": "confidenceScore",
+          "type": "uint16"
+        },
+        {
+          "name": "compCount",
+          "type": "uint16"
+        },
+        {
+          "name": "confidence",
+          "type": "uint8"
+        },
+        {
+          "name": "risk",
+          "type": "uint8"
+        },
+        {
+          "name": "eligible",
+          "type": "bool"
+        },
+        {
+          "name": "appraisedAt",
+          "type": "uint40"
+        },
+        {
+          "name": "attester",
+          "type": "address"
+        }
+      ]
+    }
+  },
+  "relatedRuntimeSHA256": {
+    "registry": "c53c4c889bd1e99c22703c41d800f732a9f028aac3b8423f8e6ddb75727c06e6",
+    "cards": "0bc66254d35cdf13d93e39c5012821ec44aee4174f8ae38f03c4800cea3bba96",
+    "usdg": "c85d18dc1e49769e01f9f88981176e213b2bc24d2f14d33a81d54bc06579f6db",
+    "implementation": "0d8203b94e33c2458a137c0c70d2491f3625837405a74fd332f4cba5a979c372"
+  },
+  "usdgImplementation": "0x68184C449E1a8f34fA18d289737129FD27B66f8F",
+  "usdgImplementationSlot": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+  "readinessSourceURLs": {
+    "vault": "https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all",
+    "cards": "https://sourcify.dev/server/v2/contract/4663/0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653?fields=all",
+    "registry": "https://sourcify.dev/server/v2/contract/4663/0x2A585396dd0248A060045b3f557076fB1B4Cb0eb?fields=all",
+    "usdg": "https://sourcify.dev/server/v2/contract/4663/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168?fields=all",
+    "implementation": "https://sourcify.dev/server/v2/contract/4663/0x68184C449E1a8f34fA18d289737129FD27B66f8F?fields=all"
+  }
 }
 </script>
 <script>
@@ -60,16 +299,112 @@
   const quantity = raw => { if (!/^0x(?:0|[1-9a-fA-F][0-9a-fA-F]*)$/.test(raw)) throw Error('Malformed RPC quantity'); return BigInt(raw); };
   const units = (value, decimals) => { const s = value.toString().padStart(decimals + 1,'0'); return decimals ? s.slice(0,-decimals) + '.' + s.slice(-decimals) : s; };
   const arg = a => a.slice(2).toLowerCase().padStart(64,'0');
+  const ZERO = '0x'+'0'.repeat(40);
+  const readinessFields = ['readyCustody','readyApprovals','readyAppraisal','readyCaps','readyBlockers'];
+  const minimum = (...v) => v.reduce((a,b) => a < b ? a : b);
+  const remaining = (cap,debt) => cap > debt ? cap-debt : 0n;
+  const bounded = (raw,bits) => { const n=uint(raw); if (n >= 1n<<BigInt(bits)) throw Error('Malformed bounded integer'); return n; };
+  function decodeVerified(raw,schema) {
+    if (typeof raw!=='string' || !new RegExp('^0x[0-9a-fA-F]{'+schema.length*64+'}$').test(raw)) throw Error('Malformed verified readiness return');
+    return Object.fromEntries(schema.map((s,i) => {
+      const r='0x'+raw.slice(2+i*64,66+i*64); let v;
+      if(s.type==='address') v=addr(r);
+      else if(s.type==='bool') { v=uint(r); if(v>1n) throw Error('Malformed boolean'); v=v===1n; }
+      else if(s.type.startsWith('uint')) v=bounded(r,Number(s.type.slice(4)));
+      else if(s.type.startsWith('bytes')) { const len=Number(s.type.slice(5))*2; if(!/^0*$/.test(r.slice(2+len))) throw Error('Malformed bytes padding'); v='0x'+r.slice(2,2+len); }
+      else throw Error('Unsupported verified type');
+      return [s.name,v];
+    }));
+  }
+  async function runtimeGuard(code,expected,label) {
+    if(!/^0x(?:[0-9a-fA-F]{2})+$/.test(code) || /^0x0+$/.test(code)) throw Error('Missing or malformed '+label+' code');
+    const bytes=Uint8Array.from(code.slice(2).match(/../g),x=>parseInt(x,16));
+    const hash=Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
+    if(hash!==expected) throw Error('Verified '+label+' runtime mismatch');
+  }
+  function headerCheck(header,block) {
+    if(!header || header.number!==block || !/^0x[0-9a-fA-F]{64}$/.test(header.hash)) throw Error('Malformed block header');
+    quantity(header.timestamp); return header;
+  }
+  async function relatedGuards(codes,block) {
+    for(const [i,label] of [[1,'registry'],[2,'cards'],[3,'usdg']]) await runtimeGuard(codes[i],C.relatedRuntimeSHA256[label],label);
+    const slot=await rpc('eth_getStorageAt',[C.usdg,C.usdgImplementationSlot,block]);
+    if(!same(addr(slot),C.usdgImplementation)) throw Error('USDG implementation changed');
+    const code=await rpc('eth_getCode',[C.usdgImplementation,block]);
+    await runtimeGuard(code,C.relatedRuntimeSHA256.implementation,'USDG implementation');
+  }
+  async function readiness(call,header,pos,holder,paused,pool,ownerBalance) {
+    const token=BigInt(C.tokenId).toString(16).padStart(64,'0');
+    async function read(key,args='') {
+      const s=C.readinessSchema[key];
+      const raw=await call(C[s.contract],s.selector+args);
+      return decodeVerified(raw,s.outputs);
+    }
+    const keys=['approved','operator','certKey','demo','allowance','assetSettings','maxAge','allowDemo','perCard','totalCap','totalDebt','borrowStatus','available'];
+    const values=await Promise.all(keys.map(k=>read(k,
+      ['approved','certKey','demo','borrowStatus','available'].includes(k)?token:
+      k==='operator'?arg(holder)+arg(C.vault):k==='allowance'?arg(C.owner)+arg(C.vault):'')));
+    const r=Object.fromEntries(keys.map((k,i)=>[k,values[i]]));
+    const key=r.certKey.value.slice(2);
+    const [exists,held]=await Promise.all([read('exists',key),read('held',key)]);
+    const a=exists.value?await read('appraisal',key):null;
+    if(a && (a.confidence>3n || a.risk>4n || a.fmvLow>a.fmvPoint || a.fmvPoint>a.fmvHigh || a.fmvLow===0n || a.ltvBps>9000n || a.appraisedAt===0n)) throw Error('Malformed appraisal');
+    if(r.borrowStatus.status>10n || r.maxAge.value===0n || r.maxAge.value>7776000n || r.perCard.value>r.totalCap.value) throw Error('Malformed readiness parameters');
+    const now=quantity(header.timestamp);
+    if(a && a.appraisedAt>now) throw Error('Future appraisal timestamp');
+    const fresh=!!a && now<=a.appraisedAt+r.maxAge.value;
+    const eligible=!!a && a.eligible && a.risk!==1n;
+    const demoBlocked=r.demo.value&&!r.allowDemo.value;
+    const deposited=!same(pos.owner,ZERO);
+    if(deposited!==same(holder,C.vault) || (!deposited&&pos.debt!==0n)) throw Error('Custody and position inconsistent');
+    const approved=same(r.approved.value,C.vault)||r.operator.value;
+    const limit=a?minimum(a.fmvLow*10000n*a.ltvBps/10000n,r.perCard.value):0n;
+    const cardHeadroom=remaining(limit,pos.debt),poolHeadroom=remaining(r.totalCap.value,r.totalDebt.value);
+    let reason=0n;
+    if(!deposited) reason=1n; else if(demoBlocked) reason=10n; else if(paused) reason=2n; else if(held.value) reason=3n;
+    else if(!a) reason=4n; else if(!eligible) reason=5n; else if(!fresh) reason=6n;
+    else if(cardHeadroom===0n) reason=7n; else if(poolHeadroom===0n) reason=8n; else if(pool===0n) reason=9n;
+    const available=reason===0n?minimum(cardHeadroom,poolHeadroom,pool):0n;
+    if(r.borrowStatus.status!==reason || r.borrowStatus.available!==available || r.available.avail!==available) throw Error('Borrow readiness inconsistent with verified views');
+    const borrow=[],deposit=[],repay=[],withdraw=[];
+    if(!deposited) borrow.push('Not deposited');
+    if(deposited&&!same(pos.owner,C.owner)) {borrow.push('Saved owner is not position owner');withdraw.push('Saved owner is not position owner');}
+    if(!same(holder,C.owner)&&!deposited) deposit.push('Saved owner does not hold token');
+    if(!deposited&&!approved) deposit.push('Wrapper approval absent (direct safe transfer has a separate path)');
+    if(demoBlocked) {borrow.push('Demo token blocked');deposit.push('Demo token blocked');}
+    if(paused) borrow.push('Vault paused');
+    if(held.value) borrow.push('Certificate held');
+    if(!a) borrow.push('No appraisal');else {if(!eligible) borrow.push('Appraisal ineligible/rejected');if(!fresh) borrow.push('Appraisal stale');}
+    if(a&&cardHeadroom===0n) borrow.push('Card limit reached');
+    if(poolHeadroom===0n) borrow.push('Pool debt cap reached');
+    if(pool===0n) borrow.push('Pool liquidity zero');
+    if(r.assetSettings.paused) {borrow.push('USDG paused');if(pos.debt>0n)repay.push('USDG paused');}
+    if(deposited&&pos.debt>0n) {
+      if(r.allowance.value<pos.debt) repay.push('Allowance below full debt');
+      if(ownerBalance<pos.debt) repay.push('Saved-owner balance below full debt');
+      withdraw.push('Outstanding debt');
+    }
+    if(!deposited) {repay.push('No deposited position');withdraw.push('No deposited position');}
+    const expiry=a?new Date(Number(a.appraisedAt+r.maxAge.value)*1000).toISOString():'Unknown — no appraisal';
+    return {
+      readyCustody:'NFT holder: '+holder+' · Position owner: '+(deposited?pos.owner:'none — not deposited')+' · Debt: '+units(pos.debt,6)+' USDG',
+      readyApprovals:'Token approval: '+r.approved.value+' · Operator approval: '+(r.operator.value?'yes':'no')+' · Saved-owner repayment allowance: '+units(r.allowance.value,6)+' USDG (spender: vault)',
+      readyAppraisal:(a?('Appraisal: '+(fresh?'fresh':'stale')+' · eligible: '+(eligible?'yes':'no')+' · LTV: '+units(a.ltvBps,2)+'% · age: '+(now-a.appraisedAt)+' / '+r.maxAge.value+' seconds · expiry: '+expiry):'Appraisal: missing; age, LTV and expiry unknown')+' · Vault paused: '+(paused?'yes':'no')+' · Certificate held: '+(held.value?'yes':'no')+' · USDG paused: '+(r.assetSettings.paused?'yes':'no'),
+      readyCaps:'Per-card cap: '+units(r.perCard.value,6)+' USDG · Total cap: '+units(r.totalCap.value,6)+' USDG · Total debt: '+units(r.totalDebt.value,6)+' USDG · Pool headroom: '+units(poolHeadroom,6)+' USDG · Pool liquidity: '+units(pool,6)+' USDG · Actual vault availability: '+units(available,6)+' USDG',
+      readyBlockers:'Deposit wrapper: '+(deposited?'already deposited':deposit.join('; ')||'no listed prerequisite blocker')+'. Borrow: '+(borrow.join('; ')||'no listed prerequisite blocker')+'. Full repay: '+(repay.join('; ')||(pos.debt===0n?'no debt to repay':'no listed prerequisite blocker'))+'. Collateral withdraw: '+(withdraw.join('; ')||'no listed prerequisite blocker')+'. Status: '+['OK','NOT_DEPOSITED','PAUSED','CARD_HELD','NO_APPRAISAL','NOT_ELIGIBLE','STALE_APPRAISAL','CARD_LIMIT_REACHED','POOL_LIMIT_REACHED','NO_LIQUIDITY','DEMO_CARD_BLOCKED'][Number(reason)]+'. No transaction is enabled.'
+    };
+  }
+
   let epoch = 0, rpcId = 0, provider = null, account = null, bindings = [], connecting = false;
-  const fields = ['chain','checks','paused','decimals','eth','usdg','pool','token','debt'];
-  function clear(message) { epoch++; fields.forEach(id => { $(id).textContent = 'Unavailable'; }); $('checked').textContent = 'No valid live snapshot.'; $('status').textContent = message; return epoch; }
+  const fields = ['chain','checks','paused','decimals','eth','usdg','pool','token','debt',...readinessFields];
+  function clear(message) { epoch++; fields.forEach(id => { $(id).textContent = readinessFields.includes(id) ? 'Unknown — snapshot unavailable' : 'Unavailable'; }); $('checked').textContent = 'No valid live snapshot.'; $('status').textContent = message; return epoch; }
   function dropWallet() { for (const [p,event,handler] of bindings) { if (p.removeListener) p.removeListener(event,handler); } bindings = []; provider = null; account = null; $('wallet').textContent = 'Wallet not connected.'; }
   async function rpc(method, params) {
-    if (!['eth_chainId','eth_blockNumber','eth_getCode','eth_call','eth_getBalance'].includes(method)) throw Error('Read-only RPC method rejected');
+    if (!['eth_chainId','eth_blockNumber','eth_getCode','eth_call','eth_getBalance','eth_getBlockByNumber','eth_getStorageAt'].includes(method)) throw Error('Read-only RPC method rejected');
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(),15000);
     try { const id = ++rpcId; const response = await fetch(C.rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id,method,params}),signal:controller.signal,credentials:'omit'});
       if (!response.ok) throw Error('RPC HTTP ' + response.status);
-      const body = await response.json(); if (body.id !== id || body.jsonrpc !== '2.0' || body.error || typeof body.result !== 'string') throw Error('RPC read rejected or malformed'); return body.result;
+      const body = await response.json(); if (body.id !== id || body.jsonrpc !== '2.0' || body.error || (method === 'eth_getBlockByNumber' ? (!body.result || typeof body.result !== 'object') : typeof body.result !== 'string')) throw Error('RPC read rejected or malformed'); return body.result;
     } finally { clearTimeout(timer); }
   }
   async function walletCheck(p,a) {
@@ -86,6 +421,7 @@
       if (p) await walletCheck(p,a);
       if (quantity(await rpc('eth_chainId',[])) !== BigInt(C.chainId)) throw Error('Public RPC network mismatch');
       const block = await rpc('eth_blockNumber',[]); quantity(block);
+      const header = headerCheck(await rpc('eth_getBlockByNumber',[block,false]),block);
       const call = (to,data) => rpc('eth_call',[{to,data},block]);
       const codes = await Promise.all(['vault','registry','cards','usdg'].map(key => rpc('eth_getCode',[C[key],block])));
       if (codes.some(code => !/^0x(?:[0-9a-fA-F]{2})+$/.test(code) || /^0x0+$/.test(code))) throw Error('Missing or malformed contract code');
@@ -94,6 +430,7 @@
       const bytes = Uint8Array.from(codes[0].slice(2).match(/../g), b => parseInt(b,16));
       const hash = Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',bytes)), b => b.toString(16).padStart(2,'0')).join('');
       if (hash !== C.vaultRuntimeSHA256) throw Error('Verified vault runtime mismatch');
+      await relatedGuards(codes,block);
       // ABI from Sourcify exact match, not inferred from return length or local source.
       const refs = await Promise.all(['0x8da5cb5b','0x452a9320','0x2977a4ad','0x58a4903f','0x7b103999'].map(s => call(C.vault,s)));
       ['owner','guardian','usdg','cards','registry'].forEach((key,i) => { if (!same(addr(refs[i]),C[key])) throw Error('Vault ' + key + ' mismatch'); });
@@ -106,6 +443,9 @@
       const pos = position(positionRaw);
       const debtText = units(pos.debt,6)+' USDG'+(same(pos.owner,'0x0000000000000000000000000000000000000000') ? ' · no deposited position' : ' · position owner '+pos.owner);
       const snapshot = {debt:debtText,chain:C.chainId + ' / ' + quantity(block), checks:'Code present; owner, guardian & references match',paused:paused === 1n ? 'Yes — paused' : 'No',decimals:String(decimals),eth:units(quantity(ethRaw),18)+' ETH',usdg:units(uint(usdgRaw),6)+' USDG',pool:units(uint(poolRaw),6)+' USDG',token:addr(tokenRaw)};
+      Object.assign(snapshot,await readiness(call,header,pos,addr(tokenRaw),paused===1n,uint(poolRaw),uint(usdgRaw)));
+      const finalHeader=headerCheck(await rpc('eth_getBlockByNumber',[block,false]),block);
+      if(finalHeader.hash!==header.hash || finalHeader.timestamp!==header.timestamp) throw Error('Snapshot block changed');
       if (quantity(await rpc('eth_chainId',[])) !== BigInt(C.chainId)) throw Error('Public RPC network changed');
       if (p) await walletCheck(p,a);
       if (ticket !== epoch) return;

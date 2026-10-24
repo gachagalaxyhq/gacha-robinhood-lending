@@ -2,7 +2,7 @@
 
 This is a read-only status page, not a new vault and not a key-recovery tool.
 No deployment, transaction, signing, approval, funding, or borrowing is included.
-Transaction controls remain deliberately unavailable. Only verified, read-only debt display has been added.
+Transaction controls remain deliberately unavailable. Only verified, read-only debt and flow-readiness display are included.
 
 ## Save and reopen
 
@@ -55,6 +55,16 @@ GitHub Pages serves `main` / `docs` at https://gachagalaxyhq.github.io/gacha-rob
 
 ## Verification and tests
 
-The debt-display candidate passed 36 Node mock-harness tests covering the real inline JavaScript: nonzero debt, malformed ABI returns, wrong runtime hash, chain/account mismatch, read failures, stale-value clearing and wallet events. Test/evidence files are intentionally not published in this docs-only update. The original lending pages and tests are untouched.
+The prior published debt-display change passed 36 Node mock-harness tests. The readiness panel passes 76 tests against its real inline JavaScript, including nonzero debt, positive availability, malformed verified schemas, related runtime changes, implementation-slot changes, block inconsistency, chain/account mismatch, read failures, stale-value clearing and wallet events. Test/evidence files remain scratch only. The original lending pages and tests are untouched.
 
 Mock tests and a page screenshot do not prove Trust Wallet compatibility. No real wallet connection, signing, approvals, transactions, funding or contract deployment is part of this update. Live reads require internet, RPC availability, browser CORS permission and Web Crypto.
+
+## Read-only flow-readiness panel
+
+Based on commit 7bd62be and published with explicit authorization. No transaction authorization is implied. The new panel separates NFT holder from position owner, reads NFT approvals and saved-owner repayment allowance, appraisal freshness and restrictions, caps and liquidity, and computes explicit prerequisite blockers. No action buttons are added.
+
+Every refresh pins calls and proxy storage to one block, compares the block header again before rendering, checks all related runtime SHA-256 values and the EIP-1967 USDG implementation slot before relying on decoded data. Schemas/selectors are copied from the previously verified Sourcify evidence, not guessed. USDG implementation verification is a Sourcify match with documented metadata/immutable transformations, not an exact match.
+
+All readiness values clear to Unknown after any failed required read, bad schema, changed runtime, block inconsistency or wallet event. Known absence of an appraisal is shown explicitly; no invented age or LTV is substituted. borrowStatus/availableToBorrow are cross-checked against prerequisites. Wrapper approval is not described as mandatory for the separate direct-safe-transfer deposit route.
+
+USDG address-freeze state, all facets/admin policy, physical custody and redemption, wallet compatibility, gas estimates and future transaction success are outside this panel. No state-changing simulation or approval is run by the page. The 76-test regression suite was run against the publication files using the isolated validation harness. Test/evidence files are not included in this docs-only publication.
