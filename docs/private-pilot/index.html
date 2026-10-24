@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Gacha Galaxy | Public transaction pilot</title>
+<style>
+:root{--canvas:#F7F5FB;--surface:#fff;--ink:#1B1424;--mute:#6E6479;--line:#E6E0EF;--purple:#7B3FE4;--deep:#532B7D;--lilac:#F0E9FC;--amber:#805000}
+*{box-sizing:border-box}body{margin:0;background:var(--canvas);color:var(--ink);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:920px;margin:auto;padding:32px 24px 64px}header{display:flex;justify-content:space-between;gap:16px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:20px}.brand{font-size:20px;font-weight:750;letter-spacing:-.02em}.tag,.eyebrow{font:600 11px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--deep)}.tag{background:var(--lilac);border-radius:99px;padding:6px 12px}h1{font-size:clamp(30px,5vw,42px);line-height:1.15;letter-spacing:-.035em;margin:12px 0}h2{font-size:19px;margin:0 0 12px}p{margin:10px 0;color:var(--mute)}.intro{padding:32px 0 20px}.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:16px}.owner{background:var(--lilac);border-color:#D5C2F2}.address,code{font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}.owner .address{display:block;font-size:clamp(13px,2.6vw,19px);font-weight:600;margin-top:8px}a{color:var(--purple);text-underline-offset:3px}button{border:1px solid var(--purple);border-radius:99px;background:var(--purple);color:white;padding:11px 18px;font:600 14px system-ui;cursor:pointer}button.secondary{background:white;color:var(--deep);border-color:var(--line)}button:disabled{opacity:.55;cursor:wait}button:focus-visible,a:focus-visible{outline:3px solid var(--deep);outline-offset:4px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}dl{margin:0}dl>div{border-top:1px solid var(--line);padding:12px 0}dt{color:var(--mute);font-size:12px}dd{margin:4px 0 0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}#status{padding:12px 14px;border-left:3px solid var(--purple);background:var(--canvas);color:var(--ink)}.note{color:var(--amber)}ul,ol{padding-left:22px}li{margin:7px 0}.fine{font-size:12px}footer{margin-top:24px;font-size:12px;color:var(--mute)}@media(max-width:600px){main{padding:20px 16px 40px}.panel{padding:18px}.grid{grid-template-columns:1fr}header{align-items:flex-start}.tag{font-size:10px}}
+</style>
+<style>#pilotAmount{display:block;max-width:100%;width:280px;padding:10px;margin:8px 0 14px;border:1px solid var(--line);border-radius:8px;font:inherit}#pilotRisk{margin-right:8px}#pilotStatus{overflow-wrap:anywhere;padding:12px;border-left:3px solid var(--purple);background:var(--canvas);color:var(--ink)}</style>
+</head>
+<body><main>
+<header><div class="brand">Gacha Galaxy</div><span class="tag">PUBLICLY ACCESSIBLE PILOT · MAINNET RISK</span></header>
+<section class="intro"><div class="eyebrow">Vault recovery & status</div><h1>Borrowing pilot — public page.</h1><p>PUBLICLY ACCESSIBLE PILOT: this page is not private or access-controlled despite its /private-pilot/ path. It is transaction-capable and separate from the read-only recovery page. Every transaction requires a separate explicit click and wallet approval. No funding controls or automatic transactions.</p></section>
+<section class="panel owner"><div class="eyebrow">Expected owner & guardian · public address</div><a class="address" id="ownerLink" href="https://robinhoodchain.blockscout.com/address/0xD77C34899858088DE6888F36fA46e2d6468F4Ca5">0xD77C34899858088DE6888F36fA46e2d6468F4Ca5</a><p class="fine">This address is not a recovery phrase. This page cannot restore keys or grant ownership.</p></section>
+<section class="panel"><h2>Connection & chain checks</h2><p id="status" role="status" aria-live="polite">Not checked. Refresh uses public RPC only; wallet access is optional.</p><p id="wallet" class="address">Wallet not connected.</p><div class="actions"><button id="refresh" type="button">Refresh public status</button><button id="connect" class="secondary" type="button">Connect Trust Wallet</button><button id="disconnect" class="secondary" type="button">Forget connection</button></div><p class="fine">Accounts are requested only when you click Connect. Use Trust Wallet's browser or injected extension. No WalletConnect relay, external library, or automatic network switching.</p><p id="checked" class="fine">No live snapshot loaded.</p></section>
+<section class="panel"><h2>Live public snapshot</h2><div class="grid"><dl>
+<div><dt>Chain / block</dt><dd id="chain">Not checked</dd></div><div><dt>Contract code / owner / guardian / references</dt><dd id="checks">Not checked</dd></div><div><dt>Vault paused</dt><dd id="paused">Not checked</dd></div><div><dt>USDG decimals</dt><dd id="decimals">Not checked</dd></div>
+</dl><dl><div><dt>Expected owner's ETH</dt><dd id="eth">Not checked</dd></div><div><dt>Expected owner's USDG</dt><dd id="usdg">Not checked</dd></div><div><dt>Vault pool USDG balance</dt><dd id="pool">Not checked</dd></div><div><dt>Card token #1 owner</dt><dd id="token" class="address">Not checked</dd></div><div><dt>Token #1 debt</dt><dd id="debt">Not checked — verified schema; refresh for debt.</dd></div></dl></div><p class="fine">Balances always refer to the saved owner, not an arbitrary connected account. A successful snapshot verifies only the listed reads at one block, not contract safety or spending authority.</p></section>
+<section class="panel" aria-labelledby="readinessTitle"><h2 id="readinessTitle">Flow readiness — read only</h2><p>Prerequisites for the saved owner and token #1, not instructions to approve, deposit or fund.</p><dl>
+<div><dt>NFT custody and deposited position</dt><dd id="readyCustody">Unknown — refresh required</dd></div><div><dt>NFT approvals and repayment allowance</dt><dd id="readyApprovals">Unknown — refresh required</dd></div><div><dt>Appraisal and restrictions</dt><dd id="readyAppraisal">Unknown — refresh required</dd></div><div><dt>Caps, liquidity and availability</dt><dd id="readyCaps">Unknown — refresh required</dd></div><div><dt>Current flow blockers</dt><dd id="readyBlockers">Unknown — refresh required</dd></div></dl><p class="fine">All reads use one block. Runtime hashes and the USDG implementation slot are checked before decoding. Missing or failed checks are unknown, never zero. No amount or transaction is selected. USDG freezes, upgrades, physical custody, gas sufficiency and future execution are not certified; a clear prerequisite list is not an all-clear.</p></section>
+<section class="panel"><h2>Explicit pilot actions — one transaction at a time</h2><p class="note">Publication is not authorization to move funds. Each transaction is initiated and approved by you in your wallet. NFT value at risk; liquidation and USDG freezes/upgrades can affect exit. No guarantees or physical custody verification. This UI intentionally blocks NFT approval/deposit until liquidity and borrowing prerequisites pass, to avoid locking collateral into an unfunded trial. This is a UI safeguard, not a vault deposit restriction. Token-specific NFT approval only; USDG approval is exact amount, never unlimited.</p><label for="pilotAmount">USDG amount (blank by default; maximum 6 decimals)</label><input id="pilotAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="Choose explicitly, e.g. 0.000001"><label><input id="pilotRisk" type="checkbox"> I understand mainnet collateral, token and gas risks and intend one transaction.</label><div class="actions"><button type="button" class="secondary" id="approveNFT">Approve token #1 only</button><button type="button" class="secondary" id="deposit">Deposit token #1</button><button type="button" class="secondary" id="borrow">Borrow selected USDG</button><button type="button" class="secondary" id="approveRepay">Approve exact repayment</button><button type="button" class="secondary" id="repay">Repay selected USDG</button><button type="button" class="secondary" id="withdraw">Withdraw zero-debt NFT</button><button type="button" class="secondary" id="revokeRepay">Revoke USDG allowance</button></div><button id="checkReceipt" type="button" class="secondary">Check pending receipt</button><p id="pilotStatus" role="status" aria-live="polite">No transaction requested. No amount selected. Refresh/connect first.</p><p class="fine">No automatic chain switch, funding or next action. Wait for two block confirmations and refreshed state. If submission outcome is unknown, inspect wallet/explorer; never blindly retry. Pending hashes are not persisted: after reload, verify wallet history before using any action.</p></section><section class="panel"><h2>Saved mainnet configuration</h2><dl id="configList"></dl><p class="fine"><a href="https://docs.paxos.com/guides/stablecoin/usdg/mainnet">Official Paxos USDG address list</a> · JSON and recovery guide are included in the recovery ZIP. Configuration is also embedded in this HTML; no adjacent file is needed to open it.</p></section>
+<section class="panel"><h2>Recovery, not funding</h2><p class="note"><strong>The public recovery page remains read-only. This publicly accessible pilot has explicit transaction controls.</strong> Local contract sources are outdated. Debt uses the Sourcify exact-match ABI: positions(uint256) returns (address owner, uint256 debt). Runtime SHA-256 is checked before decoding. No transaction safety review is implied.</p><ol><li>Keep the original Trust Wallet recovery material offline. Never enter it into this page, a chat, a repository, or a website.</li><li>Compare the public owner address above with your wallet. Select Robinhood Chain mainnet, chain ID <code>4663</code> (<code>0x1237</code>), ETH, using the saved RPC below.</li><li>Open your saved HTML for public reads, or open a trusted HTTPS-hosted copy in Trust Wallet for optional account matching. If reads fail, no old live values remain valid; use the saved explorer links.</li></ol><p class="fine">The HTML works without this chat or a temporary server. Live reads still need internet and a reachable RPC that permits browser requests. Wallet injection may not work for local files. PUBLICLY ACCESSIBLE PILOT: no privacy or access control is promised. The separate /pilot/ recovery route remains read-only.</p></section>
+<footer>Public information only. Never provide a private key or recovery phrase. No wallet permissions or live balances are saved.</footer>
+</main>
+<script id="pilot-config" type="application/json">
+{
+  "version": 1,
+  "chainId": 4663,
+  "chainHex": "0x1237",
+  "network": "Robinhood Chain mainnet",
+  "rpc": "https://rpc.mainnet.chain.robinhood.com",
+  "explorer": "https://robinhoodchain.blockscout.com",
+  "nativeSymbol": "ETH",
+  "owner": "0xD77C34899858088DE6888F36fA46e2d6468F4Ca5",
+  "guardian": "0xD77C34899858088DE6888F36fA46e2d6468F4Ca5",
+  "registry": "0x2A585396dd0248A060045b3f557076fB1B4Cb0eb",
+  "cards": "0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653",
+  "vault": "0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23",
+  "usdg": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+  "usdgDecimals": 6,
+  "tokenId": "1",
+  "usdgSource": "https://docs.paxos.com/guides/stablecoin/usdg/mainnet",
+  "transactionsEnabled": true,
+  "debtSchemaVerified": true,
+  "debtSchemaSource": "https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all",
+  "vaultRuntimeSHA256": "e9e012a1bc5dc65bb360584964158da67940510544233b004ae7c0836854c103",
+  "readinessSchema": {
+    "approved": {
+      "contract": "cards",
+      "selector": "0x081812fc",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "address"
+        }
+      ]
+    },
+    "operator": {
+      "contract": "cards",
+      "selector": "0xe985e9c5",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "certKey": {
+      "contract": "cards",
+      "selector": "0xc5471120",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bytes32"
+        }
+      ]
+    },
+    "demo": {
+      "contract": "cards",
+      "selector": "0x22b4191f",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "allowance": {
+      "contract": "usdg",
+      "selector": "0xdd62ed3e",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "assetSettings": {
+      "contract": "usdg",
+      "selector": "0x5b9d419e",
+      "outputs": [
+        {
+          "name": "referenceTime",
+          "type": "uint40"
+        },
+        {
+          "name": "maturityPeriod",
+          "type": "uint32"
+        },
+        {
+          "name": "partnerSignedRegistrationsEnabled",
+          "type": "bool"
+        },
+        {
+          "name": "__gap_remaining",
+          "type": "bytes10"
+        },
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    "maxAge": {
+      "contract": "vault",
+      "selector": "0x4e941b01",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "allowDemo": {
+      "contract": "vault",
+      "selector": "0xcf256ae7",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "perCard": {
+      "contract": "vault",
+      "selector": "0x8da731d9",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "totalCap": {
+      "contract": "vault",
+      "selector": "0x226b6408",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "totalDebt": {
+      "contract": "vault",
+      "selector": "0xfc7b9c18",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "borrowStatus": {
+      "contract": "vault",
+      "selector": "0x0367b498",
+      "outputs": [
+        {
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "name": "available",
+          "type": "uint256"
+        }
+      ]
+    },
+    "available": {
+      "contract": "vault",
+      "selector": "0x8c99df5b",
+      "outputs": [
+        {
+          "name": "avail",
+          "type": "uint256"
+        }
+      ]
+    },
+    "exists": {
+      "contract": "registry",
+      "selector": "0x38a699a4",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "held": {
+      "contract": "vault",
+      "selector": "0x77ecc1aa",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "appraisal": {
+      "contract": "registry",
+      "selector": "0x5fbb5a81",
+      "outputs": [
+        {
+          "name": "fmvLow",
+          "type": "uint64"
+        },
+        {
+          "name": "fmvPoint",
+          "type": "uint64"
+        },
+        {
+          "name": "fmvHigh",
+          "type": "uint64"
+        },
+        {
+          "name": "ltvBps",
+          "type": "uint16"
+        },
+        {
+          "name": "confidenceScore",
+          "type": "uint16"
+        },
+        {
+          "name": "compCount",
+          "type": "uint16"
+        },
+        {
+          "name": "confidence",
+          "type": "uint8"
+        },
+        {
+          "name": "risk",
+          "type": "uint8"
+        },
+        {
+          "name": "eligible",
+          "type": "bool"
+        },
+        {
+          "name": "appraisedAt",
+          "type": "uint40"
+        },
+        {
+          "name": "attester",
+          "type": "address"
+        }
+      ]
+    }
+  },
+  "relatedRuntimeSHA256": {
+    "registry": "c53c4c889bd1e99c22703c41d800f732a9f028aac3b8423f8e6ddb75727c06e6",
+    "cards": "0bc66254d35cdf13d93e39c5012821ec44aee4174f8ae38f03c4800cea3bba96",
+    "usdg": "c85d18dc1e49769e01f9f88981176e213b2bc24d2f14d33a81d54bc06579f6db",
+    "implementation": "0d8203b94e33c2458a137c0c70d2491f3625837405a74fd332f4cba5a979c372"
+  },
+  "usdgImplementation": "0x68184C449E1a8f34fA18d289737129FD27B66f8F",
+  "usdgImplementationSlot": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+  "readinessSourceURLs": {
+    "vault": "https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all",
+    "cards": "https://sourcify.dev/server/v2/contract/4663/0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653?fields=all",
+    "registry": "https://sourcify.dev/server/v2/contract/4663/0x2A585396dd0248A060045b3f557076fB1B4Cb0eb?fields=all",
+    "usdg": "https://sourcify.dev/server/v2/contract/4663/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168?fields=all",
+    "implementation": "https://sourcify.dev/server/v2/contract/4663/0x68184C449E1a8f34fA18d289737129FD27B66f8F?fields=all"
+  },
+  "actionSelectors": {
+    "approveNFT": "0x095ea7b3",
+    "approveUSDG": "0x095ea7b3",
+    "deposit": "0xb6b55f25",
+    "borrow": "0x0ecbcdab",
+    "repay": "0xd8aed145",
+    "withdraw": "0x2e1a7d4d"
+  },
+  "privatePilot": true,
+  "publiclyAccessible": true
+}
+</script>
+<script>
+function createPilotActions(env) {
+  'use strict';
+  const {C}=env, ZERO='0x'+'0'.repeat(40), MAX=(1n<<256n)-1n;
+  const same=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.toLowerCase()===b.toLowerCase();
+  const word=n=>{n=BigInt(n);if(n<0n||n>MAX)throw Error('Amount out of range');return n.toString(16).padStart(64,'0');};
+  const address=a=>a.slice(2).toLowerCase().padStart(64,'0');
+  function amount(text){if(typeof text!=='string'||! /^(0|[1-9][0-9]*)(\.[0-9]{1,6})?$/.test(text))throw Error('Enter a positive USDG amount with at most 6 decimals');const [a,b='']=text.split('.');const n=BigInt(a)*1000000n+BigInt(b.padEnd(6,'0'));if(n<=0n||n>MAX)throw Error('Amount out of range');return n;}
+  let busy=false,pending=null;
+  function plan(action,text,s){
+    if(C.privatePilot!==true)throw Error('Private candidate configuration required');
+    if(!s||!s.verified)throw Error('Fresh verified snapshot required');
+    if(!same(s.account,C.owner))throw Error('Saved owner account required');
+    const deposited=!same(s.positionOwner,ZERO),own=deposited&&same(s.positionOwner,C.owner);
+    const token=word(C.tokenId),a=C.actionSelectors;
+    let to=C.vault,data,n=0n;
+    if(action==='approveNFT'||action==='deposit'){
+      if(deposited||!same(s.holder,C.owner)||s.demoBlocked)throw Error('Owned, allowed, non-deposited NFT required');
+      // Do not lock collateral into an unfunded or restricted trial.
+      if(s.pool<=0n||s.borrowRestricted||s.potential<=0n)throw Error('Pilot prerequisites blocked: liquidity, appraisal or caps');
+      if(action==='approveNFT'){if(s.nftApproved)throw Error('NFT already approved');to=C.cards;data=a.approveNFT+address(C.vault)+token;}
+      else {if(!s.nftApproved)throw Error('Token-specific approval required before deposit');data=a.deposit+token;}
+    }else if(action==='borrow'){
+      if(!own)throw Error('Deposited position owned by saved owner required');n=amount(text);
+      if(s.borrowRestricted||n>s.available)throw Error('Borrow amount exceeds current availability or borrowing restricted');data=a.borrow+token+word(n);
+    }else if(action==='approveRepay'||action==='repay'){
+      if(!own||s.debt<=0n)throw Error('Owned deposited debt required');n=amount(text);
+      if(n>s.debt||n>s.balance||s.assetPaused)throw Error('Repayment exceeds debt/balance or USDG paused');
+      if(action==='approveRepay'){if(n===MAX)throw Error('Unlimited approval prohibited');if(s.allowance>=n)throw Error('Existing allowance sufficient');if(s.allowance!==0n)throw Error('Revoke existing allowance first');to=C.usdg;data=a.approveUSDG+address(C.vault)+word(n);}
+      else {if(s.allowance<n)throw Error('Exact repayment allowance required');data=a.repay+token+word(n);}
+    }else if(action==='revokeRepay'){
+      if(s.allowance===0n||s.assetPaused)throw Error('No allowance to revoke or USDG paused');to=C.usdg;data=a.approveUSDG+address(C.vault)+word(0);
+    }else if(action==='withdraw'){
+      if(!own||s.debt!==0n)throw Error('Owned deposited position with zero debt required');data=a.withdraw+token;
+    }else throw Error('Unsupported action');
+    return {from:C.owner,to,data,value:'0x0',chainId:C.chainHex};
+  }
+  async function identity(){const p=env.provider();if(!p)throw Error('Connect saved owner wallet');const chain=await p.request({method:'eth_chainId'}),accounts=await p.request({method:'eth_accounts'});if(BigInt(chain)!==BigInt(C.chainId)||!Array.isArray(accounts)||!same(accounts[0],C.owner))throw Error('Wallet chain/account mismatch');return p;}
+  async function checkReceipt(){
+    if(!pending)throw Error('No pending transaction');
+    await identity();const p=pending;
+    const receipt=await env.read('eth_getTransactionReceipt',[p.hash]);
+    if(!receipt){env.status('Pending: '+p.hash+'. No other action allowed.');return false;}
+    if(!same(receipt.transactionHash,p.hash)||!same(receipt.from,C.owner)||!same(receipt.to,p.tx.to)||!['0x0','0x1'].includes(receipt.status)||!/^0x[0-9a-fA-F]{64}$/.test(receipt.blockHash))throw Error('Receipt mismatch; retain pending lock');
+    const tx=await env.read('eth_getTransactionByHash',[p.hash]);
+    if(!tx||!same(tx.from,p.tx.from)||!same(tx.to,p.tx.to)||!same(tx.input,p.tx.data)||BigInt(tx.value)!==0n||BigInt(tx.chainId)!==BigInt(C.chainId)||!same(tx.blockHash,receipt.blockHash))throw Error('Mined transaction mismatch');
+    const header=await env.read('eth_getBlockByNumber',[receipt.blockNumber,false]);
+    if(!header||!same(header.hash,receipt.blockHash))throw Error('Receipt block changed; retain pending lock');
+    const height=await env.read('eth_blockNumber',[]);
+    if(BigInt(height)<BigInt(receipt.blockNumber)+1n){env.status('Mined; waiting for 2 block confirmations. Check receipt again.');return false;}
+    pending=null;
+    await env.refresh();
+    env.status((receipt.status==='0x1'?'Confirmed':'Reverted')+': '+p.hash+'. Snapshot refreshed; next action requires a new click.');return true;
+  }
+  async function run(action,text){
+    if(busy||pending)throw Error('Pending/in-progress action: check receipt; do not resubmit');busy=true;env.lock(true);
+    let attempted=false;
+    try{
+      await identity();const s=await env.refresh();const tx=plan(action,text,s);
+      const summary='MAINNET '+action+' · token #'+C.tokenId+'\nUSDG amount: '+(text||'not applicable')+'\nFrom: '+tx.from+'\nTo: '+tx.to+'\nValue: 0 ETH (network gas extra)\nCalldata: '+tx.data+'\nNFT collateral can be liquidated. USDG freezes/upgrades can prevent repayment. No funding is performed. Confirm this ONE transaction?';
+      if(!env.confirm(summary)){env.status('Cancelled; no wallet transaction requested.');return;}
+      // Confirmation can take time: re-read, compare plan, and simulate before wallet prompt.
+      const again=plan(action,text,await env.refresh());if(JSON.stringify(again)!==JSON.stringify(tx))throw Error('Transaction plan changed');
+      const ticket=env.version();
+      const result=await env.read('eth_call',[tx,'latest']);if(toERC20(action)&&result!=='0x'+'0'.repeat(63)+'1')throw Error('ERC20 simulation did not return true');
+      const p=await identity();
+      if(env.version()!==ticket)throw Error('Session changed during preflight; refresh again');
+      attempted=true;env.status('Wallet submission requested. Do not resubmit.');
+      let hash;
+      try{hash=await p.request({method:'eth_sendTransaction',params:[tx]});}
+      catch(e){if(e.code===4001){attempted=false;throw Error('User rejected wallet request');}pending={hash:null,tx};throw Error('Submission outcome unknown: inspect wallet/explorer; no automatic retry');}
+      if(!/^0x[0-9a-fA-F]{64}$/.test(hash)){pending={hash:null,tx};throw Error('Invalid wallet hash; submission outcome unknown');}
+      pending={hash,tx};env.invalidate();env.status('Submitted: '+hash+'. Check receipt; no automatic next transaction.');
+      if(env.version()!==ticket+1)env.status('Submitted: '+hash+'. Wallet/session changed; reconnect saved owner and check receipt.');
+    }finally{busy=false;env.lock(!!pending);}
+  }
+  function toERC20(action){return action==='approveRepay'||action==='revokeRepay';}
+  return {amount,plan,run,async receipt(){if(busy)throw Error('Action in progress');if(pending&&!pending.hash)throw Error('Unknown submission: inspect wallet/explorer before any recovery');busy=true;env.lock(true);try{return await checkReceipt();}finally{busy=false;env.lock(!!pending);}},get pending(){return pending;}};
+}
+
+'use strict';
+(() => {
+  const C = Object.freeze(JSON.parse(document.getElementById('pilot-config').textContent));
+  const $ = id => document.getElementById(id);
+  const same = (a,b) => typeof a === 'string' && a.toLowerCase() === b.toLowerCase();
+  const addressOK = a => /^0x[0-9a-fA-F]{40}$/.test(a);
+  const word = raw => { if (!/^0x[0-9a-fA-F]{64}$/.test(raw)) throw Error('Malformed scalar return'); return raw.slice(2); };
+  const addr = raw => { const w = word(raw); if (!/^0{24}/.test(w)) throw Error('Malformed address return'); return '0x' + w.slice(24); };
+  const position = raw => { if (!/^0x[0-9a-fA-F]{128}$/.test(raw)) throw Error('Malformed verified position return'); return {owner:addr('0x'+raw.slice(2,66)),debt:uint('0x'+raw.slice(66))}; };
+  const uint = raw => BigInt('0x' + word(raw));
+  const quantity = raw => { if (!/^0x(?:0|[1-9a-fA-F][0-9a-fA-F]*)$/.test(raw)) throw Error('Malformed RPC quantity'); return BigInt(raw); };
+  const units = (value, decimals) => { const s = value.toString().padStart(decimals + 1,'0'); return decimals ? s.slice(0,-decimals) + '.' + s.slice(-decimals) : s; };
+  const arg = a => a.slice(2).toLowerCase().padStart(64,'0');
+  let pilotSnapshot=null;
+  const ZERO = '0x'+'0'.repeat(40);
+  const readinessFields = ['readyCustody','readyApprovals','readyAppraisal','readyCaps','readyBlockers'];
+  const minimum = (...v) => v.reduce((a,b) => a < b ? a : b);
+  const remaining = (cap,debt) => cap > debt ? cap-debt : 0n;
+  const bounded = (raw,bits) => { const n=uint(raw); if (n >= 1n<<BigInt(bits)) throw Error('Malformed bounded integer'); return n; };
+  function decodeVerified(raw,schema) {
+    if (typeof raw!=='string' || !new RegExp('^0x[0-9a-fA-F]{'+schema.length*64+'}$').test(raw)) throw Error('Malformed verified readiness return');
+    return Object.fromEntries(schema.map((s,i) => {
+      const r='0x'+raw.slice(2+i*64,66+i*64); let v;
+      if(s.type==='address') v=addr(r);
+      else if(s.type==='bool') { v=uint(r); if(v>1n) throw Error('Malformed boolean'); v=v===1n; }
+      else if(s.type.startsWith('uint')) v=bounded(r,Number(s.type.slice(4)));
+      else if(s.type.startsWith('bytes')) { const len=Number(s.type.slice(5))*2; if(!/^0*$/.test(r.slice(2+len))) throw Error('Malformed bytes padding'); v='0x'+r.slice(2,2+len); }
+      else throw Error('Unsupported verified type');
+      return [s.name,v];
+    }));
+  }
+  async function runtimeGuard(code,expected,label) {
+    if(!/^0x(?:[0-9a-fA-F]{2})+$/.test(code) || /^0x0+$/.test(code)) throw Error('Missing or malformed '+label+' code');
+    const bytes=Uint8Array.from(code.slice(2).match(/../g),x=>parseInt(x,16));
+    const hash=Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
+    if(hash!==expected) throw Error('Verified '+label+' runtime mismatch');
+  }
+  function headerCheck(header,block) {
+    if(!header || header.number!==block || !/^0x[0-9a-fA-F]{64}$/.test(header.hash)) throw Error('Malformed block header');
+    quantity(header.timestamp); return header;
+  }
+  async function relatedGuards(codes,block) {
+    for(const [i,label] of [[1,'registry'],[2,'cards'],[3,'usdg']]) await runtimeGuard(codes[i],C.relatedRuntimeSHA256[label],label);
+    const slot=await rpc('eth_getStorageAt',[C.usdg,C.usdgImplementationSlot,block]);
+    if(!same(addr(slot),C.usdgImplementation)) throw Error('USDG implementation changed');
+    const code=await rpc('eth_getCode',[C.usdgImplementation,block]);
+    await runtimeGuard(code,C.relatedRuntimeSHA256.implementation,'USDG implementation');
+  }
+  async function readiness(call,header,pos,holder,paused,pool,ownerBalance) {
+    const token=BigInt(C.tokenId).toString(16).padStart(64,'0');
+    async function read(key,args='') {
+      const s=C.readinessSchema[key];
+      const raw=await call(C[s.contract],s.selector+args);
+      return decodeVerified(raw,s.outputs);
+    }
+    const keys=['approved','operator','certKey','demo','allowance','assetSettings','maxAge','allowDemo','perCard','totalCap','totalDebt','borrowStatus','available'];
+    const values=await Promise.all(keys.map(k=>read(k,
+      ['approved','certKey','demo','borrowStatus','available'].includes(k)?token:
+      k==='operator'?arg(holder)+arg(C.vault):k==='allowance'?arg(C.owner)+arg(C.vault):'')));
+    const r=Object.fromEntries(keys.map((k,i)=>[k,values[i]]));
+    const key=r.certKey.value.slice(2);
+    const [exists,held]=await Promise.all([read('exists',key),read('held',key)]);
+    const a=exists.value?await read('appraisal',key):null;
+    if(a && (a.confidence>3n || a.risk>4n || a.fmvLow>a.fmvPoint || a.fmvPoint>a.fmvHigh || a.fmvLow===0n || a.ltvBps>9000n || a.appraisedAt===0n)) throw Error('Malformed appraisal');
+    if(r.borrowStatus.status>10n || r.maxAge.value===0n || r.maxAge.value>7776000n || r.perCard.value>r.totalCap.value) throw Error('Malformed readiness parameters');
+    const now=quantity(header.timestamp);
+    if(a && a.appraisedAt>now) throw Error('Future appraisal timestamp');
+    const fresh=!!a && now<=a.appraisedAt+r.maxAge.value;
+    const eligible=!!a && a.eligible && a.risk!==1n;
+    const demoBlocked=r.demo.value&&!r.allowDemo.value;
+    const deposited=!same(pos.owner,ZERO);
+    if(deposited!==same(holder,C.vault) || (!deposited&&pos.debt!==0n)) throw Error('Custody and position inconsistent');
+    const approved=same(r.approved.value,C.vault)||r.operator.value;
+    const limit=a?minimum(a.fmvLow*10000n*a.ltvBps/10000n,r.perCard.value):0n;
+    const cardHeadroom=remaining(limit,pos.debt),poolHeadroom=remaining(r.totalCap.value,r.totalDebt.value);
+    let reason=0n;
+    if(!deposited) reason=1n; else if(demoBlocked) reason=10n; else if(paused) reason=2n; else if(held.value) reason=3n;
+    else if(!a) reason=4n; else if(!eligible) reason=5n; else if(!fresh) reason=6n;
+    else if(cardHeadroom===0n) reason=7n; else if(poolHeadroom===0n) reason=8n; else if(pool===0n) reason=9n;
+    const available=reason===0n?minimum(cardHeadroom,poolHeadroom,pool):0n;
+    if(r.borrowStatus.status!==reason || r.borrowStatus.available!==available || r.available.avail!==available) throw Error('Borrow readiness inconsistent with verified views');
+    const borrow=[],deposit=[],repay=[],withdraw=[];
+    if(!deposited) borrow.push('Not deposited');
+    if(deposited&&!same(pos.owner,C.owner)) {borrow.push('Saved owner is not position owner');withdraw.push('Saved owner is not position owner');}
+    if(!same(holder,C.owner)&&!deposited) deposit.push('Saved owner does not hold token');
+    if(!deposited&&!approved) deposit.push('Wrapper approval absent (direct safe transfer has a separate path)');
+    if(demoBlocked) {borrow.push('Demo token blocked');deposit.push('Demo token blocked');}
+    if(paused) borrow.push('Vault paused');
+    if(held.value) borrow.push('Certificate held');
+    if(!a) borrow.push('No appraisal');else {if(!eligible) borrow.push('Appraisal ineligible/rejected');if(!fresh) borrow.push('Appraisal stale');}
+    if(a&&cardHeadroom===0n) borrow.push('Card limit reached');
+    if(poolHeadroom===0n) borrow.push('Pool debt cap reached');
+    if(pool===0n) borrow.push('Pool liquidity zero');
+    if(r.assetSettings.paused) {borrow.push('USDG paused');if(pos.debt>0n)repay.push('USDG paused');}
+    if(deposited&&pos.debt>0n) {
+      if(r.allowance.value<pos.debt) repay.push('Allowance below full debt');
+      if(ownerBalance<pos.debt) repay.push('Saved-owner balance below full debt');
+      withdraw.push('Outstanding debt');
+    }
+    if(!deposited) {repay.push('No deposited position');withdraw.push('No deposited position');}
+    const expiry=a?new Date(Number(a.appraisedAt+r.maxAge.value)*1000).toISOString():'Unknown — no appraisal';
+    const usable=eligible&&fresh&&!paused&&!held.value&&!demoBlocked&&!r.assetSettings.paused;
+    return {
+      pilotMachine:{verified:true,account:C.owner,holder,positionOwner:pos.owner,debt:pos.debt,pool,balance:ownerBalance,allowance:r.allowance.value,nftApproved:approved,demoBlocked,assetPaused:r.assetSettings.paused,borrowRestricted:!usable,potential:usable?minimum(cardHeadroom,poolHeadroom,pool):0n,available},
+      readyCustody:'NFT holder: '+holder+' · Position owner: '+(deposited?pos.owner:'none — not deposited')+' · Debt: '+units(pos.debt,6)+' USDG',
+      readyApprovals:'Token approval: '+r.approved.value+' · Operator approval: '+(r.operator.value?'yes':'no')+' · Saved-owner repayment allowance: '+units(r.allowance.value,6)+' USDG (spender: vault)',
+      readyAppraisal:(a?('Appraisal: '+(fresh?'fresh':'stale')+' · eligible: '+(eligible?'yes':'no')+' · LTV: '+units(a.ltvBps,2)+'% · age: '+(now-a.appraisedAt)+' / '+r.maxAge.value+' seconds · expiry: '+expiry):'Appraisal: missing; age, LTV and expiry unknown')+' · Vault paused: '+(paused?'yes':'no')+' · Certificate held: '+(held.value?'yes':'no')+' · USDG paused: '+(r.assetSettings.paused?'yes':'no'),
+      readyCaps:'Per-card cap: '+units(r.perCard.value,6)+' USDG · Total cap: '+units(r.totalCap.value,6)+' USDG · Total debt: '+units(r.totalDebt.value,6)+' USDG · Pool headroom: '+units(poolHeadroom,6)+' USDG · Pool liquidity: '+units(pool,6)+' USDG · Actual vault availability: '+units(available,6)+' USDG',
+      readyBlockers:'Deposit wrapper: '+(deposited?'already deposited':deposit.join('; ')||'no listed prerequisite blocker')+'. Borrow: '+(borrow.join('; ')||'no listed prerequisite blocker')+'. Full repay: '+(repay.join('; ')||(pos.debt===0n?'no debt to repay':'no listed prerequisite blocker'))+'. Collateral withdraw: '+(withdraw.join('; ')||'no listed prerequisite blocker')+'. Status: '+['OK','NOT_DEPOSITED','PAUSED','CARD_HELD','NO_APPRAISAL','NOT_ELIGIBLE','STALE_APPRAISAL','CARD_LIMIT_REACHED','POOL_LIMIT_REACHED','NO_LIQUIDITY','DEMO_CARD_BLOCKED'][Number(reason)]+'. No transaction is automatic; pilot controls require a separate click.'
+    };
+  }
+
+  let epoch = 0, rpcId = 0, provider = null, account = null, bindings = [], connecting = false;
+  const fields = ['chain','checks','paused','decimals','eth','usdg','pool','token','debt',...readinessFields];
+  function clear(message) { pilotSnapshot=null; epoch++; fields.forEach(id => { $(id).textContent = readinessFields.includes(id) ? 'Unknown — snapshot unavailable' : 'Unavailable'; }); $('checked').textContent = 'No valid live snapshot.'; $('status').textContent = message; return epoch; }
+  function dropWallet() { for (const [p,event,handler] of bindings) { if (p.removeListener) p.removeListener(event,handler); } bindings = []; provider = null; account = null; $('wallet').textContent = 'Wallet not connected.'; }
+  async function rpc(method, params) {
+    if (!['eth_chainId','eth_blockNumber','eth_getCode','eth_call','eth_getBalance','eth_getBlockByNumber','eth_getStorageAt'].includes(method)) throw Error('Read-only RPC method rejected');
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(),15000);
+    try { const id = ++rpcId; const response = await fetch(C.rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id,method,params}),signal:controller.signal,credentials:'omit'});
+      if (!response.ok) throw Error('RPC HTTP ' + response.status);
+      const body = await response.json(); if (body.id !== id || body.jsonrpc !== '2.0' || body.error || (method === 'eth_getBlockByNumber' ? (!body.result || typeof body.result !== 'object') : typeof body.result !== 'string')) throw Error('RPC read rejected or malformed'); return body.result;
+    } finally { clearTimeout(timer); }
+  }
+  async function walletCheck(p,a) {
+    if (quantity(await p.request({method:'eth_chainId'})) !== BigInt(C.chainId)) throw Error('Wallet network mismatch; select chain 4663 manually');
+    const accounts = await p.request({method:'eth_accounts'});
+    if (!Array.isArray(accounts) || !accounts.length || !same(accounts[0],a) || !same(a,C.owner)) throw Error('Connected account does not match saved owner');
+  }
+  async function refresh() {
+    const ticket = clear('Checking public mainnet reads…'), p = provider, a = account;
+    try {
+      if (connecting) throw Error('Wallet connection pending; retry after connection');
+      for (const key of ['owner','guardian','registry','cards','vault','usdg']) if (!addressOK(C[key])) throw Error('Invalid saved address');
+      if (C.chainId !== 4663 || C.chainHex !== '0x1237' || (C.transactionsEnabled !== true || C.privatePilot !== true || C.publiclyAccessible !== true)) throw Error('Invalid public pilot configuration');
+      if (p) await walletCheck(p,a);
+      if (quantity(await rpc('eth_chainId',[])) !== BigInt(C.chainId)) throw Error('Public RPC network mismatch');
+      const block = await rpc('eth_blockNumber',[]); quantity(block);
+      const header = headerCheck(await rpc('eth_getBlockByNumber',[block,false]),block);
+      const call = (to,data) => rpc('eth_call',[{to,data},block]);
+      const codes = await Promise.all(['vault','registry','cards','usdg'].map(key => rpc('eth_getCode',[C[key],block])));
+      if (codes.some(code => !/^0x(?:[0-9a-fA-F]{2})+$/.test(code) || /^0x0+$/.test(code))) throw Error('Missing or malformed contract code');
+      if (C.debtSchemaVerified !== true) throw Error('Debt schema not verified');
+      if (!globalThis.crypto || !globalThis.crypto.subtle) throw Error('Runtime hash verification unavailable');
+      const bytes = Uint8Array.from(codes[0].slice(2).match(/../g), b => parseInt(b,16));
+      const hash = Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',bytes)), b => b.toString(16).padStart(2,'0')).join('');
+      if (hash !== C.vaultRuntimeSHA256) throw Error('Verified vault runtime mismatch');
+      await relatedGuards(codes,block);
+      // ABI from Sourcify exact match, not inferred from return length or local source.
+      const refs = await Promise.all(['0x8da5cb5b','0x452a9320','0x2977a4ad','0x58a4903f','0x7b103999'].map(s => call(C.vault,s)));
+      ['owner','guardian','usdg','cards','registry'].forEach((key,i) => { if (!same(addr(refs[i]),C[key])) throw Error('Vault ' + key + ' mismatch'); });
+      const [pausedRaw,decimalRaw,ethRaw,usdgRaw,poolRaw,tokenRaw,positionRaw] = await Promise.all([
+        call(C.vault,'0x5c975abb'),call(C.usdg,'0x313ce567'),rpc('eth_getBalance',[C.owner,block]),
+        call(C.usdg,'0x70a08231'+arg(C.owner)),call(C.usdg,'0x70a08231'+arg(C.vault)),call(C.cards,'0x6352211e'+BigInt(C.tokenId).toString(16).padStart(64,'0')),call(C.vault,'0x99fbab88'+BigInt(C.tokenId).toString(16).padStart(64,'0'))]);
+      const paused = uint(pausedRaw), decimals = uint(decimalRaw);
+      if (paused > 1n) throw Error('Malformed paused flag');
+      if (decimals !== BigInt(C.usdgDecimals) || decimals !== 6n) throw Error('USDG decimals mismatch');
+      const pos = position(positionRaw);
+      const debtText = units(pos.debt,6)+' USDG'+(same(pos.owner,'0x0000000000000000000000000000000000000000') ? ' · no deposited position' : ' · position owner '+pos.owner);
+      const snapshot = {debt:debtText,chain:C.chainId + ' / ' + quantity(block), checks:'Code present; owner, guardian & references match',paused:paused === 1n ? 'Yes — paused' : 'No',decimals:String(decimals),eth:units(quantity(ethRaw),18)+' ETH',usdg:units(uint(usdgRaw),6)+' USDG',pool:units(uint(poolRaw),6)+' USDG',token:addr(tokenRaw)};
+      Object.assign(snapshot,await readiness(call,header,pos,addr(tokenRaw),paused===1n,uint(poolRaw),uint(usdgRaw)));
+      const finalHeader=headerCheck(await rpc('eth_getBlockByNumber',[block,false]),block);
+      if(finalHeader.hash!==header.hash || finalHeader.timestamp!==header.timestamp) throw Error('Snapshot block changed');
+      if (quantity(await rpc('eth_chainId',[])) !== BigInt(C.chainId)) throw Error('Public RPC network changed');
+      if (p) await walletCheck(p,a);
+      if (ticket !== epoch) return;
+      pilotSnapshot=snapshot.pilotMachine;delete snapshot.pilotMachine;
+      for (const [id,value] of Object.entries(snapshot)) $(id).textContent = value;
+      $('checked').textContent = 'Read at block ' + quantity(block) + ' · ' + new Date().toISOString() + ' · refresh before relying on it.';
+      $('status').textContent = paused === 1n ? 'Read checks passed, but vault is paused. Debt read with verified schema and runtime. Snapshot checked; pilot actions still require explicit confirmation.' : 'Listed read checks passed. Debt read with verified schema and runtime. Snapshot checked; pilot actions still require explicit confirmation.';
+      return pilotSnapshot;
+    } catch (error) { if (ticket === epoch) { if (p) dropWallet(); clear('Status unavailable: ' + error.message + '. All live values cleared.'); } }
+  }
+  function chooseProvider() { const e = window.ethereum; const candidates = [window.trustwallet,...(e && Array.isArray(e.providers) ? e.providers : []),e]; return candidates.find(p => p && (p.isTrust || p.isTrustWallet) && typeof p.request === 'function'); }
+  async function connect() {
+    if (connecting) return;
+    clear('Waiting for Trust Wallet account permission…'); dropWallet();
+    const p = chooseProvider(); if (!p) { clear('Trust Wallet not detected. Use its browser or injected extension; public reads remain available.'); return; }
+    connecting = true; $('connect').disabled = true;
+    const ticket = epoch;
+    try {
+      const accounts = await p.request({method:'eth_requestAccounts'});
+      if (ticket !== epoch) return;
+      if (!Array.isArray(accounts) || !accounts.length || !addressOK(accounts[0])) throw Error('No valid wallet account');
+      await walletCheck(p,accounts[0]); if (ticket !== epoch) return;
+      provider = p; account = accounts[0]; $('wallet').textContent = 'Connected owner: ' + account;
+      const changed = () => { clear('Wallet account or network changed. Live values cleared; reconnect to validate.'); dropWallet(); };
+      if (p.on) for (const event of ['accountsChanged','chainChanged','disconnect']) { p.on(event,changed); bindings.push([p,event,changed]); }
+      connecting = false; await refresh();
+    } catch(error) { if (ticket === epoch) { dropWallet(); clear('Connection unavailable: ' + error.message); } }
+    finally { connecting = false; $('connect').disabled = false; }
+  }
+  for (const key of ['network','chainId','chainHex','nativeSymbol','rpc','explorer','owner','guardian','registry','cards','vault','usdg','tokenId']) {
+    const row = document.createElement('div'), label = document.createElement('dt'), value = document.createElement('dd'); label.textContent = key; value.className = 'address';
+    if (addressOK(String(C[key]))) { const link = document.createElement('a'); link.href = C.explorer + '/address/' + C[key]; link.textContent = C[key]; value.appendChild(link); } else value.textContent = String(C[key]);
+    row.appendChild(label); row.appendChild(value); $('configList').appendChild(row);
+  }
+
+  const actionIDs=['approveNFT','deposit','borrow','approveRepay','repay','withdraw','revokeRepay'];
+  async function txRead(method,params){
+    if(!['eth_call','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_blockNumber'].includes(method))throw Error('Unsupported transaction preflight read');
+    const id=++rpcId,controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+    try{const response=await fetch(C.rpc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id,method,params}),credentials:'omit',signal:controller.signal});if(!response.ok)throw Error('Preflight HTTP failure');const body=await response.json();if(body.id!==id||body.jsonrpc!=='2.0'||body.error)throw Error('Preflight/receipt read failed');return body.result;}finally{clearTimeout(timer);}
+  }
+  const pilot=createPilotActions({C,provider:()=>provider,refresh:async()=>{const snapshot=await refresh();if(!snapshot)throw Error('Verified refresh failed');return snapshot;},read:txRead,version:()=>epoch,invalidate:()=>clear('Transaction submitted; snapshot invalidated.'),confirm:m=>window.confirm(m),status:m=>{$('pilotStatus').textContent=m;},lock:on=>{for(const id of actionIDs)$(id).disabled=on;}});
+  for(const action of actionIDs)$(action).addEventListener('click',async()=>{try{if(!$('pilotRisk').checked)throw Error('Acknowledge mainnet risk first');const text=$('pilotAmount').value;$('pilotRisk').checked=false;await pilot.run(action,text);}catch(e){$('pilotStatus').textContent=e.message;}});
+  $('checkReceipt').addEventListener('click',async()=>{try{await pilot.receipt();}catch(e){$('pilotStatus').textContent=e.message;}});
+
+  $('refresh').addEventListener('click',refresh); $('connect').addEventListener('click',connect);
+  $('disconnect').addEventListener('click',() => { dropWallet(); clear('Connection forgotten locally. Revoke site permissions in Trust Wallet separately if desired.'); });
+  window.addEventListener('pagehide',() => { clear('Page closed. Refresh to reload.'); dropWallet(); });
+  // Restored browser-history pages must not present a cached snapshot as current.
+  window.addEventListener('pageshow',event => { if (event.persisted) { dropWallet(); clear('Restored page: refresh public status.'); } });
+})();
+</script>
+</body></html>

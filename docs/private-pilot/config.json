@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "chainId": 4663,
+  "chainHex": "0x1237",
+  "network": "Robinhood Chain mainnet",
+  "rpc": "https://rpc.mainnet.chain.robinhood.com",
+  "explorer": "https://robinhoodchain.blockscout.com",
+  "nativeSymbol": "ETH",
+  "owner": "0xD77C34899858088DE6888F36fA46e2d6468F4Ca5",
+  "guardian": "0xD77C34899858088DE6888F36fA46e2d6468F4Ca5",
+  "registry": "0x2A585396dd0248A060045b3f557076fB1B4Cb0eb",
+  "cards": "0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653",
+  "vault": "0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23",
+  "usdg": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+  "usdgDecimals": 6,
+  "tokenId": "1",
+  "usdgSource": "https://docs.paxos.com/guides/stablecoin/usdg/mainnet",
+  "transactionsEnabled": true,
+  "debtSchemaVerified": true,
+  "debtSchemaSource": "https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all",
+  "vaultRuntimeSHA256": "e9e012a1bc5dc65bb360584964158da67940510544233b004ae7c0836854c103",
+  "readinessSchema": {
+    "approved": {
+      "contract": "cards",
+      "selector": "0x081812fc",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "address"
+        }
+      ]
+    },
+    "operator": {
+      "contract": "cards",
+      "selector": "0xe985e9c5",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "certKey": {
+      "contract": "cards",
+      "selector": "0xc5471120",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bytes32"
+        }
+      ]
+    },
+    "demo": {
+      "contract": "cards",
+      "selector": "0x22b4191f",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "allowance": {
+      "contract": "usdg",
+      "selector": "0xdd62ed3e",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "assetSettings": {
+      "contract": "usdg",
+      "selector": "0x5b9d419e",
+      "outputs": [
+        {
+          "name": "referenceTime",
+          "type": "uint40"
+        },
+        {
+          "name": "maturityPeriod",
+          "type": "uint32"
+        },
+        {
+          "name": "partnerSignedRegistrationsEnabled",
+          "type": "bool"
+        },
+        {
+          "name": "__gap_remaining",
+          "type": "bytes10"
+        },
+        {
+          "name": "paused",
+          "type": "bool"
+        }
+      ]
+    },
+    "maxAge": {
+      "contract": "vault",
+      "selector": "0x4e941b01",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "allowDemo": {
+      "contract": "vault",
+      "selector": "0xcf256ae7",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "perCard": {
+      "contract": "vault",
+      "selector": "0x8da731d9",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "totalCap": {
+      "contract": "vault",
+      "selector": "0x226b6408",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "totalDebt": {
+      "contract": "vault",
+      "selector": "0xfc7b9c18",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ]
+    },
+    "borrowStatus": {
+      "contract": "vault",
+      "selector": "0x0367b498",
+      "outputs": [
+        {
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "name": "available",
+          "type": "uint256"
+        }
+      ]
+    },
+    "available": {
+      "contract": "vault",
+      "selector": "0x8c99df5b",
+      "outputs": [
+        {
+          "name": "avail",
+          "type": "uint256"
+        }
+      ]
+    },
+    "exists": {
+      "contract": "registry",
+      "selector": "0x38a699a4",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "held": {
+      "contract": "vault",
+      "selector": "0x77ecc1aa",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "bool"
+        }
+      ]
+    },
+    "appraisal": {
+      "contract": "registry",
+      "selector": "0x5fbb5a81",
+      "outputs": [
+        {
+          "name": "fmvLow",
+          "type": "uint64"
+        },
+        {
+          "name": "fmvPoint",
+          "type": "uint64"
+        },
+        {
+          "name": "fmvHigh",
+          "type": "uint64"
+        },
+        {
+          "name": "ltvBps",
+          "type": "uint16"
+        },
+        {
+          "name": "confidenceScore",
+          "type": "uint16"
+        },
+        {
+          "name": "compCount",
+          "type": "uint16"
+        },
+        {
+          "name": "confidence",
+          "type": "uint8"
+        },
+        {
+          "name": "risk",
+          "type": "uint8"
+        },
+        {
+          "name": "eligible",
+          "type": "bool"
+        },
+        {
+          "name": "appraisedAt",
+          "type": "uint40"
+        },
+        {
+          "name": "attester",
+          "type": "address"
+        }
+      ]
+    }
+  },
+  "relatedRuntimeSHA256": {
+    "registry": "c53c4c889bd1e99c22703c41d800f732a9f028aac3b8423f8e6ddb75727c06e6",
+    "cards": "0bc66254d35cdf13d93e39c5012821ec44aee4174f8ae38f03c4800cea3bba96",
+    "usdg": "c85d18dc1e49769e01f9f88981176e213b2bc24d2f14d33a81d54bc06579f6db",
+    "implementation": "0d8203b94e33c2458a137c0c70d2491f3625837405a74fd332f4cba5a979c372"
+  },
+  "usdgImplementation": "0x68184C449E1a8f34fA18d289737129FD27B66f8F",
+  "usdgImplementationSlot": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+  "readinessSourceURLs": {
+    "vault": "https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all",
+    "cards": "https://sourcify.dev/server/v2/contract/4663/0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653?fields=all",
+    "registry": "https://sourcify.dev/server/v2/contract/4663/0x2A585396dd0248A060045b3f557076fB1B4Cb0eb?fields=all",
+    "usdg": "https://sourcify.dev/server/v2/contract/4663/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168?fields=all",
+    "implementation": "https://sourcify.dev/server/v2/contract/4663/0x68184C449E1a8f34fA18d289737129FD27B66f8F?fields=all"
+  },
+  "actionSelectors": {
+    "approveNFT": "0x095ea7b3",
+    "approveUSDG": "0x095ea7b3",
+    "deposit": "0xb6b55f25",
+    "borrow": "0x0ecbcdab",
+    "repay": "0xd8aed145",
+    "withdraw": "0x2e1a7d4d"
+  },
+  "privatePilot": true,
+  "publiclyAccessible": true
+}
