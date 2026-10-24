@@ -649,7 +649,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     $('repayBtn').disabled=blocked||!depositor||pos.debt===0n||pos.assetPaused||pos.balance<pos.debt||pos.allowance<pos.debt;
     $('withdrawBtn').hidden=!depositor||pos.debt!==0n;
     $('withdrawBtn').disabled=blocked||!depositor||pos.debt!==0n;
-    $('pDebt').textContent=usd6(pos.debt);$('pLimit').textContent=usd6(pos.limit);$('pLiq').textContent='Card stays in vault until repaid';const util=pos.limit?Number(pos.debt*10000n/pos.limit)/100:0;$('pUtil').textContent=util+'%';$('pUtilBar').style.width=Math.min(100,util)+'%';
+    $('pDebt').textContent=usd6(pos.debt);$('pLimit').textContent=usd6(pos.limit);$('pLiq').textContent=pos.inVault?'Card stays in vault until repaid':'No active vault position';const util=pos.limit?Number(pos.debt*10000n/pos.limit)/100:0;$('pUtil').textContent=util+'%';$('pUtilBar').style.width=Math.min(100,util)+'%';
     const reasons=[pos.paused&&'Vault paused',pos.held&&'Certificate held',!pos.fresh&&'Certificate stale',!pos.eligible&&'Ineligible appraisal',pos.demoBlocked&&'Demo token blocked',pos.assetPaused&&'USDG paused',pos.pool===0n&&'No pool liquidity',pos.poolHead===0n&&'Pool debt cap reached'].filter(Boolean);
     if(depositor&&pos.debt>0n&&pos.balance<pos.debt)reasons.push('Insufficient USDG balance to repay');
     $('demoNote').hidden=false;$('demoNote').textContent='Pool liquidity: '+poolDisplay(pos.pool)+' · total debt: '+poolDisplay(pos.totalDebt)+' / '+poolDisplay(pos.totalCap)+' · available after deposit/caps: '+poolDisplay(pos.inVault?pos.available:pos.potential)+'. '+(reasons.join('; ')||'Listed borrowing prerequisites pass, not a safety guarantee.')+' Real USDG and ETH gas; minimum input 1 USDG.';
@@ -707,7 +707,13 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
       if(!same(r.transactionHash,p.hash)||!same(r.from,p.from)||!same(r.to,p.to)||!same(tx?.from,p.from)||!same(tx?.to,p.to)||!same(tx?.input,p.data)||BigInt(tx.value)!==0n||BigInt(tx.chainId)!==4663n||BigInt(tx.nonce)!==BigInt(p.nonce)||BigInt(r.blockNumber)<=BigInt(p.block)||!same(tx.blockNumber,r.blockNumber)||!same(tx.blockHash,r.blockHash)||!same(b?.hash,r.blockHash)||!['0x0','0x1'].includes(r.status))throw Error('Receipt verification failed; pending lock retained');
       if(BigInt(h)<BigInt(r.blockNumber)+1n){message('Confirming · 1 of 2 confirmations. Checking automatically. '+EXPLORER+'/tx/'+p.hash);return;}
       // Receipt resolves only this immutable submission, independent of wallet/session changes.
-      localStorage.removeItem(journalKey(p.from));pending=null;activeAction=null;busy=false;receiptFallback=false;stopPolling();message((r.status==='0x1'?'Confirmed':'Reverted')+': '+EXPLORER+'/tx/'+p.hash+'. Refreshing verified debt/liquidity. '+(!account?'Reconnect explicitly; wallet actions remain disabled.':'Next action requires a new click.'));await refreshPosition(BigInt(r.blockNumber));
+      localStorage.removeItem(journalKey(p.from));pending=null;activeAction=null;busy=false;receiptFallback=false;stopPolling();
+      const outcome=(r.status==='0x1'?'Confirmed':'Reverted')+': '+EXPLORER+'/tx/'+p.hash+'. ',c=ctx();
+      message(outcome+'Refreshing verified debt/liquidity. No automatic next transaction.');
+      const refreshed=await refreshPosition(BigInt(r.blockNumber));
+      // A receipt is final independently of a follow-up read. Never leave its transient
+      // "Refreshing" message behind, or claim a failed read is a failed withdrawal.
+      if(valid(c)&&!pending)message(outcome+(refreshed&&pos?'Live status updated. '+(pos.inVault?'Token #1 is in vault custody. ':'Token #1 is back outside the vault; no active vault position. ')+'Debt: '+usd6(pos.debt)+'. ':'Live status unavailable. Actions disabled; use Refresh live status to retry. ')+(!account?'Reconnect explicitly; wallet actions remain disabled.':'Next action requires a new click.'));
     }catch(e){if(pending===p){receiptFallback=true;message(errorText(e)+' Pending lock retained. Automatic read-only checks continue.');}}finally{receiptBusy=false;if(pos)renderPosition();else lock();renderWallet();}
   }
   ORDER.forEach(cert=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=META[cert].chip+' · PSA 10';b.addEventListener('click',()=>{if(busy||pending)return;$('certInput').value=cert;lookup(cert);});$('chips').appendChild(b);});
