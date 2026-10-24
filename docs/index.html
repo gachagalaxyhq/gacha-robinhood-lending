@@ -405,10 +405,10 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
         <div class="step-body" style="width:100%"><div class="title" style="margin-bottom:12px">Borrow amount</div>
           <div class="borrow-input-row">
             <label class="borrow-input" for="amt"><span class="cur">$</span><span class="sr">Borrow amount in dollars</span>
-              <input id="amt" type="text" inputmode="decimal" value="0" /><button type="button" class="max" id="maxBtn">MAX</button></label>
+              <input id="amt" type="number" inputmode="decimal" min="1" step="0.000001" value="1" /><button type="button" class="max" id="maxBtn">MAX</button></label>
             <button class="btn btn-primary borrow-btn" id="borrowBtn" hidden disabled>Connect wallet to borrow</button></div>
-          <input type="range" class="amt" id="amtRange" min="0" max="0" step="0.000001" value="0" aria-label="Borrow amount slider" />
-          <div class="slider-ends"><span>$0</span><span id="rangeMax">$0</span></div>
+          <input type="range" class="amt" id="amtRange" min="1" max="0" step="0.000001" value="1" aria-label="Borrow amount slider" />
+          <div class="slider-ends"><span>1 USDG</span><span id="rangeMax">$0</span></div>
           <p class="demo-note" id="demoNote">Reading mainnet liquidity…</p>
           <div class="wallet-links" id="walletLinks" hidden><span>No wallet in this browser. Open this page in:</span><a class="btn btn-sm" id="openTrust" href="#">Open in Trust Wallet</a><a class="btn btn-sm" id="openMM" href="#">Open in MetaMask</a></div>
           <div class="actions" id="ownerActions" hidden><button class="btn btn-outline btn-sm" id="approveUsdBtn">Approve exact repayment</button><button class="btn btn-outline btn-sm" id="repayBtn">Repay all</button><button class="btn btn-outline btn-sm" id="withdrawBtn">Withdraw card</button></div>
@@ -498,6 +498,8 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   const same=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.toLowerCase()===b.toLowerCase();
   const short=a=>a.slice(0,6)+'…'+a.slice(-4);
   const usd6=n=>ethers.formatUnits(n,6)+' USDG';
+  // Pool display only: hide sub-cent dust, but retain precision for tiny test balances.
+  const poolDisplay=n=>n===0n?'0 USDG':n>=10000n?(Number(n)/1000000).toLocaleString('en-US',{maximumFractionDigits:2})+' USDG':usd6(n);
   const usdFromCents=n=>'$'+(Number(n)/100).toLocaleString('en-US',{maximumFractionDigits:2});
   const ago=ts=>Math.max(0,Math.floor(Date.now()/1000)-Number(ts))+' seconds ago';
   const min=(...v)=>v.reduce((a,b)=>a<b?a:b), head=(cap,debt)=>cap>debt?cap-debt:0n;
@@ -545,7 +547,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     const o={blockTag:block};const [r,c,u,owner,dec]=await Promise.all([vault.registry(o),vault.cards(o),vault.loanAsset(o),vault.owner(o),usd.decimals(o)]);
     if(!same(r,A.registry)||!same(c,A.cards)||!same(u,A.usd)||!same(owner,C.owner)||dec!==6n)throw Error('Mainnet references/owner/decimals mismatch');
   }
-  function amount(text){if(!/^(0|[1-9]\d*)(\.\d{1,6})?$/.test(text))throw Error('Use a positive USDG amount with at most six decimals.');const n=ethers.parseUnits(text,6);if(n<=0n||n>=(1n<<256n)-1n)throw Error('Amount out of range');return n;}
+  function amount(text){if(!/^(0|[1-9]\d*)(\.\d{1,6})?$/.test(text))throw Error('Use a positive USDG amount with at most six decimals.');const n=ethers.parseUnits(text,6);if(n<1000000n)throw Error('Minimum borrow amount is 1 USDG.');if(n>=(1n<<256n)-1n)throw Error('Amount out of range');return n;}
   async function identity(c){if(!valid(c)||!wallet||!account)throw Error('Connect wallet again.');const chain=await wallet.request({method:'eth_chainId'}),accounts=await wallet.request({method:'eth_accounts'});if(!valid(c))throw Error('Session changed.');networkNeeded=BigInt(chain)!==4663n;if(networkNeeded||!same(accounts?.[0],c.account)){drop('Wallet account/network changed. Reconnect on mainnet.');throw Error('Wallet account/network changed. Reconnect on mainnet.');}}
   function drop(text){stopPolling();for(const ctl of activeReads)ctl.abort();activeReads.clear();if(pending)receiptFallback=true;++epoch;account=null;signer=null;for(const [p,e,h]of bindings)p.removeListener?.(e,h);bindings=[];wallet=null;window.GG_CONNECTED=false;clearPosition(text);renderWallet();}
   function hook(p,onAccounts){for(const e of ['accountsChanged','chainChanged','disconnect']){const h=value=>{if(e==='accountsChanged'&&onAccounts?.(value))return;if(e==='chainChanged')networkNeeded=!same(value,CHAIN_HEX);drop('Wallet changed. Actions disabled; reconnect explicitly.');if(connecting)message('Wallet changed during connection. Reconnect explicitly after the request settles.');};p.on?.(e,h);bindings.push([p,e,h]);}}
@@ -635,7 +637,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     $('dStatus').lastElementChild.textContent=pos.inVault?'In vault':own?'In your wallet':'Read only';
     $('depositBtn').hidden=!own||pos.inVault||pos.restricted||pos.potential<=0n;$('depositBtn').disabled=blocked||!own||pos.restricted||pos.potential<=0n;
     $('lBig').textContent=usd6(pos.perCard);$('lSub').textContent='Per-card cap: certificate floor '+usdFromCents(current.a.fmvLow)+' × '+Number(current.a.ltvBps)/100+'% LTV. Your real limit is pool liquidity — live in step 03.';
-    $('amtRange').max=ethers.formatUnits(pos.inVault?pos.available:pos.potential,6);$('rangeMax').textContent=usd6(pos.inVault?pos.available:pos.potential);
+    $('amtRange').max=ethers.formatUnits(pos.inVault?pos.available:pos.potential,6);$('rangeMax').textContent=poolDisplay(pos.inVault?pos.available:pos.potential);
     let n=0n;try{n=amount($('amt').value);}catch{}
     $('borrowBtn').hidden=!depositor||pos.restricted||pos.available<=0n;
     $('borrowBtn').disabled=blocked||!depositor||pos.restricted||n<=0n||n>pos.available;
@@ -650,7 +652,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     $('pDebt').textContent=usd6(pos.debt);$('pLimit').textContent=usd6(pos.limit);$('pLiq').textContent='Card stays in vault until repaid';const util=pos.limit?Number(pos.debt*10000n/pos.limit)/100:0;$('pUtil').textContent=util+'%';$('pUtilBar').style.width=Math.min(100,util)+'%';
     const reasons=[pos.paused&&'Vault paused',pos.held&&'Certificate held',!pos.fresh&&'Certificate stale',!pos.eligible&&'Ineligible appraisal',pos.demoBlocked&&'Demo token blocked',pos.assetPaused&&'USDG paused',pos.pool===0n&&'No pool liquidity',pos.poolHead===0n&&'Pool debt cap reached'].filter(Boolean);
     if(depositor&&pos.debt>0n&&pos.balance<pos.debt)reasons.push('Insufficient USDG balance to repay');
-    $('demoNote').hidden=false;$('demoNote').textContent='Pool liquidity: '+usd6(pos.pool)+' · total debt: '+usd6(pos.totalDebt)+' / '+usd6(pos.totalCap)+' · available after deposit/caps: '+usd6(pos.inVault?pos.available:pos.potential)+'. '+(reasons.join('; ')||'Listed borrowing prerequisites pass, not a safety guarantee.')+' Real USDG and ETH gas; minimum input 0.000001 USDG.';
+    $('demoNote').hidden=false;$('demoNote').textContent='Pool liquidity: '+poolDisplay(pos.pool)+' · total debt: '+poolDisplay(pos.totalDebt)+' / '+poolDisplay(pos.totalCap)+' · available after deposit/caps: '+poolDisplay(pos.inVault?pos.available:pos.potential)+'. '+(reasons.join('; ')||'Listed borrowing prerequisites pass, not a safety guarantee.')+' Real USDG and ETH gas; minimum input 1 USDG.';
     $('bNoteText').textContent='Read at mainnet block '+BigInt(pos.block)+'. '+(!account?'Connect to validate ownership. ':depositor?'Your deposited position. ':own?'Your token. Deposit transfers token #1 into vault custody without NFT approval. Borrowing requires a separate action. ':'This wallet cannot act on token #1. ')+'Repay and zero-debt withdrawal remain independent of borrow pause/freshness/liquidity. No physical authenticity, custody or legal rights are verified.';
   }
   function plan(action,text){if(!pos||!signer||!account)throw Error('Verified position and connected wallet required');const owned=same(pos.holder,account)&&!pos.inVault,depositor=pos.inVault&&same(pos.depositor,account);let contract=vault,method,args;
@@ -689,7 +691,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   const autoRefresh=()=>{if(!suspended&&!busy&&!connecting&&!pending&&!receiptBusy&&!refreshing&&current)return refreshPosition();};
   let refreshTimer=null;
   // start
-  renderWallet();$('amt').value='0.000001';$('certInput').value='109308847';lookup('109308847');
+  renderWallet();$('amt').value='1';$('certInput').value='109308847';lookup('109308847');
   message('Mainnet pilot. No transaction requested. After any reload, inspect wallet history for pending transactions before acting.');
   refreshTimer=setInterval(autoRefresh,30000);
 })();
