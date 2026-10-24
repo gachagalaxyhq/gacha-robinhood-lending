@@ -412,7 +412,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
           <p class="demo-note" id="demoNote">Reading mainnet liquidity…</p>
           <div class="wallet-links" id="walletLinks" hidden><span>No wallet in this browser. Open this page in:</span><a class="btn btn-sm" id="openTrust" href="#">Open in Trust Wallet</a><a class="btn btn-sm" id="openMM" href="#">Open in MetaMask</a></div>
           <div class="actions" id="ownerActions" hidden><button class="btn btn-outline btn-sm" id="approveUsdBtn">Approve exact repayment</button><button class="btn btn-outline btn-sm" id="repayBtn">Repay all</button><button class="btn btn-outline btn-sm" id="withdrawBtn">Withdraw card</button></div>
-          <details class="recovery" id="recovery"><summary>Connection &amp; recovery</summary><div class="actions"><button class="btn btn-outline btn-sm" id="refreshBtn">Refresh live status</button><button class="btn btn-outline btn-sm" id="networkBtn" hidden>Switch / add mainnet</button><button class="btn btn-outline btn-sm" id="receiptBtn" hidden>Check pending receipt</button></div></details><div id="txMsg" role="status" aria-live="polite"></div></div></div>
+          <details class="recovery" id="recovery"><summary>Connection &amp; recovery</summary><div class="actions"><button class="btn btn-outline btn-sm" id="refreshBtn">Refresh live status</button><button class="btn btn-outline btn-sm" id="networkBtn" hidden>Switch / add mainnet</button><button class="btn btn-outline btn-sm" id="receiptBtn" hidden>Check transaction / recover status</button></div><label id="recoveryHashLabel" hidden>Optional transaction hash from wallet history (read-only verification)<input id="recoveryHash" type="text" spellcheck="false" autocomplete="off" placeholder="0x…" aria-label="Transaction hash from wallet history" /></label></details><div id="txMsg" role="status" aria-live="polite"></div></div></div>
       <div class="position">
         <div class="cell"><div class="p-label">Debt</div><div class="p-value" id="pDebt">…</div></div>
         <div class="cell"><div class="p-label">Limit</div><div class="p-value" id="pLimit">…</div></div>
@@ -505,13 +505,13 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   const min=(...v)=>v.reduce((a,b)=>a<b?a:b), head=(cap,debt)=>cap>debt?cap-debt:0n;
   const actionIDs=['depositBtn','borrowBtn','approveUsdBtn','repayBtn','withdrawBtn'];
   let account=null, wallet=null, signer=null, current=null, pos=null, epoch=0, lookupSeq=0, refreshSeq=0;
-  let busy=false, connecting=false, pending=null, bindings=[], rpcID=0, refreshing=0;
+  let busy=false, connecting=false, pending=null, bindings=[], rpcID=0, refreshing=0, activeAction=null;
   let receiptBusy=false, pollTimer=null, pollGeneration=0, receiptFallback=false, networkNeeded=false, suspended=false;
   const activeReads=new Set();
   function stopPolling(){++pollGeneration;clearTimeout(pollTimer);pollTimer=null;}
-  function startPolling(){stopPolling();if(!pending?.hash||!account||suspended)return;const generation=pollGeneration,c=ctx(),p=pending;let delay=1500,attempts=0;
-    const tick=async()=>{pollTimer=null;if(generation!==pollGeneration||!valid(c)||pending!==p||suspended)return;
-      await receipt();if(generation!==pollGeneration||!valid(c)||pending!==p||suspended)return;
+  function startPolling(){stopPolling();if(!pending||suspended)return;const generation=pollGeneration,p=pending;let delay=1500,attempts=0;
+    const tick=async()=>{pollTimer=null;if(generation!==pollGeneration||pending!==p||suspended)return;
+      await receipt();if(generation!==pollGeneration||pending!==p||suspended)return;
       if(++attempts>=6){receiptFallback=true;lock();}delay=Math.min(delay*2,15000);pollTimer=setTimeout(tick,delay);
     };pollTimer=setTimeout(tick,delay);
   }
@@ -521,7 +521,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   const errorText=e=>e?.code===4001||e?.code==='ACTION_REJECTED'?'Cancelled in wallet.':String(e?.shortMessage||e?.message||'Request failed.');
   async function bounded(read,ms,text,onTimeout=()=>{}){let timer;try{return await Promise.race([Promise.resolve().then(read),new Promise((_,reject)=>{timer=setTimeout(()=>{onTimeout();reject(Error(text));},ms);})]);}finally{clearTimeout(timer);}}
   async function rpc(method,params=[]) {
-    if(!['eth_chainId','eth_blockNumber','eth_getBlockByNumber','eth_getCode','eth_getStorageAt','eth_call','eth_getTransactionReceipt','eth_getTransactionByHash'].includes(method)) throw Error('Read-only RPC method required');
+    if(!['eth_chainId','eth_blockNumber','eth_getBlockByNumber','eth_getCode','eth_getStorageAt','eth_call','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getTransactionCount','eth_getLogs'].includes(method)) throw Error('Read-only RPC method required');
     const ctl=new AbortController(),id=++rpcID;activeReads.add(ctl);
     try {return await bounded(async()=>{const r=await fetch(C.rpc,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',signal:ctl.signal,body:JSON.stringify({jsonrpc:'2.0',id,method,params})});
        if(!r.ok)throw Error('RPC HTTP '+r.status);const b=await r.json();if(b.id!==id||b.jsonrpc!=='2.0'||b.error)throw Error(b.error?.message||'Malformed RPC response');return b.result;
@@ -535,7 +535,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   const reg=new ethers.Contract(A.registry,C.abi.registry,ro), cards=new ethers.Contract(A.cards,[...C.abi.cards,'function safeTransferFrom(address,address,uint256)'],ro), vault=new ethers.Contract(A.vault,C.abi.vault,ro);
   const usd=new ethers.Contract(A.usd,['function decimals() view returns(uint8)','function balanceOf(address) view returns(uint256)','function allowance(address,address) view returns(uint256)','function approve(address,uint256) returns(bool)'],ro);
   const assets=new ethers.Contract(A.usd,['function globalTransferSettings() view returns(uint40 referenceTime,uint32 maturityPeriod,bool partnerSignedRegistrationsEnabled,bytes10 __gap_remaining,bool paused)'],ro);
-  function lock(){for(const id of actionIDs)$(id).disabled=true; $('connectBtn').disabled=busy||connecting; $('networkBtn').hidden=!networkNeeded; $('networkBtn').disabled=busy||connecting||!!pending; $('receiptBtn').hidden=!pending||!receiptFallback; $('receiptBtn').disabled=busy||receiptBusy||connecting||!account; $('refreshBtn').disabled=busy||connecting||!!pending||receiptBusy; $('recovery').hidden=busy&&!pending; $('amt').disabled=busy||!!pending||!pos;$('amtRange').disabled=busy||!!pending||!pos;$('maxBtn').disabled=busy||!!pending||!pos;}
+  function lock(){for(const id of actionIDs)$(id).disabled=true; $('connectBtn').disabled=busy||connecting; $('networkBtn').hidden=!networkNeeded; $('networkBtn').disabled=busy||connecting||!!pending; $('receiptBtn').hidden=!pending; $('recoveryHashLabel').hidden=!pending||!!pending.hash; $('receiptBtn').textContent='Check transaction / recover status'; $('receiptBtn').disabled=receiptBusy||connecting; $('refreshBtn').disabled=busy||connecting||!!pending||receiptBusy; $('recovery').hidden=busy&&!pending; $('amt').disabled=busy||!!pending||!pos;$('amtRange').disabled=busy||!!pending||!pos;$('maxBtn').disabled=busy||!!pending||!pos;}
   function clearPosition(text){++refreshSeq;pos=null;lock();for(const id of actionIDs)$(id).hidden=true;$('ownerActions').hidden=true;for(const id of ['pDebt','pLimit','pUtil','pLiq','lBig'])$(id).textContent='—';$('pUtilBar').style.width='0%';$('dSub').textContent=text;$('bNoteText').textContent=pending?'Updating after transaction · actions locked until verified confirmation. '+text:text;$('lSub').textContent=pending?'Updating after transaction':'Verified live reads required.';$('dStatus').lastElementChild.textContent=pending?'Updating':'Read only';$('demoNote').hidden=false;$('demoNote').textContent=text;}
   async function runtime(address,expected,block){const code=await rpc('eth_getCode',[address,block]);if(!/^0x(?:[a-fA-F0-9]{2})+$/.test(code))throw Error('Missing contract code');const bytes=Uint8Array.from(code.slice(2).match(/../g),x=>parseInt(x,16));const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');if(hash!==expected)throw Error('Verified runtime changed; actions disabled');}
   async function verify(block){
@@ -549,8 +549,8 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   }
   function amount(text){if(!/^(0|[1-9]\d*)(\.\d{1,6})?$/.test(text))throw Error('Use a positive USDG amount with at most six decimals.');const n=ethers.parseUnits(text,6);if(n<1000000n)throw Error('Minimum borrow amount is 1 USDG.');if(n>=(1n<<256n)-1n)throw Error('Amount out of range');return n;}
   async function identity(c){if(!valid(c)||!wallet||!account)throw Error('Connect wallet again.');const chain=await wallet.request({method:'eth_chainId'}),accounts=await wallet.request({method:'eth_accounts'});if(!valid(c))throw Error('Session changed.');networkNeeded=BigInt(chain)!==4663n;if(networkNeeded||!same(accounts?.[0],c.account)){drop('Wallet account/network changed. Reconnect on mainnet.');throw Error('Wallet account/network changed. Reconnect on mainnet.');}}
-  function drop(text){stopPolling();for(const ctl of activeReads)ctl.abort();activeReads.clear();if(pending)receiptFallback=true;++epoch;account=null;signer=null;for(const [p,e,h]of bindings)p.removeListener?.(e,h);bindings=[];wallet=null;window.GG_CONNECTED=false;clearPosition(text);renderWallet();}
-  function hook(p,onAccounts){for(const e of ['accountsChanged','chainChanged','disconnect']){const h=value=>{if(e==='accountsChanged'&&onAccounts?.(value))return;if(e==='chainChanged')networkNeeded=!same(value,CHAIN_HEX);drop('Wallet changed. Actions disabled; reconnect explicitly.');if(connecting)message('Wallet changed during connection. Reconnect explicitly after the request settles.');};p.on?.(e,h);bindings.push([p,e,h]);}}
+  function drop(text){stopPolling();for(const ctl of activeReads)ctl.abort();activeReads.clear();if(pending)receiptFallback=true;++epoch;account=null;signer=null;for(const [p,e,h]of bindings)p.removeListener?.(e,h);bindings=[];wallet=null;window.GG_CONNECTED=false;clearPosition(text);renderWallet();message(text+(pending?' Transaction outcome is being checked read-only; do not resubmit.':''));if(pending)startPolling();}
+  function hook(p,onAccounts){for(const e of ['accountsChanged','chainChanged','disconnect']){const h=value=>{if(p!==wallet)return;if(e==='accountsChanged'&&(onAccounts?.(value)||(Array.isArray(value)&&same(value[0],account))))return;if(e==='chainChanged'){try{networkNeeded=BigInt(value)!==BigInt(C.chainId);if(!networkNeeded)return;}catch{networkNeeded=true;}}drop('Wallet changed. Actions disabled; reconnect explicitly.');};p.on?.(e,h);bindings.push([p,e,h]);}}
   function renderWallet(){$('connectBtn').textContent=account?short(account)+' · connected':'Connect wallet';$('connectBtn').setAttribute('aria-label',account?'Connected wallet '+account+'. Click to reconnect.':'Connect wallet');$('connectBtn').disabled=busy||connecting;}
   async function connect(){
     if(connecting||busy)return;connecting=true;drop('Connecting wallet…');lock();const ticket=epoch;
@@ -560,9 +560,9 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
       const accounts=await p.request({method:'eth_requestAccounts'});authorizing=false;if(ticket!==epoch)return;
       if(!ethers.isAddress(accounts?.[0]))throw Error('No valid wallet account');account=accounts[0];
       if(announcedAccount&&!same(announcedAccount,account))throw Error('Wallet account changed during authorization. Reconnect explicitly.');
-      const c=ctx();await identity(c);const nextSigner=await new ethers.BrowserProvider(p).getSigner(account);if(!valid(c))return;await identity(c);if(!valid(c))return;signer=nextSigner;window.GG_CONNECTED=true;message('Connected. Mainnet uses real USDG and ETH gas.');
+      const c=ctx();await identity(c);const nextSigner=await new ethers.BrowserProvider(p).getSigner(account);if(!valid(c))return;await identity(c);if(!valid(c))return;signer=nextSigner;window.GG_CONNECTED=true;restorePending(account);message(pending?'Connected. Recovering unresolved transaction read-only; do not resubmit.':'Connected. Mainnet uses real USDG and ETH gas.');
     }catch(e){if(ticket===epoch){drop('Connection unavailable. Select mainnet, then reconnect.');message(errorText(e));}}
-    finally{connecting=false;renderWallet();lock();if(current&&!busy&&!pending)await refreshPosition();if(account&&pending?.hash)startPolling();}
+    finally{connecting=false;renderWallet();lock();if(current&&!busy)await refreshPosition();if(pending)startPolling();}
   }
   // Network mutation is isolated to this explicit button, never connect, refresh or transaction preflight.
   async function network(){if(busy||connecting||pending)return;connecting=true;lock();const p=window.GG_WALLET||window.ethereum;
@@ -604,13 +604,13 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   }
 
 
-  async function refreshPosition(){
+  async function refreshPosition(minBlock=0n){
     clearPosition('Refreshing verified mainnet snapshot…');const seq=refreshSeq,c=ctx();
     if(!current)return false;
     if(current.cert!=='109308847'){clearPosition('Mainnet certificate published. Lending is currently enabled only for token #1 (PSA 109308847); no deposit or borrowing is enabled for this card.');return false;}
     ++refreshing;
     try{return await bounded(async()=>{if(wallet&&account)await identity(c);const block=await rpc('eth_blockNumber'),header=await rpc('eth_getBlockByNumber',[block,false]);
-      if(!header||header.number!==block||!/^0x[\da-f]{64}$/i.test(header.hash))throw Error('Invalid block header');
+      if(!header||header.number!==block||!/^0x[\da-f]{64}$/i.test(header.hash)||BigInt(block)<minBlock)throw Error('Invalid or stale block header');
       await verify(block);const o={blockTag:block};
       const [holder,p,card,key,demo,allowDemo,paused,maxAge,perCard,totalCap,totalDebt,pool,approved,operator,status,available,limit,liq,asset]=await Promise.all([
         cards.ownerOf(1,o),vault.positions(1,o),cards.card(1,o),cards.certKeyOf(1,o),cards.isDemo(1,o),vault.allowDemoCards(o),vault.paused(o),vault.maxAppraisalAge(o),vault.maxLoanPerCard(o),vault.maxTotalDebt(o),vault.totalDebt(o),usd.balanceOf(A.vault,o),cards.getApproved(1,o),cards.isApprovedForAll(account||C.owner,A.vault,o),vault.borrowStatus(1,o),vault.availableToBorrow(1,o),vault.borrowLimit(1,o),vault.liquidationThreshold(1,o),assets.globalTransferSettings(o)]);
@@ -663,26 +663,56 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     else if(action==='withdraw'){if(!depositor||pos.debt!==0n)throw Error('Owned zero-debt deposited position required');method='withdraw';args=[1];}else throw Error('Unknown action');
     return {contract,method,args,to:contract.target,data:contract.interface.encodeFunctionData(method,args)};
   }
-  async function act(action){if(busy||connecting||pending||receiptBusy||suspended)return;busy=true;lock();const c=ctx(),text=$('amt').value;
-    try{await identity(c);if(!await refreshPosition()||!valid(c))throw Error('Fresh verified snapshot required');const p=plan(action,text);await identity(c);if(!valid(c))throw Error('Session changed');
-      await p.contract.connect(signer)[p.method].staticCall(...p.args);await identity(c);if(!valid(c))throw Error('Session changed');
-      // Lock ambiguous submissions too: no timeout, second send, automatic approval/deposit/repay chain, or retry.
-      pending={hash:null,from:account,to:p.to,data:p.data};receiptFallback=false;clearPosition('Awaiting wallet confirmation.');message('Awaiting wallet: confirm ONE '+action+' transaction. Do not click again.');
-      let tx;try{tx=await p.contract.connect(signer)[p.method](...p.args);}catch(e){if(e.code===4001||e.code==='ACTION_REJECTED')pending=null;else throw Error('Submission outcome unknown. Inspect wallet/explorer before retrying. '+errorText(e));throw e;}
-      if(!/^0x[\da-f]{64}$/i.test(tx.hash))throw Error('Invalid transaction hash; inspect wallet.');pending.hash=tx.hash;if(!valid(c)||suspended){receiptFallback=true;return;}clearPosition('Submitted · confirming automatically.');message('Submitted · confirming: '+EXPLORER+'/tx/'+tx.hash+'. No automatic next transaction.');
-    }catch(e){if(valid(c)){if(pending){receiptFallback=true;clearPosition('Submission outcome unknown. Inspect wallet history; do not resubmit.');}message(errorText(e));}}finally{busy=false;if(pos)renderPosition();else lock();renderWallet();if(valid(c)&&pending?.hash&&!suspended)startPolling();}
+  // Durable safety journal contains only public transaction context, never wallet credentials.
+  const journalKey=from=>'gg:pending:v2:'+C.chainId+':'+A.vault.toLowerCase()+':1:'+from.toLowerCase();
+  function savePending(p){localStorage.setItem(journalKey(p.from),JSON.stringify(p));}
+  function restorePending(from){if(pending)return;try{const raw=localStorage.getItem(journalKey(from));if(!raw)return;const p=JSON.parse(raw),contract=same(p.to,A.vault)?vault:same(p.to,A.cards)?cards:same(p.to,A.usd)?usd:null;
+      if(!same(p.from,from)||p.chain!==C.chainId||p.vault!==A.vault||p.token!=='1'||!contract||!/^0x[\da-f]+$/i.test(p.data)||!/^0x[\da-f]+$/i.test(p.block)||!/^0x[\da-f]{64}$/i.test(p.blockHash)||!/^\d+$/.test(p.debt)||!/^0x[\da-f]+$/i.test(p.nonce)||!(p.hash===null||/^0x[\da-f]{64}$/i.test(p.hash))||!contract.interface.parseTransaction({data:p.data}))throw Error('Invalid recovery journal');
+      p.scan=p.block;pending=p;receiptFallback=true;
+    }catch{throw Error('Recovery journal unreadable. Actions disabled; inspect wallet history before clearing browser storage.');}}
+  async function findSubmission(p){
+    if(!p.block)throw Error('Submission baseline unavailable; pending lock retained');
+    if(BigInt(await rpc('eth_chainId'))!==BigInt(C.chainId))throw Error('Recovery RPC chain mismatch');
+    const baseline=await rpc('eth_getBlockByNumber',[p.block,false]);if(!same(baseline?.hash,p.blockHash))throw Error('Submission baseline changed; pending lock retained');
+    const tip=BigInt(await rpc('eth_blockNumber')),from=BigInt(p.scan||p.block)+1n;if(from>tip)return;
+    const end=from+1999n<tip?from+1999n:tip,hex=n=>'0x'+n.toString(16);
+    const logs=await rpc('eth_getLogs',[{address:p.to,fromBlock:hex(from),toBlock:hex(end)}]);
+    if(!Array.isArray(logs))throw Error('Malformed recovery logs');
+    for(const hash of new Set(logs.filter(l=>!l.removed).map(l=>l.transactionHash))){const tx=await rpc('eth_getTransactionByHash',[hash]);
+      if(same(tx?.from,p.from)&&same(tx?.to,p.to)&&same(tx?.input,p.data)&&BigInt(tx.value)===0n&&BigInt(tx.chainId)===BigInt(C.chainId)&&BigInt(tx.nonce)===BigInt(p.nonce)&&BigInt(tx.blockNumber)>BigInt(p.block)){p.hash=hash;savePending(p);return;}}
+    // Failed transactions emit no logs. A user may supply their wallet's hash for verification.
+    p.scan=hex(end);
   }
-  async function receipt(){if(busy||connecting||receiptBusy||!pending||suspended)return;receiptBusy=true;lock();const c=ctx(),p=pending;
-    try{if(!p.hash)throw Error('Submission unknown; inspect wallet history. Do not resubmit.');await identity(c);const r=await rpc('eth_getTransactionReceipt',[p.hash]);if(!valid(c)||pending!==p)return;if(!r){message('Submitted · confirming automatically. No resubmission. '+EXPLORER+'/tx/'+p.hash);return;}
+  async function act(action){if(busy||connecting||pending||receiptBusy||suspended)return;const flight={};activeAction=flight;busy=true;lock();const c=ctx(),text=$('amt').value;let submission=null;
+    try{await identity(c);restorePending(account);if(pending){startPolling();throw Error('Unresolved saved submission recovered; do not resubmit.');}if(!await refreshPosition()||!valid(c))throw Error('Fresh verified snapshot required');const p=plan(action,text);await identity(c);if(!valid(c))throw Error('Session changed');
+      await p.contract.connect(signer)[p.method].staticCall(...p.args);await identity(c);if(!valid(c))throw Error('Session changed');
+      const block=await rpc('eth_blockNumber'),header=await rpc('eth_getBlockByNumber',[block,false]),nonce=await rpc('eth_getTransactionCount',[account,block]);
+      if(!/^0x[\da-f]{64}$/i.test(header?.hash)||header.number!==block)throw Error('Invalid submission baseline');
+      const baseline=await vault.positions(1,{blockTag:block});
+      if(BigInt(await rpc('eth_getTransactionCount',[account,'pending']))!==BigInt(nonce))throw Error('Wallet has an outstanding transaction or baseline advanced. Resolve wallet history, then refresh; nothing sent.');
+      await identity(c);if(!valid(c))throw Error('Session changed');
+      submission={hash:null,from:account,to:p.to,data:p.data,chain:C.chainId,vault:A.vault,token:'1',block,blockHash:header.hash,nonce,debt:baseline.debt.toString(),scan:block};
+      // Persist BEFORE sending. If storage is unavailable, fail closed without opening a transaction.
+      savePending(submission);pending=submission;receiptFallback=false;clearPosition('Awaiting wallet confirmation.');message('Awaiting wallet: confirm ONE '+action+' transaction. Read-only recovery is active; do not click again.');startPolling();
+      // Use the EIP-1193 result directly: ethers' send wrapper may wait on further provider reads.
+      let hash;try{hash=await c.wallet.request({method:'eth_sendTransaction',params:[{from:submission.from,to:p.to,data:p.data,value:'0x0'}]});}catch(e){if((e.code===4001||e.code==='ACTION_REJECTED')&&pending===submission&&!submission.hash){localStorage.removeItem(journalKey(submission.from));pending=null;stopPolling();}else if(pending===submission)throw Error('Submission outcome unknown. Do not resubmit. '+errorText(e));else return;throw e;}
+      if(pending!==submission)return; // A late wallet answer must not resurrect an already reconciled operation.
+      if(!/^0x[\da-f]{64}$/i.test(hash))throw Error('Invalid transaction hash; inspect wallet.');submission.hash=hash;savePending(submission);if(!valid(c)||suspended)return;clearPosition('Submitted · confirming automatically.');message('Submitted · confirming: '+EXPLORER+'/tx/'+hash+'. No automatic next transaction.');
+    }catch(e){if(activeAction===flight&&valid(c)){if(pending){receiptFallback=true;clearPosition('Submission outcome unknown. Read-only recovery active; do not resubmit.');}message(errorText(e));}}finally{if(activeAction===flight){activeAction=null;busy=false;if(pos)renderPosition();else lock();renderWallet();if(pending&&!suspended)startPolling();else if(valid(c)&&current)await refreshPosition();}}
+  }
+  async function receipt(){if(connecting||receiptBusy||!pending||suspended)return;receiptBusy=true;lock();const p=pending;
+    try{if(BigInt(await rpc('eth_chainId'))!==BigInt(C.chainId))throw Error('Recovery RPC chain mismatch');if(!p.hash)await findSubmission(p);if(pending!==p||suspended)return;if(!p.hash){message('Wallet response unresolved. No matching mined transaction found after the saved baseline; existing debt is not proof of success. Read-only checks continue; do not resubmit.');return;}const r=await rpc('eth_getTransactionReceipt',[p.hash]);if(pending!==p||suspended)return;if(!r){message('Submitted · confirming automatically. No resubmission. '+EXPLORER+'/tx/'+p.hash);return;}
       const [tx,b,h]=await Promise.all([rpc('eth_getTransactionByHash',[p.hash]),rpc('eth_getBlockByNumber',[r.blockNumber,false]),rpc('eth_blockNumber')]);
-      if(!valid(c)||!same(r.transactionHash,p.hash)||!same(r.from,p.from)||!same(r.to,p.to)||!same(tx?.from,p.from)||!same(tx?.to,p.to)||!same(tx?.input,p.data)||BigInt(tx.value)!==0n||BigInt(tx.chainId)!==4663n||!same(tx.blockHash,r.blockHash)||!same(b?.hash,r.blockHash)||!['0x0','0x1'].includes(r.status))throw Error('Receipt verification failed; pending lock retained');
-      await identity(c);if(!valid(c)||pending!==p)return;
-      if(BigInt(h)<BigInt(r.blockNumber)+1n){message('Confirming · 1 of 2 confirmations. Checking automatically. '+EXPLORER+'/tx/'+p.hash);return;}pending=null;receiptFallback=false;stopPolling();message((r.status==='0x1'?'Confirmed':'Reverted')+': '+EXPLORER+'/tx/'+p.hash+'. Updating position; next action requires a new click.');await refreshPosition();
-    }catch(e){if(valid(c)&&pending===p){receiptFallback=true;message(errorText(e)+' Pending lock retained. Automatic checks continue; manual check is in Connection & recovery.');}}finally{receiptBusy=false;if(pos)renderPosition();else lock();renderWallet();}
+      if(pending!==p||suspended)return;
+      if(!same(r.transactionHash,p.hash)||!same(r.from,p.from)||!same(r.to,p.to)||!same(tx?.from,p.from)||!same(tx?.to,p.to)||!same(tx?.input,p.data)||BigInt(tx.value)!==0n||BigInt(tx.chainId)!==4663n||BigInt(tx.nonce)!==BigInt(p.nonce)||BigInt(r.blockNumber)<=BigInt(p.block)||!same(tx.blockNumber,r.blockNumber)||!same(tx.blockHash,r.blockHash)||!same(b?.hash,r.blockHash)||!['0x0','0x1'].includes(r.status))throw Error('Receipt verification failed; pending lock retained');
+      if(BigInt(h)<BigInt(r.blockNumber)+1n){message('Confirming · 1 of 2 confirmations. Checking automatically. '+EXPLORER+'/tx/'+p.hash);return;}
+      // Receipt resolves only this immutable submission, independent of wallet/session changes.
+      localStorage.removeItem(journalKey(p.from));pending=null;activeAction=null;busy=false;receiptFallback=false;stopPolling();message((r.status==='0x1'?'Confirmed':'Reverted')+': '+EXPLORER+'/tx/'+p.hash+'. Refreshing verified debt/liquidity. '+(!account?'Reconnect explicitly; wallet actions remain disabled.':'Next action requires a new click.'));await refreshPosition(BigInt(r.blockNumber));
+    }catch(e){if(pending===p){receiptFallback=true;message(errorText(e)+' Pending lock retained. Automatic read-only checks continue.');}}finally{receiptBusy=false;if(pos)renderPosition();else lock();renderWallet();}
   }
   ORDER.forEach(cert=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=META[cert].chip+' · PSA 10';b.addEventListener('click',()=>{if(busy||pending)return;$('certInput').value=cert;lookup(cert);});$('chips').appendChild(b);});
   $('lookupForm').addEventListener('submit',e=>{e.preventDefault();if(!busy&&!pending)lookup($('certInput').value.replace(/\D/g,''));});
-  $('connectBtn').addEventListener('click',connect);$('networkBtn').addEventListener('click',network);$('refreshBtn').addEventListener('click',()=>{if(!busy&&!connecting&&!pending&&!receiptBusy){if(current)return refreshPosition();return lookup($('certInput').value.replace(/\D/g,''));}});$('receiptBtn').addEventListener('click',receipt);
+  $('connectBtn').addEventListener('click',connect);$('networkBtn').addEventListener('click',network);$('refreshBtn').addEventListener('click',()=>{if(!busy&&!connecting&&!pending&&!receiptBusy){if(current)return refreshPosition();return lookup($('certInput').value.replace(/\D/g,''));}});$('receiptBtn').addEventListener('click',async()=>{if(!pending||receiptBusy||connecting)return;const hash=$('recoveryHash').value.trim();if(!pending.hash&&hash){if(!/^0x[\da-f]{64}$/i.test(hash)){message('Enter a complete transaction hash from wallet history. No transaction will be sent.');return;}pending.hash=hash;try{await receipt();}finally{if(pending?.hash===hash){pending.hash=null;lock();}}}else await receipt();});
   for(const [id,a]of [['depositBtn','deposit'],['borrowBtn','borrow'],['approveUsdBtn','approveUsd'],['repayBtn','repay'],['withdrawBtn','withdraw']])$(id).addEventListener('click',()=>act(a));
   $('amt').addEventListener('input',()=>{if(pos)renderPosition();});$('amtRange').addEventListener('input',e=>{if(busy||pending)return;$('amt').value=e.target.value;if(pos)renderPosition();});$('maxBtn').addEventListener('click',()=>{if(busy||pending||!pos)return;$('amt').value=ethers.formatUnits(pos.inVault?pos.available:pos.potential,6);renderPosition();});
   document.querySelectorAll('.copy-btn').forEach(b=>b.addEventListener('click',()=>{const a=b.parentElement.querySelector('[data-copy]');if(a)navigator.clipboard?.writeText(a.dataset.copy);}));
