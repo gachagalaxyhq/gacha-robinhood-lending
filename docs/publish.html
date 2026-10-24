@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gacha Galaxy · Publish remaining certificates (owner only)</title>
+<style>
+  :root{--ink:#14181E;--paper:#F1EADB;--ember:#C24A1F;--moss:#5C6E3F;--tan:#E7DCC2}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;padding:40px 16px}
+  main{max-width:860px;margin:0 auto}
+  h1{font-size:28px;margin:0 0 4px}
+  .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ember);font-weight:700}
+  .card{background:#fff;border:1px solid #e3ddcf;border-radius:14px;padding:20px 22px;margin:18px 0}
+  .row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #eee7d8;flex-wrap:wrap}
+  .row:last-child{border-bottom:0}
+  .mono{font-family:ui-monospace,Menlo,monospace;font-size:13px}
+  .val{font-weight:700}
+  .btn{border:0;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer;background:var(--ink);color:#fff}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn.done{background:var(--moss)}
+  .note{font-size:14px;color:#5c5648}
+  .warn{background:#fdf3e4;border:1px solid #ecd9b8;border-radius:10px;padding:12px 14px;font-size:14px;margin:12px 0}
+  .ok{color:var(--moss);font-weight:700}
+  .bad{color:#b3261e;font-weight:700}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  th,td{padding:8px 10px;border-bottom:1px solid #eee7d8;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  input[type=checkbox]{transform:scale(1.3)}
+  #msg{min-height:22px;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">Gacha Galaxy · owner tool</div>
+  <h1>Publish remaining certificates to mainnet</h1>
+  <p class="note">This page signs <b>real mainnet transactions</b> with your connected wallet (Trust). It sends nothing on its own — every transaction needs your explicit click and wallet confirmation. Contract:
+    <span class="mono">0x2A585396dd0248A060045b3f557076fB1B4Cb0eb</span> (AppraisalRegistry, chain 4663).</p>
+
+  <div class="warn"><b>What you are re-attesting:</b> the five appraisals below were originally published on 23&nbsp;Sep&nbsp;2026 with zero completed sales in their evidence. Publishing writes these <i>same historical values</i> again and stamps today's date as the appraisal date — the underlying data is not refreshed. Review each value before ticking its box.</div>
+
+  <div class="card">
+    <div class="row"><span><b>Step 1</b> — Grant your own wallet the attester role</span><span id="roleState" class="note">connect wallet to check</span></div>
+    <div class="row"><span class="note">Transaction 1 of 6 · <span class="mono">grantRole(ATTESTER_ROLE, 0xD77C…4Ca5)</span> · needed once, before any publish</span><button class="btn" id="grantBtn" disabled>Sign &amp; send</button></div>
+  </div>
+
+  <div class="card">
+    <div class="kicker">Review the five appraisals</div>
+    <table>
+      <thead><tr><th>Card (PSA 10)</th><th>Cert</th><th>Fair range</th><th>Mid</th><th>LTV</th><th>Score</th><th>Comps</th><th>Reviewed ✓</th><th></th></tr></thead>
+      <tbody id="cards"></tbody>
+    </table>
+    <p class="note">Each publish calls <span class="mono">publish("PSA", certId, fmvLow, fmvPoint, fmvHigh, 5000, confidenceScore, compCount, 3, 4, true)</span> with the values shown. Range and mid are in USD; LTV 50%; confidence band 3; risk tier 4; eligible true — identical to the 23 Sep testnet records.</p>
+  </div>
+
+  <div class="card">
+    <div class="row"><span><b>Step 2</b> — Publish the five certificates</span><span id="pubState" class="note"></span></div>
+    <div id="msg" role="status" aria-live="polite"></div>
+  </div>
+
+  <p class="note">After all six transactions succeed, the demo page shows all six cards live and its "Token #1" copy updates automatically. Verify on <a href="https://robinhoodchain.blockscout.com/address/0x2A585396dd0248A060045b3f557076fB1B4Cb0eb" target="_blank" rel="noopener">Blockscout</a>.</p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+const REG='0x2A585396dd0248A060045b3f557076fB1B4Cb0eb', OWNER='0xD77C34899858088DE6888F36fA46e2d6468F4Ca5',
+  ROLE='0xca77cd8f9856ef5fcd36f6b15bf469fe216c2f9114f60dd031f0a2b97b67aaa9', CHAIN=4663,
+  EXPL='https://robinhoodchain.blockscout.com/tx/';
+const CARDS=[
+ {name:'Pikachu & Zekrom GX SM168',cert:'118973623',low:287520,point:320000,high:352480,score:870,comps:15},
+ {name:'Lugia V 186',cert:'100863346',low:121561,point:133100,high:144639,score:890,comps:14},
+ {name:'Giratina VSTAR GG69',cert:'154790134',low:52403,point:65000,high:77597,score:750,comps:45},
+ {name:'Rayquaza VMAX TG20',cert:'153708045',low:34002,point:41000,high:47998,score:780,comps:29},
+ {name:'Umbreon VMAX TG23',cert:'111992917',low:24902,point:27500,high:30098,score:880,comps:27}];
+const ABI=['function grantRole(bytes32 role,address account)','function hasRole(bytes32 role,address account) view returns(bool)',
+ 'function publish(string grader,string certId,uint64 fmvLow,uint64 fmvPoint,uint64 fmvHigh,uint16 ltvBps,uint16 confidenceScore,uint16 compCount,uint8 confidence,uint8 risk,bool eligible) returns(bytes32 key)'];
+const $=id=>document.getElementById(id);
+let signer=null;
+
+const usd=c=>'$'+(c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function msg(t,ok){$('msg').innerHTML=ok?'<span class="ok">'+t+'</span>':t;}
+
+const tb=$('cards');
+CARDS.forEach((c,i)=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML='<td>'+c.name+'</td><td class="mono">'+c.cert+'</td><td>'+usd(c.low)+' – '+usd(c.high)+'</td><td class="val">'+usd(c.point)+'</td><td>50%</td><td>'+c.score+'</td><td>'+c.comps+'</td>'+
+    '<td><input type="checkbox" data-i="'+i+'"></td><td><button class="btn" data-pub="'+i+'" disabled>Publish</button></td>';
+  tb.appendChild(tr);
+});
+document.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>{
+  document.querySelector('button[data-pub="'+cb.dataset.i+'"]').disabled=!cb.checked||!signer;
+}));
+
+async function connect(){
+  try{
+    const p=window.ethereum;if(!p)throw Error('No injected wallet. Open this page in a wallet browser (Trust).');
+    const accounts=await p.request({method:'eth_requestAccounts'});
+    if(accounts[0]?.toLowerCase()!==OWNER.toLowerCase())throw Error('Connected account is not the owner wallet '+OWNER.slice(0,6)+'…'+OWNER.slice(-4)+'.');
+    const prov=new ethers.BrowserProvider(p);
+    const net=await prov.getNetwork();if(Number(net.chainId)!==CHAIN)throw Error('Wrong network. Switch to Robinhood Chain mainnet (4663).');
+    signer=await prov.getSigner();
+    const reg=new ethers.Contract(REG,ABI,signer);
+    const has=await reg.hasRole(ROLE,OWNER);
+    $('roleState').innerHTML=has?'<span class="ok">Already attester — skip transaction 1</span>':'Not attester yet — transaction 1 required';
+    $('grantBtn').disabled=has;
+    document.querySelectorAll('button[data-pub]').forEach(b=>{const cb=document.querySelector('input[data-i="'+b.dataset.pub+'"]');b.disabled=!cb.checked||!has;});
+    msg(has?'Wallet connected. Attester role already granted — you can publish now.':'Wallet connected. Sign transaction 1 first.');
+  }catch(e){msg('<span class="bad">'+(e.message||e)+'</span>');}
+}
+window.addEventListener('load',()=>{connect();});
+$('grantBtn').addEventListener('click',async()=>{
+  const reg=new ethers.Contract(REG,ABI,signer);
+  try{$('grantBtn').disabled=true;msg('Confirm transaction 1 in your wallet…');
+    const tx=await reg.grantRole(ROLE,OWNER);msg('Transaction sent — waiting for confirmation… '+EXPL+tx.hash);
+    await tx.wait();$('roleState').innerHTML='<span class="ok">Attester granted</span>';
+    document.querySelectorAll('button[data-pub]').forEach(b=>{const cb=document.querySelector('input[data-i="'+b.dataset.pub+'"]');b.disabled=!cb.checked;});
+    msg('Attester role granted. Publish each card once you have ticked its review box.');}
+  catch(e){msg('<span class="bad">'+(e.message||e)+'</span>');$('grantBtn').disabled=false;}
+});
+document.querySelectorAll('button[data-pub]').forEach(b=>b.addEventListener('click',async()=>{
+  const c=CARDS[+b.dataset.pub],reg=new ethers.Contract(REG,ABI,signer);
+  try{b.disabled=true;msg('Confirm publish of PSA '+c.cert+' ('+c.name+') in your wallet…');
+    const tx=await reg.publish('PSA',c.cert,c.low,c.point,c.high,5000,c.score,c.comps,3,4,true);
+    msg('Transaction sent — waiting for confirmation… '+EXPL+tx.hash);
+    await tx.wait();b.textContent='Published';b.classList.add('done');
+    const done=document.querySelectorAll('button[data-pub].done').length;
+    $('pubState').textContent=done+' of 5 published';
+    msg(done===5?'<span class="ok">All five published. All six certificates are now live on mainnet.</span>':'Published PSA '+c.cert+'. '+(5-done)+' left.');}
+  catch(e){msg('<span class="bad">'+(e.message||e)+'</span>');b.disabled=false;}
+}));
+</script>
+</body>
+</html>
