@@ -666,7 +666,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     return {contract,method,args,to:contract.target,data:contract.interface.encodeFunctionData(method,args)};
   }
   // Durable safety journal contains only public transaction context, never wallet credentials.
-  const BUILD='tx-recovery-20261107.3';
+  const BUILD='tx-recovery-20261107.4';
   const isHash=x=>typeof x==='string'&&/^0x[\da-f]{64}$/i.test(x);
   function submissionEvidence(error,p){const hashes=new Set(),seen=new Set();let rejected=false,ambiguous=false,broadcast=false,definite=false;
     function visit(e,depth=0){if(depth>10||e==null)return;if(typeof e==='string'){if(/already known|known transaction|timeout|timed out|nonce|network|disconnect|transport/i.test(e)){ambiguous=true;broadcast=true;}if(/insufficient[ _-]*funds|insufficient[ _-]*gas|out of gas|intrinsic gas too low|execution reverted|\brevert(?:ed)?\b/i.test(e))definite=true;for(const h of e.match(/0x[\da-f]{64}\b/ig)||[])hashes.add(h.toLowerCase());if(e.trim().startsWith('{'))try{visit(JSON.parse(e),depth+1);}catch{}return;}if(typeof e!=='object'||seen.has(e))return;seen.add(e);
@@ -675,7 +675,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
       if(['TIMEOUT','NETWORK_ERROR','NONCE_EXPIRED','REPLACEMENT_UNDERPRICED'].includes(e.code))broadcast=true;
       if(['INSUFFICIENT_FUNDS','CALL_EXCEPTION'].includes(e.code))definite=true;
       for(const k of ['hash','transactionHash','txHash'])if(isHash(e[k]))hashes.add(e[k].toLowerCase());
-      for(const k of ['signedTransaction','rawTransaction'])if(typeof e[k]==='string')try{const tx=ethers.Transaction.from(e[k]);if(tx.signature&&same(tx.from,p.from)&&same(tx.to,p.to)&&same(tx.data,p.data)&&BigInt(tx.nonce)===BigInt(p.nonce)&&tx.chainId===4663n&&tx.value===0n)hashes.add(ethers.keccak256(e[k]).toLowerCase());}catch{}
+      for(const k of ['signedTransaction','rawTransaction'])if(typeof e[k]==='string')try{const tx=ethers.Transaction.from(e[k]);if(tx.signature&&same(tx.from,p.from)&&same(tx.to,p.to)&&same(tx.data,p.data)&&tx.chainId===4663n&&tx.value===0n)hashes.add(ethers.keccak256(e[k]).toLowerCase());}catch{}
       for(const k of ['error','info','data','cause','result','body','message','shortMessage'])visit(e[k],depth+1);
     }visit(error);return{hash:hashes.size===1?[...hashes][0]:null,rejected:rejected&&!ambiguous&&hashes.size===0,failed:definite&&!broadcast&&hashes.size===0};}
   const journalKey=from=>'gg:pending:v2:'+C.chainId+':'+A.vault.toLowerCase()+':1:'+from.toLowerCase();
@@ -701,8 +701,20 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
       cache.set(key,block);return block;
     }));const failed=results.find(r=>r.status==='rejected');if(failed)throw failed.reason;return results.map(r=>r.value);}
     function match(block){
+      // Nonce-free identity. The wallet now assigns the nonce, so the page cannot
+      // pin or verify one; a nonce is never used to confirm or veto a match.
+      // Identity is the exact from/to/calldata/value tuple plus chain and block
+      // bindings, and any hash the wallet or provider already returned must agree.
+      // A transaction that differs in calldata is never accepted.
+      const num=v=>typeof v==='string'&&/^0x[\da-f]+$/i.test(v)?BigInt(v):null;
       for(const tx of block.transactions){
-        if(same(tx.from,p.from)&&same(tx.to,p.to)&&same(tx.input,p.data)&&BigInt(tx.value)===0n&&BigInt(tx.chainId)===BigInt(C.chainId)&&BigInt(tx.nonce)===BigInt(p.nonce)&&same(tx.blockNumber,block.number)&&same(tx.blockHash,block.hash)&&isHash(tx.hash)){p.hash=tx.hash;savePending(p);return true;}
+        if(!tx||typeof tx!=='object'||!isHash(tx.hash)||typeof tx.input!=='string')continue;
+        const value=num(tx.value),chain=num(tx.chainId);
+        if(value!==0n||chain===null||chain!==BigInt(C.chainId))continue;
+        if(!same(tx.from,p.from)||!same(tx.to,p.to)||!same(tx.input,p.data))continue;
+        if(!same(tx.blockNumber,block.number)||!same(tx.blockHash,block.hash))continue;
+        if(p.hash&&!same(tx.hash,p.hash))continue;
+        p.hash=tx.hash;savePending(p);return true;
       }
       return false;
     }
@@ -732,7 +744,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
       // Persist BEFORE sending. If storage is unavailable, fail closed without opening a transaction.
       savePending(submission);pending=submission;receiptFallback=false;clearPosition('Awaiting wallet confirmation.');message('Awaiting wallet: confirm ONE '+action+' transaction. Read-only recovery is active; do not click again.');startPolling();
       // Use the EIP-1193 result directly: ethers' send wrapper may wait on further provider reads.
-      let hash;try{hash=await c.wallet.request({method:'eth_sendTransaction',params:[{from:submission.from,to:p.to,data:p.data,value:'0x0',chainId:CHAIN_HEX,nonce:submission.nonce}]});}catch(e){if(pending!==submission)return;const evidence=submissionEvidence(e,submission);if((evidence.rejected||evidence.failed)&&!submission.hash){removePending(submission);pending=null;stopPolling();throw evidence.failed?Error('Transaction not submitted: '+errorText(e)):e;}if(evidence.hash){submission.hash=evidence.hash;savePending(submission);}throw Error(CHECKING);}
+      let hash;try{hash=await c.wallet.request({method:'eth_sendTransaction',params:[{from:submission.from,to:p.to,data:p.data,value:'0x0'}]});}catch(e){if(pending!==submission)return;const evidence=submissionEvidence(e,submission);if((evidence.rejected||evidence.failed)&&!submission.hash){removePending(submission);pending=null;stopPolling();throw evidence.failed?Error('Transaction not submitted: '+errorText(e)):e;}if(evidence.hash){submission.hash=evidence.hash;savePending(submission);}throw Error(CHECKING);}
       if(pending!==submission)return; // A late wallet answer must not resurrect an already reconciled operation.
       if(!/^0x[\da-f]{64}$/i.test(hash))throw Error(CHECKING);submission.hash=hash;savePending(submission);if(!valid(c)||suspended)return;clearPosition(CHECKING);message(CHECKING);
     }catch(e){if(activeAction===flight&&valid(c)){if(pending){receiptFallback=true;clearPosition(CHECKING);message(CHECKING);}else message(errorText(e),'error');}}finally{if(activeAction===flight){activeAction=null;busy=false;if(pos)renderPosition();else lock();renderWallet();if(pending&&!suspended)startPolling();else if(valid(c)&&current)await refreshPosition();}}
@@ -741,7 +753,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     try{if(BigInt(await rpc('eth_chainId'))!==BigInt(C.chainId))throw Error('Recovery RPC chain mismatch');if(!p.hash)await findSubmission(p,true);if(pending!==p||suspended)return;if(!p.hash){message(CHECKING);return;}const r=await rpc('eth_getTransactionReceipt',[p.hash]);if(pending!==p||suspended)return;if(!r){message(CHECKING);return;}
       const [tx,b,h]=await Promise.all([rpc('eth_getTransactionByHash',[p.hash]),rpc('eth_getBlockByNumber',[r.blockNumber,false]),rpc('eth_blockNumber')]);
       if(pending!==p||suspended)return;
-      if(!same(r.transactionHash,p.hash)||!same(tx?.hash,p.hash)||!same(b?.number,r.blockNumber)||!same(r.from,p.from)||!same(r.to,p.to)||!same(tx?.from,p.from)||!same(tx?.to,p.to)||!same(tx?.input,p.data)||BigInt(tx.value)!==0n||BigInt(tx.chainId)!==4663n||BigInt(tx.nonce)!==BigInt(p.nonce)||BigInt(r.blockNumber)<=BigInt(p.block)||!same(tx.blockNumber,r.blockNumber)||!same(tx.blockHash,r.blockHash)||!same(b?.hash,r.blockHash)||!['0x0','0x1'].includes(r.status))throw Error('Receipt verification failed; pending lock retained');
+      if(!same(r.transactionHash,p.hash)||!same(tx?.hash,p.hash)||!same(b?.number,r.blockNumber)||!same(r.from,p.from)||!same(r.to,p.to)||!same(tx?.from,p.from)||!same(tx?.to,p.to)||!same(tx?.input,p.data)||BigInt(tx.value)!==0n||BigInt(tx.chainId)!==4663n||BigInt(r.blockNumber)<=BigInt(p.block)||!same(tx.blockNumber,r.blockNumber)||!same(tx.blockHash,r.blockHash)||!same(b?.hash,r.blockHash)||!['0x0','0x1'].includes(r.status))throw Error('Receipt verification failed; pending lock retained');
       if(BigInt(h)<BigInt(r.blockNumber)+1n){message('Confirming · 1 of 2 confirmations. Checking automatically. '+EXPLORER+'/tx/'+p.hash);return;}
       // Receipt resolves only this immutable submission, independent of wallet/session changes.
       removePending(p);pending=null;activeAction=null;busy=false;receiptFallback=false;stopPolling();
