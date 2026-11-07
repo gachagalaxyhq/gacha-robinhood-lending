@@ -509,10 +509,11 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
   let receiptBusy=false, pollTimer=null, pollGeneration=0, receiptFallback=false, networkNeeded=false, suspended=false;
   const activeReads=new Set();
   function stopPolling(){++pollGeneration;clearTimeout(pollTimer);pollTimer=null;}
-  function startPolling(){stopPolling();if(!pending||suspended)return;const generation=pollGeneration,p=pending;let delay=1500,attempts=0;
+  function startPolling(){stopPolling();if(!pending||suspended)return;const generation=pollGeneration,p=pending;let delay=1500,attempts=0,failures=0;
     const tick=async()=>{pollTimer=null;if(generation!==pollGeneration||pending!==p||suspended)return;
-      await receipt();if(generation!==pollGeneration||pending!==p||suspended)return;
-      if(++attempts>=6){receiptFallback=true;lock();}delay=Math.min(delay*2,15000);pollTimer=setTimeout(tick,delay);
+      const healthy=await receipt();if(generation!==pollGeneration||pending!==p||suspended)return;
+      failures=healthy===false?Math.min(failures+1,4):0;
+      if(++attempts>=6){receiptFallback=true;lock();}delay=failures?Math.min(4000*2**failures,60000):p.hash?1500:4000;pollTimer=setTimeout(tick,delay);
     };pollTimer=setTimeout(tick,delay);
   }
   const ctx=()=>({epoch,lookupSeq,current,account,wallet});
@@ -665,7 +666,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     return {contract,method,args,to:contract.target,data:contract.interface.encodeFunctionData(method,args)};
   }
   // Durable safety journal contains only public transaction context, never wallet credentials.
-  const BUILD='tx-recovery-20261107.2';
+  const BUILD='tx-recovery-20261107.3';
   const isHash=x=>typeof x==='string'&&/^0x[\da-f]{64}$/i.test(x);
   function submissionEvidence(error,p){const hashes=new Set(),seen=new Set();let rejected=false,ambiguous=false,broadcast=false,definite=false;
     function visit(e,depth=0){if(depth>10||e==null)return;if(typeof e==='string'){if(/already known|known transaction|timeout|timed out|nonce|network|disconnect|transport/i.test(e)){ambiguous=true;broadcast=true;}if(/insufficient[ _-]*funds|insufficient[ _-]*gas|out of gas|intrinsic gas too low|execution reverted|\brevert(?:ed)?\b/i.test(e))definite=true;for(const h of e.match(/0x[\da-f]{64}\b/ig)||[])hashes.add(h.toLowerCase());if(e.trim().startsWith('{'))try{visit(JSON.parse(e),depth+1);}catch{}return;}if(typeof e!=='object'||seen.has(e))return;seen.add(e);
@@ -685,23 +686,38 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
       if(p.scan!=null&&(!/^0x[\da-f]+$/i.test(p.scan)||BigInt(p.scan)<BigInt(p.block)))throw Error('Invalid recovery cursor');
       if(!p.scan||!isHash(p.scanHash)){p.scan=p.block;p.scanHash=p.blockHash;}pending=p;receiptFallback=true;
     }catch{throw Error('Recovery journal unreadable. Actions disabled; inspect wallet history before clearing browser storage.');}}
-  async function findSubmission(p){
+  async function findSubmission(p,chainChecked=false){
     if(!p.block)throw Error('Submission baseline unavailable; pending lock retained');
-    if(BigInt(await rpc('eth_chainId'))!==BigInt(C.chainId))throw Error('Recovery RPC chain mismatch');
+    if(!chainChecked&&BigInt(await rpc('eth_chainId'))!==BigInt(C.chainId))throw Error('Recovery RPC chain mismatch');
     const baseline=await rpc('eth_getBlockByNumber',[p.block,false]);if(!same(baseline?.hash,p.blockHash))throw Error('Submission baseline changed; pending lock retained');
-    if(p.scanHash&&p.scan!==p.block){const cursor=await rpc('eth_getBlockByNumber',[p.scan,false]);if(!same(cursor?.hash,p.scanHash)){p.scan=p.block;p.scanHash=p.blockHash;savePending(p);}}
-    const tip=BigInt(await rpc('eth_blockNumber')),from=BigInt(p.scan||p.block)+1n;if(from>tip)return;
-    // Bounded full-block scan also finds reverted transactions (which emit no logs).
-    // Match intent + sender + nonce, never debt/pool postconditions. Never rebroadcast.
-    const end=from+15n<tip?from+15n:tip,hex=n=>'0x'+n.toString(16);
-    for(let n=from;n<=end;n++){
-      const block=await rpc('eth_getBlockByNumber',[hex(n),true]);
-      if(!block||block.number!==hex(n)||!isHash(block.hash)||!Array.isArray(block.transactions))throw Error('Incomplete recovery block; pending lock retained');
+    const tip=BigInt(await rpc('eth_blockNumber')),base=BigInt(p.block),hex=n=>'0x'+n.toString(16),cache=new Map();
+    // Existing transport is single-request, not JSON-RPC batch. Drain each group
+    // before proceeding (including failures): at most four reads in flight.
+    async function readGroup(numbers){const results=await Promise.allSettled(numbers.map(async n=>{
+      const key=hex(n);if(cache.has(key))return cache.get(key);
+      const block=await rpc('eth_getBlockByNumber',[key,true]);
+      if(!block||block.number!==key||!isHash(block.hash)||!Array.isArray(block.transactions))throw Error('Incomplete recovery block; pending lock retained');
+      if(block.transactions.some(tx=>typeof tx!=='object'||!tx))throw Error('Recovery RPC omitted full transactions; pending lock retained');
+      cache.set(key,block);return block;
+    }));const failed=results.find(r=>r.status==='rejected');if(failed)throw failed.reason;return results.map(r=>r.value);}
+    function match(block){
       for(const tx of block.transactions){
-        if(typeof tx!=='object'||!tx)throw Error('Recovery RPC omitted full transactions; pending lock retained');
-        if(same(tx.from,p.from)&&same(tx.to,p.to)&&same(tx.input,p.data)&&BigInt(tx.value)===0n&&BigInt(tx.chainId)===BigInt(C.chainId)&&BigInt(tx.nonce)===BigInt(p.nonce)&&same(tx.blockNumber,block.number)&&same(tx.blockHash,block.hash)&&isHash(tx.hash)){p.hash=tx.hash;savePending(p);return;}
+        if(same(tx.from,p.from)&&same(tx.to,p.to)&&same(tx.input,p.data)&&BigInt(tx.value)===0n&&BigInt(tx.chainId)===BigInt(C.chainId)&&BigInt(tx.nonce)===BigInt(p.nonce)&&same(tx.blockNumber,block.number)&&same(tx.blockHash,block.hash)&&isHash(tx.hash)){p.hash=tx.hash;savePending(p);return true;}
       }
-      p.scan=hex(n);p.scanHash=block.hash;savePending(p);
+      return false;
+    }
+    // Always inspect the newest 32 blocks first, regardless of signature delay.
+    // A moving head can outrun this window; the independent journal cursor below
+    // covers every older gap. Recent reads NEVER advance that cursor.
+    const recent=[];for(let n=tip;n>base&&recent.length<32;n--)recent.push(n);
+    for(let i=0;i<recent.length;i+=4){for(const block of await readGroup(recent.slice(i,i+4)))if(match(block))return;}
+    if(p.scanHash&&p.scan!==p.block){const cursor=await rpc('eth_getBlockByNumber',[p.scan,false]);if(!same(cursor?.hash,p.scanHash)){p.scan=p.block;p.scanHash=p.blockHash;savePending(p);}}
+    // At most 16 historical blocks, with four-block overlap on each successful
+    // check. Canonical checkpoint mismatch rewinds to baseline; never skip gaps.
+    const scan=BigInt(p.scan||p.block),from=scan-3n>base?scan-3n:base+1n,history=[];
+    for(let n=from;n<=tip&&history.length<16;n++)history.push(n);
+    for(let i=0;i<history.length;i+=4){const group=history.slice(i,i+4),blocks=await readGroup(group);
+      for(let j=0;j<blocks.length;j++){if(match(blocks[j]))return;if(group[j]>BigInt(p.scan||p.block)){p.scan=hex(group[j]);p.scanHash=blocks[j].hash;savePending(p);}}
     }
   }
   async function act(action){if(busy||connecting||pending||receiptBusy||suspended)return;const flight={};activeAction=flight;busy=true;lock();const c=ctx(),text=$('amt').value;let submission=null;
@@ -722,7 +738,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
     }catch(e){if(activeAction===flight&&valid(c)){if(pending){receiptFallback=true;clearPosition(CHECKING);message(CHECKING);}else message(errorText(e),'error');}}finally{if(activeAction===flight){activeAction=null;busy=false;if(pos)renderPosition();else lock();renderWallet();if(pending&&!suspended)startPolling();else if(valid(c)&&current)await refreshPosition();}}
   }
   async function receipt(){if(connecting||receiptBusy||!pending||suspended)return;receiptBusy=true;lock();const p=pending;
-    try{if(BigInt(await rpc('eth_chainId'))!==BigInt(C.chainId))throw Error('Recovery RPC chain mismatch');if(!p.hash)await findSubmission(p);if(pending!==p||suspended)return;if(!p.hash){message(CHECKING);return;}const r=await rpc('eth_getTransactionReceipt',[p.hash]);if(pending!==p||suspended)return;if(!r){message(CHECKING);return;}
+    try{if(BigInt(await rpc('eth_chainId'))!==BigInt(C.chainId))throw Error('Recovery RPC chain mismatch');if(!p.hash)await findSubmission(p,true);if(pending!==p||suspended)return;if(!p.hash){message(CHECKING);return;}const r=await rpc('eth_getTransactionReceipt',[p.hash]);if(pending!==p||suspended)return;if(!r){message(CHECKING);return;}
       const [tx,b,h]=await Promise.all([rpc('eth_getTransactionByHash',[p.hash]),rpc('eth_getBlockByNumber',[r.blockNumber,false]),rpc('eth_blockNumber')]);
       if(pending!==p||suspended)return;
       if(!same(r.transactionHash,p.hash)||!same(tx?.hash,p.hash)||!same(b?.number,r.blockNumber)||!same(r.from,p.from)||!same(r.to,p.to)||!same(tx?.from,p.from)||!same(tx?.to,p.to)||!same(tx?.input,p.data)||BigInt(tx.value)!==0n||BigInt(tx.chainId)!==4663n||BigInt(tx.nonce)!==BigInt(p.nonce)||BigInt(r.blockNumber)<=BigInt(p.block)||!same(tx.blockNumber,r.blockNumber)||!same(tx.blockHash,r.blockHash)||!same(b?.hash,r.blockHash)||!['0x0','0x1'].includes(r.status))throw Error('Receipt verification failed; pending lock retained');
@@ -735,7 +751,7 @@ footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);p
       // A receipt is final independently of a follow-up read. Never leave its transient
       // "Refreshing" message behind, or claim a failed read is a failed withdrawal.
       if(valid(c)&&!pending)message(outcome+(refreshed&&pos?'Live status updated. '+(pos.inVault?'Token #1 is in vault custody. ':'Token #1 is back outside the vault; no active vault position. ')+'Debt: '+usd6(pos.debt)+'. ':'Live status unavailable. Actions disabled; use Refresh live status to retry. ')+(!account?'Reconnect explicitly; wallet actions remain disabled.':'Next action requires a new click.'),outcomeState);
-    }catch(e){if(pending===p){receiptFallback=true;message(CHECKING);}}finally{receiptBusy=false;if(pos)renderPosition();else lock();renderWallet();}
+    }catch(e){if(pending===p){receiptFallback=true;message(CHECKING);}return false;}finally{receiptBusy=false;if(pos)renderPosition();else lock();renderWallet();}
   }
   ORDER.forEach(cert=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=META[cert].chip+' · PSA 10';b.addEventListener('click',()=>{if(busy||pending)return;$('certInput').value=cert;lookup(cert);});$('chips').appendChild(b);});
   $('lookupForm').addEventListener('submit',e=>{e.preventDefault();if(!busy&&!pending)lookup($('certInput').value.replace(/\D/g,''));});
@@ -764,6 +780,7 @@ document.querySelectorAll('.rowlink img').forEach(img=>{img.loading='eager';});
   const upd = () => { const v = c.textContent.trim(); a.href = ok.includes(v) ? 'cert/' + v + '/' : 'cert/'; };
   new MutationObserver(upd).observe(c, { childList: true, characterData: true, subtree: true }); upd(); })();
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
