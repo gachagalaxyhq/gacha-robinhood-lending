@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gacha Galaxy: Verified Value for graded cards on Robinhood Chain</title>
+<meta name="description" content="Any graded card, from any platform, gets a private appraisal, an onchain price certificate anyone can check, and can be borrowed against on Robinhood Chain. Mainnet pilot. Real assets and gas at risk.">
+<meta property="og:title" content="Gacha Galaxy: Verified Value for graded cards">
+<meta property="og:description" content="Robinhood made stocks usable onchain. We do it for collectibles.">
+<meta property="og:image" content="https://gachagalaxyhq.github.io/gacha-robinhood-lending/img/109308847.jpg">
+<link rel="icon" href="img/gg-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--canvas:#F7F5FB;--surface:#FFFFFF;--ink:#1B1424;--mute:#6E6479;--line:#E6E0EF;--purple:#7B3FE4;--deep:#532B7D;--glow:#A74CFF;--lilac:#F0E9FC;--green:#0E8A5F;--greenbg:#E3F4EC;--amber:#A86200;--amberbg:#FBF0DF;--red:#C2334D;--redbg:#FBE7EB;--shadow:0 24px 60px -32px rgba(83,43,125,.38)}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}section{scroll-margin-top:90px}
+body{background:var(--canvas);color:var(--ink);font-family:'Geist',system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--purple)}
+.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.container{max-width:1160px;margin:0 auto;padding:0 32px}
+.kicker{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--purple)}
+section{padding:72px 0 0}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px;flex-wrap:wrap}
+.sec-head h2{font-size:32px;line-height:1.1;letter-spacing:-.03em;margin:8px 0 0;font-weight:700;max-width:22ch}
+.sec-head p{color:var(--mute);margin:0;max-width:46ch}
+/* header */
+.topbar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar-inner{display:flex;align-items:center;justify-content:space-between;height:84px;gap:16px}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink)}
+.brand .logo{width:60px;height:60px;border-radius:50%;display:block;flex:none;box-shadow:0 0 0 1px var(--line),0 8px 24px -10px rgba(123,63,228,.55)}
+.brand .wm{white-space:nowrap;font-weight:700;font-size:20px;letter-spacing:-.02em;line-height:1.1}
+.brand .wm small{display:block;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--purple);margin-top:3px}
+.topbar-right{display:flex;align-items:center;gap:18px}
+.nav{display:flex;gap:22px;font-size:14px}.nav a{color:var(--mute);text-decoration:none}.nav a:hover{color:var(--ink)}
+.live-pill{display:inline-flex;align-items:center;gap:8px;font:500 11px 'JetBrains Mono',monospace;color:var(--mute);white-space:nowrap}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--greenbg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:99px;font:600 13.5px 'Geist',sans-serif;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none;transition:border-color .15s,background .15s,transform .05s;white-space:nowrap}
+.btn:hover{border-color:var(--purple)}.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--purple);border-color:var(--purple);color:#fff}.btn-primary:hover{background:var(--deep);border-color:var(--deep)}
+.btn-outline{background:var(--surface)}
+.btn-sm{height:34px;padding:0 14px;font-size:12.5px}
+/* hero */
+.hero{padding:64px 0 8px;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.hero h1{font-size:54px;line-height:1.03;letter-spacing:-.04em;margin:14px 0 0;font-weight:700}
+.hero h1 span{color:var(--purple)}
+.lede{color:var(--mute);font-size:17px;margin:18px 0 0;max-width:50ch}
+.hero-cta{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+.hero-cta .btn{height:46px;padding:0 22px;font-size:14.5px}
+.honest-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.hchip{font:500 11.5px 'JetBrains Mono',monospace;padding:5px 10px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--mute)}
+.hchip b{color:var(--deep);font-weight:600}
+.hero-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.hc-strip{display:flex;justify-content:space-between;padding:11px 20px;background:var(--greenbg);color:var(--green);font-size:13px;font-weight:600}
+.hc-strip .mono{font-size:11.5px;font-weight:500}
+.hc-body{display:grid;grid-template-columns:118px 1fr;gap:20px;padding:20px}
+.hc-body img{width:100%;border-radius:8px;display:block}
+.hc-val{font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-top:8px}
+.hc-name{font-weight:600;margin-top:6px;line-height:1.3}
+.hc-range{font:500 12px 'JetBrains Mono',monospace;color:var(--mute);margin-top:6px}
+.hc-foot{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.hc-foot div{padding:12px 20px;font:500 10px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);border-right:1px solid var(--line)}
+.hc-foot div:last-child{border:0}.hc-foot b{display:block;font:700 18px 'Geist',sans-serif;letter-spacing:-.01em;text-transform:none;color:var(--ink);margin-top:3px}
+/* flow */
+.flow{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.flow-step{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 18px 20px}
+.fs-top{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.fs-n{font-size:12px;font-weight:600;color:var(--purple)}
+.flow-step h3{font-size:18px;letter-spacing:-.02em;margin:14px 0 6px}
+.flow-step p{font-size:13.5px;color:var(--mute);margin:0;line-height:1.5}
+.fs-arrow{position:absolute;right:-17px;top:50%;transform:translateY(-50%);z-index:2;width:22px;height:22px;border-radius:50%;background:var(--purple);color:#fff;display:grid;place-items:center}
+.fs-arrow svg{width:12px;height:12px}
+.st{font:600 10px 'JetBrains Mono',monospace;letter-spacing:.04em;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.st.ok{background:var(--greenbg);color:var(--green)}.st.warn{background:var(--amberbg);color:var(--amber)}
+/* quote */
+.quote{display:grid;grid-template-columns:1.25fr 1fr;gap:0;background:var(--deep);color:#fff;border-radius:24px;overflow:hidden}
+.q-main{padding:44px 44px 38px}
+.q-main .kicker{color:#CDB4F7}
+.q-main blockquote{margin:18px 0 0;font-size:25px;line-height:1.35;letter-spacing:-.02em;font-weight:500}
+.q-main blockquote .gap{color:#CDB4F7}
+.q-by{margin-top:22px;font-size:14px;color:#E4D8F8}.q-by b{color:#fff}
+.q-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.q-links a{font:500 12px 'JetBrains Mono',monospace;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:7px 12px}
+.q-links a:hover{background:rgba(255,255,255,.1)}
+.q-note{font-size:12px;color:#CDB4F7;margin-top:16px}
+.q-answer{background:var(--lilac);color:var(--ink);padding:44px 36px}
+.q-answer h3{font-size:20px;letter-spacing:-.02em;margin:10px 0 14px}
+.q-answer ul{margin:0;padding:0;list-style:none}
+.q-answer li{padding:10px 0 10px 28px;border-top:1px solid rgba(83,43,125,.15);position:relative;font-size:14.5px}
+.q-answer li::before{content:"✓";position:absolute;left:0;top:10px;width:18px;height:18px;border-radius:50%;background:var(--purple);color:#fff;font-size:10px;display:grid;place-items:center}
+.q-answer .fine{font-size:12.5px;color:var(--mute);margin-top:12px}
+/* lookup + certificate */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px}
+.lookup{padding:22px}
+.lookup-row{display:flex;gap:10px}
+.input-wrap{flex:1;display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:var(--canvas);overflow:hidden}
+.input-wrap:focus-within{border-color:var(--purple);box-shadow:0 0 0 4px var(--lilac)}
+.prefix{padding:0 0 0 16px;font:600 13px 'JetBrains Mono',monospace;color:var(--mute)}
+.input-wrap input{flex:1;border:0;background:transparent;padding:14px 12px;font:500 15px 'JetBrains Mono',monospace;color:var(--ink);outline:0;min-width:0}
+.lookup-btn{height:auto;border-radius:12px;background:var(--purple);color:#fff;border-color:var(--purple);padding:0 24px}
+.chips-label{font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:18px 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 12px;font:500 13px 'Geist',sans-serif;color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--purple)}
+.chip .grade{font:600 10px 'JetBrains Mono',monospace;color:var(--mute)}
+.chip.is-selected{background:var(--lilac);border-color:var(--purple);color:var(--deep)}
+.notice{margin-top:14px;padding:12px 16px;border-radius:12px;font-size:13.5px;background:var(--canvas);border:1px solid var(--line)}
+.notice.err{background:var(--redbg);border-color:transparent;color:var(--red)}
+.notice.ok{background:var(--greenbg);border-color:transparent;color:var(--green)}
+.notice a{color:inherit;text-decoration:underline}
+.cert{margin-top:16px;overflow:hidden;box-shadow:var(--shadow);transition:opacity .2s}
+.is-loading{opacity:.5}
+.cert-strip{display:flex;justify-content:space-between;gap:12px;padding:11px 24px;background:var(--lilac);font:500 11.5px 'JetBrains Mono',monospace;color:var(--deep);flex-wrap:wrap}
+.cert-inner{display:grid;grid-template-columns:200px 1fr;gap:28px;padding:24px}
+.slab{position:relative;border-radius:10px;background:var(--canvas);min-height:260px;display:grid;place-items:center;overflow:hidden}
+.slab img{width:100%;display:block}
+.slab-label{font:500 11px 'JetBrains Mono',monospace;color:var(--mute);text-align:center}.slab-label b{display:block}
+.corner{display:none}
+.slab-caption{display:flex;justify-content:space-between;font:500 10.5px 'JetBrains Mono',monospace;color:var(--mute);margin-top:8px}
+.cert-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.cert-name{font-size:24px;letter-spacing:-.025em;margin:0;line-height:1.2}
+.cert-subline{font-size:12px;color:var(--mute);margin-top:6px}.cert-subline .dot{color:var(--line)}
+.badges{display:flex;gap:8px;align-items:center;flex:none}
+.chip-real{font:600 10.5px 'JetBrains Mono',monospace;padding:4px 10px;border-radius:99px;background:var(--greenbg);color:var(--green)}
+.score{font-size:13px;color:var(--mute);border:1px solid var(--line);border-radius:99px;padding:3px 10px}.score b{color:var(--ink);font-size:15px}
+.price-block{margin-top:18px}
+.price-label{font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--purple)}
+.price-big{font-size:52px;font-weight:700;letter-spacing:-.045em;line-height:1;margin-top:8px}.price-big .cur{font-size:30px;vertical-align:10px;margin-right:2px;color:var(--mute)}
+.band{display:flex;align-items:center;gap:12px;margin-top:14px;max-width:460px}
+.band .low,.band .high{font-size:12px;color:var(--mute)}
+.rail{position:relative;flex:1;height:8px;border-radius:99px;background:var(--lilac)}
+.rail .fill{position:absolute;inset:0;border-radius:99px;background:linear-gradient(90deg,var(--lilac),var(--glow),var(--lilac))}
+.rail .tick{display:none}
+.rail .mid{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:var(--deep);border:3px solid #fff;box-shadow:0 0 0 1px var(--line);transform:translate(-50%,-50%)}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+.metric{border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.m-label{font:500 10px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.m-value{font-size:19px;font-weight:700;margin-top:3px}
+.cert-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:var(--mute)}
+.cert-foot a{font-weight:600;text-decoration:none}
+.cert-links{display:flex;gap:16px;flex-wrap:wrap}
+.history{margin-top:8px;font:500 11.5px 'JetBrains Mono',monospace;color:var(--mute)}.history a{color:var(--mute);margin-right:10px}
+/* table */
+.tbl-wrap{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font:600 10px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);background:#FBFAFD}
+td{padding:10px 16px;border-bottom:1px solid var(--line);vertical-align:middle}tr:last-child td{border:0}
+tr:hover td{background:#FCFBFE}
+th.r,td.r{text-align:right}td.m{font-family:'JetBrains Mono',monospace;font-size:13px}
+.rowlink{display:flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none}
+.rowlink img{width:34px;aspect-ratio:505/840;object-fit:contain;flex:none;border-radius:3px}
+.rowlink small{display:block;font-size:12px;color:var(--mute)}
+.open{font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap}
+/* demo */
+.demo{background:var(--surface);border:1px dashed #CDBFE3;border-radius:24px;padding:28px}
+.demo-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.demo-head h2{font-size:24px;letter-spacing:-.025em;margin:8px 0 4px}
+.demo-head p{margin:0;color:var(--mute);font-size:14px;max-width:60ch}
+.demo-head h2{max-width:34ch}
+.model{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 18px 14px;margin-bottom:16px}
+.m-row{display:grid;grid-template-columns:80px minmax(0,1fr) minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.m-row span:first-child{font:500 11px 'JetBrains Mono',monospace;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.m-row span:last-child{color:var(--deep);font-weight:600}
+.m-head span{font-weight:600;font-size:12.5px}.m-head span:nth-child(2){color:var(--mute)}
+.m-note{margin:12px 0 0;font-size:12.5px;color:var(--mute)}.m-note a{color:var(--purple)}
+@media (max-width:640px){.m-row{grid-template-columns:58px minmax(0,1fr) minmax(0,1fr);gap:8px;font-size:12.5px}.model{padding:4px 12px 12px}}
+.borrow{border-radius:16px;overflow:hidden}
+.step{display:grid;grid-template-columns:48px 1fr auto;gap:16px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
+.step-num .n{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--lilac);color:var(--deep);font:600 12px 'JetBrains Mono',monospace}
+.step-body{min-width:0}.step-body .title{font-weight:600}
+.step-body .sub{font-size:13.5px;color:var(--mute);margin-top:2px}
+.limit-big{font-size:28px;font-weight:700;letter-spacing:-.03em;overflow-wrap:anywhere}
+.status-pill{display:inline-flex;align-items:center;gap:7px;font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);border:1px solid var(--line);border-radius:99px;padding:4px 10px}
+.status-pill .d{width:7px;height:7px;border-radius:50%;background:var(--mute)}
+.status-pill.good{color:var(--green);background:var(--greenbg);border-color:transparent}.status-pill.good .d{background:var(--green)}
+.status-pill.bad{color:var(--red);background:var(--redbg);border-color:transparent}.status-pill.bad .d{background:var(--red)}
+.status-pill.pend{color:var(--purple);background:var(--lilac);border-color:transparent}.status-pill.pend .d{background:var(--purple)}
+.borrow-input-row{display:flex;gap:10px}
+.borrow-input{flex:1;display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:var(--canvas);padding:0 8px 0 14px}
+.borrow-input:focus-within{border-color:var(--purple)}
+.borrow-input .cur{font-weight:600;color:var(--mute)}
+.borrow-input input{flex:1;border:0;background:transparent;padding:12px 6px;font:600 17px 'JetBrains Mono',monospace;outline:0;min-width:0;color:var(--ink)}
+.max{border:1px solid var(--line);background:var(--surface);border-radius:8px;font:600 11px 'JetBrains Mono',monospace;padding:6px 10px;cursor:pointer;color:var(--purple)}
+.borrow-btn{height:auto;padding:12px 22px;border-radius:12px}
+input.amt{width:100%;margin-top:16px;accent-color:var(--purple)}
+.slider-ends{display:flex;justify-content:space-between;font:500 11.5px 'JetBrains Mono',monospace;color:var(--mute)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.recovery{margin-top:14px;font-size:13px;color:var(--mute)}.recovery summary{cursor:pointer}.recovery .actions{margin-top:10px}
+.position{display:grid;grid-template-columns:repeat(4,1fr);background:#FBFAFD}
+.position .cell{padding:14px 20px;border-right:1px solid var(--line)}.position .cell:last-child{border:0}
+.p-label{font:500 10px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.p-value{font-size:19px;font-weight:700;margin-top:3px;overflow-wrap:anywhere}
+.util-bar{height:5px;border-radius:99px;background:var(--line);margin-top:8px;overflow:hidden}.u-fill{display:block;height:100%;background:var(--purple)}
+.disconnected-note{display:flex;gap:10px;align-items:flex-start;padding:14px 20px;border-top:1px solid var(--line);font-size:13px;color:var(--mute)}
+.n-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);margin-top:6px;flex:none}
+/* footer */
+footer{margin-top:0;background:var(--surface);border-top:1px solid var(--line);padding:40px 0 48px}
+.foot-label{font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:12px}
+.contracts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.contract{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.c-name{font-weight:600;font-size:13.5px}
+.c-addr{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.c-addr a{font-size:12.5px;color:var(--mute);text-decoration:none}.c-addr a:hover{color:var(--purple)}
+.copy-btn{border:0;background:none;color:var(--mute);cursor:pointer;padding:4px}
+.foot-meta{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:24px;font-size:13px;color:var(--mute)}
+.foot-meta a{text-decoration:none;font-weight:600}
+.disclaimer{margin-top:16px;font-size:14px;color:#3D3547;line-height:1.65;max-width:92ch}
+.lp1,.lp2{display:block;line-height:1.35}.lp2{color:var(--mute)}.live-pill b{color:var(--deep);font-weight:600}
+.flow-step.hl{background:var(--lilac);border-color:#CDBFE3;box-shadow:0 14px 34px -22px rgba(83,43,125,.55)}
+.flow-step.hl h3{color:var(--deep)}
+.quote.vela{background:#FFFFFF;color:var(--ink);border:1px solid var(--line)}
+.quote.vela .q-main{background:var(--surface)}
+.quote.vela .q-main .kicker{color:var(--purple)}
+.quote.vela blockquote{color:var(--ink)}
+.quote.vela .q-by{color:var(--mute)}.quote.vela .q-by b{color:var(--ink)}
+.quote.vela .q-links a{color:var(--deep);border-color:var(--line)}.quote.vela .q-links a:hover{background:var(--lilac)}
+.quote.vela .q-note{color:var(--mute)}
+.q-why{margin:18px 0 0;padding:14px 16px;border-left:3px solid var(--purple);background:var(--lilac);border-radius:0 12px 12px 0;font-weight:600;color:var(--deep);font-size:15.5px}
+.quote.vela .q-answer{background:var(--deep);color:#fff}
+.quote.vela .q-answer .kicker{color:#CDB4F7}
+.quote.vela .q-answer h3{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#fff}
+.demand{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:stretch}
+.d-main{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:36px 38px}
+.d-main h2{font-size:30px;line-height:1.12;letter-spacing:-.03em;margin:10px 0 14px;font-weight:700;max-width:24ch}
+.d-main p{color:var(--mute);margin:0 0 12px;font-size:15.5px;max-width:56ch}
+.d-main p b{color:var(--ink);font-weight:600}
+.d-side{display:grid;gap:14px}
+.d-card{border-radius:18px;padding:22px 24px;border:1px solid var(--line);background:var(--surface)}
+.d-card .kicker{margin-bottom:8px}
+.d-card p{margin:0;font-size:14.5px;line-height:1.5}
+.d-card.moat{background:var(--deep);border-color:var(--deep);color:#fff}
+.d-card.moat .kicker{color:#CDB4F7}
+.d-next{font-size:13px;color:var(--mute);margin:2px 4px 0}
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 18px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 18px;min-width:170px}
+.stat b{display:block;font:600 24px 'JetBrains Mono',monospace;color:var(--deep);letter-spacing:-.01em}
+.stat span{font-size:12.5px;color:var(--mute)}
+.stat-note{font:500 11px 'JetBrains Mono',monospace;color:var(--mute);align-self:flex-end;padding-bottom:6px}
+.tn{display:grid;gap:10px}
+.tn-row{border-radius:14px;padding:14px 16px}
+.tn-row.today{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.3)}
+.tn-row.next{background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.35)}
+.tn-row h4{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px;color:#CDB4F7}
+.tn-row p{margin:0;font-size:13.5px;line-height:1.5;color:#fff}
+.tn-out{background:#fff;color:var(--ink);border-radius:14px;padding:12px 16px}
+.tn-out h4{font:600 10px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px;color:var(--green)}
+.tn-out p{margin:0;font-size:13.5px}
+@media (max-width:860px){.demand{grid-template-columns:1fr}.d-main{padding:26px 22px}.d-main h2{font-size:24px}}
+.split2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.split2>div{border-radius:14px;padding:14px}
+.split2 .sealed{background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.35)}
+.split2 .out{background:#fff;color:var(--ink)}
+.split2 h4{font:600 10px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px}
+.split2 .sealed h4{color:#CDB4F7}.split2 .out h4{color:var(--green)}
+.split2 ul{margin:0;padding:0;list-style:none}.split2 li{font-size:13.5px;line-height:1.9}
+.split2 .sealed li::before{content:"";display:inline-block;width:26px;height:7px;border-radius:4px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.45) 0 5px,transparent 5px 8px);margin-right:8px;vertical-align:middle}
+.quote.vela .q-answer .fine{color:#E4D8F8}
+.demo-note{margin:12px 0 0;padding:10px 14px;border-radius:10px;background:var(--amberbg);color:var(--amber);font-size:13.5px;font-weight:500}
+.wallet-links{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:var(--mute)}
+.wallet-links span{width:100%}
+.band-foot{margin-top:80px;background:var(--deep);color:#fff}
+.band-inner{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding-top:18px;padding-bottom:18px;font-size:14.5px}
+.band-foot b{font-weight:700}.band-foot em{font-style:normal;color:#CDB4F7;font-size:13px}
+.season{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;border:1px solid rgba(255,255,255,.35);border-radius:99px;padding:6px 12px}
+#ggToast{position:fixed;left:50%;top:92px;transform:translateX(-50%);z-index:60;max-width:min(640px,calc(100vw - 24px));padding:12px 40px 12px 16px;border-radius:12px;background:var(--ink);color:#fff;font-size:14px;line-height:1.45;box-shadow:0 16px 40px -16px rgba(27,20,36,.6)}
+#ggToast.err{background:var(--red)}#ggToast.ok{background:var(--green)}
+#ggToast button{position:absolute;right:8px;top:8px;border:0;background:none;color:#fff;font-size:18px;cursor:pointer;line-height:1}
+/* responsive */
+@media (max-width:1200px){.nav{display:none}}
+@media (max-width:1020px){.flow{grid-template-columns:1fr 1fr}.fs-arrow{display:none}.hero{grid-template-columns:1fr}.quote{grid-template-columns:1fr}.nav{display:none}}
+@media (max-width:720px){.container{padding:0 18px}.hero h1{font-size:38px}.topbar-inner{height:72px}.brand .logo{width:48px;height:48px}.live-pill{display:none}
+.flow{grid-template-columns:1fr}.cert-inner{grid-template-columns:1fr}.slab{min-height:0;max-width:220px}.metric-grid,.position,.contracts{grid-template-columns:1fr 1fr}
+.hide-s{display:none}td,th{padding:10px 10px}.rowlink small{display:none}.rowlink{gap:8px}.split2{grid-template-columns:1fr}.disclaimer{font-size:14.5px;color:var(--ink)}.band-inner{font-size:14px}.q-main,.q-answer{padding:28px 22px}.q-main blockquote{font-size:20px}.step{grid-template-columns:40px 1fr}.step>div:last-child{grid-column:2}
+.borrow-input-row,.lookup-row{flex-direction:column}.step{grid-template-columns:40px minmax(0,1fr)!important}.step-body{min-width:0}.borrow-btn{white-space:normal}.lookup-btn,.borrow-btn{height:46px}.sec-head h2{font-size:26px}.demo{padding:18px}.hc-body{grid-template-columns:90px 1fr}.hc-val{font-size:34px}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="container topbar-inner">
+  <a href="./" class="brand" aria-label="Gacha Galaxy home"><img class="logo" src="data:image/png;base64,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" alt="Gacha Galaxy logo"><span class="wm">Gacha Galaxy<small>Verified Value</small></span></a>
+  <div class="topbar-right">
+    <nav class="nav"><a href="#how">How it works</a><a href="#demo">Demo</a></nav>
+    <span class="live-pill"><span class="live-dot"></span><span><span class="lp1">Private pricing by <b>Horizen Vela</b> · tested locally</span><span class="lp2">Settled on <b>Robinhood Chain</b> mainnet</span></span></span>
+    <button class="btn btn-outline" id="connectBtn">Connect wallet</button>
+  </div>
+</div></header>
+
+<div class="container">
+  <div class="hero">
+    <div>
+      <div class="kicker">Verified Value for graded cards</div>
+      <h1>Robinhood made stocks usable onchain. <span>We do it for collectibles.</span></h1>
+      <p class="lede">Any graded card, from any platform, gets a private appraisal, a price certificate anyone can check, and can be borrowed against on Robinhood Chain.</p>
+      <div class="hero-cta"><a class="btn btn-primary" href="#lookup">Check a card <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn" href="#how">See the 4 steps</a></div>
+      <div class="honest-row"><span class="hchip">Pricing engine for <b>Horizen Vela</b> · tested locally</span><span class="hchip">Settled on <b>Robinhood Chain</b> mainnet</span></div>
+    </div>
+    <a class="hero-card" href="cert/109308847/" style="text-decoration:none;color:inherit" aria-label="Open the Rayquaza VMAX certificate">
+      <div class="hc-strip"><span>● Historical certificate snapshot</span><span class="mono">PSA 109308847</span></div>
+      <div class="hc-body"><img src="img/109308847.jpg" alt="PSA 10 Rayquaza VMAX slab">
+        <div><div class="kicker">Verified Value</div><div class="hc-val">$2,900</div><div class="hc-name">2021 Rayquaza VMAX 218/203 · PSA 10</div><div class="hc-range">fair range $2,587 to $3,213</div></div></div>
+      <div class="hc-foot"><div>Confidence<b>86 / 100</b></div><div>Risk tier<b>A</b></div><div>Historical ceiling<b>$1,293</b></div></div>
+    </a>
+  </div>
+</div>
+
+<section id="how"><div class="container">
+  <div class="sec-head"><div><div class="kicker">How it works</div><h2>From any platform to a checkable value, in four steps.</h2></div>
+  <p>Each step says plainly what is live today and what is still being built.</p></div>
+  <ol class="flow"><li class="flow-step"><div class="fs-top"><span class="fs-n mono">01</span><span class="st ok">Live</span></div><h3>Any platform</h3><p>A graded slab listed on a public marketplace, identified by its PSA cert number.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step hl"><div class="fs-top"><span class="fs-n mono">02</span><span class="st warn">Tested locally</span></div><h3>Horizen Vela</h3><p>The appraisal engine prices it privately. Raw comps stay sealed; only the result comes out.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step hl"><div class="fs-top"><span class="fs-n mono">03</span><span class="st ok">Live</span></div><h3>Gacha Mark</h3><p>Your card's Gacha Mark goes onchain: value, range, confidence, risk tier. One token per cert.</p><span class=fs-arrow><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></li><li class="flow-step"><div class="fs-top"><span class="fs-n mono">04</span><span class="st ok">Mainnet pilot</span></div><h3>Robinhood Chain</h3><p>A vault reads the certificate and lends stablecoins against the slab.</p></li></ol>
+</div></section>
+
+<section id="proof"><div class="container">
+  <div class="sec-head"><div><div class="kicker">Why it works</div><h2>One cert. One token. One checkable value.</h2></div>
+  <p>Three rules make the certificate trustworthy.</p></div>
+  <div class="demand">
+    <div class="d-card" style="padding:22px 24px"><div class="kicker">One cert</div><p>Every token points at one real PSA cert number.</p></div>
+    <div class="d-card" style="padding:22px 24px"><div class="kicker">One token</div><p>The contract refuses a second token for the same cert.</p></div>
+  </div>
+  <p class="fine" style="margin-top:14px">Each cert also gets a signed price certificate anyone can verify onchain. Neither this UI nor token custody proves physical authenticity, storage or legal rights; we make the published value checkable. Values are asking prices, not completed sales.</p>
+</div></section>
+
+<section id="lookup"><div class="container">
+  <div class="sec-head"><div><div class="kicker">Check a card</div><h2>Look up a price certificate.</h2></div>
+  <p>Read live from Robinhood Chain. No account needed.</p></div>
+  <div class="card lookup">
+    <form class="lookup-row" id="lookupForm" autocomplete="off">
+      <label class="input-wrap" for="certInput"><span class="prefix">PSA</span><span class="sr">PSA cert number</span>
+        <input id="certInput" type="text" inputmode="numeric" placeholder="Cert number, e.g. 109308847" /></label>
+      <button type="submit" class="btn lookup-btn">Look up</button>
+    </form>
+    <div id="lookupMsg" role="status" aria-live="polite"></div>
+    <div class="chips-label">Six mainnet certificates · select a card to view its appraisal</div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="card cert" id="cert">
+    <div class="cert-strip"><span>Gacha Mark · <span id="cGrader">PSA</span> <b>Cert <span id="cCert">…</span></b></span><span>Robinhood Chain · Chain ID 4663</span></div>
+    <div class="cert-inner">
+      <div>
+        <div class="slab" id="slab"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+          <span class="slab-label" id="slabLabel">CARD IMAGE<b>no photo</b></span><img id="slabImg" alt="" hidden /></div>
+        <div class="slab-caption"><span>SLAB · <span id="cGrader2">PSA</span></span><span id="cTierCap">…</span></div>
+      </div>
+      <div class="cert-body">
+        <div class="cert-head">
+          <div><h3 class="cert-name" id="cName">Loading certificate…</h3><div class="cert-subline mono" id="cSub">Reading Robinhood Chain</div></div>
+          <div class="badges"><span class="chip-real" id="cTier" title="Confidence tier">…</span><span class="score">Score <b id="cScore">…</b></span></div>
+        </div>
+        <div class="price-block">
+          <div class="price-label">Verified Value · point estimate</div>
+          <div class="price-big"><span class="cur">$</span><span id="cPoint">…</span></div>
+          <div class="band"><span class="low mono" id="cLow">…</span>
+            <div class="rail" aria-hidden="true"><span class="tick" style="left:0"></span><span class="fill"></span><span class="mid" id="cMid"></span><span class="tick" style="left:100%"></span></div>
+            <span class="high mono" id="cHigh">…</span></div>
+        </div>
+        <div class="metric-grid">
+          <div class="metric risk"><div class="m-label">Risk tier</div><div class="m-value" id="cRisk">…</div></div>
+          <div class="metric"><div class="m-label">Max LTV</div><div class="m-value" id="cLtv">…</div></div>
+          <div class="metric"><div class="m-label">Appraisal ceiling</div><div class="m-value" id="cMaxLoan">…</div></div>
+          <div class="metric"><div class="m-label">Comps</div><div class="m-value" id="cComps">…</div></div>
+        </div>
+        <div class="cert-foot"><span id="cUpdated">…</span>
+          <span class="cert-links"><a id="cShare" href="cert/">Historical share page →</a><a id="cLink" href="#" target="_blank" rel="noopener">Verify mainnet registry ↗</a></span></div>
+        <div class="history" id="cHistory"></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section id="certs"><div class="container">
+  <div class="sec-head"><div><div class="kicker">Reference collection</div><h2>Six PSA 10 slab references.</h2></div>
+  <p>The pages below are historical reference snapshots, not current mainnet loan offers. The certificate lookup above reads mainnet live.</p></div>
+  <div class="stats"><div class="stat"><b>6</b><span>cards priced and certified</span></div><div class="stat"><b>20</b><span>price points behind the Rayquaza certificate</span></div><div class="stat"><b>100%</b><span>historical certificates, not mainnet availability</span></div><span class="stat-note">historical snapshots · Sep 27, not live stats</span></div>
+  <div class="tbl-wrap"><table>
+    <tr><th>Card</th><th class="hide-s">PSA cert</th><th class="r">Value</th><th class="hide-s">Fair range</th><th class="r">Score</th><th class="r hide-s">Max loan</th><th></th></tr>
+    <tr><td><a class="rowlink" href="cert/109308847/"><img src="img/109308847.jpg" alt="" loading="lazy"><span><b>Rayquaza VMAX 218/203</b><small>Evolving Skies · PSA 10</small></span></a></td><td class="m hide-s">109308847</td><td class="m r"><b>$2,900</b></td><td class="m hide-s">$2,587 to $3,213</td><td class="m r">86</td><td class="m r hide-s">$1,293</td><td class="r"><a class="open" href="cert/109308847/">Open →</a></td></tr><tr><td><a class="rowlink" href="cert/118973623/"><img src="img/118973623.jpg" alt="" loading="lazy"><span><b>Pikachu &amp; Zekrom GX SM168</b><small>SM Black Star Promo · PSA 10</small></span></a></td><td class="m hide-s">118973623</td><td class="m r"><b>$3,200</b></td><td class="m hide-s">$2,875 to $3,525</td><td class="m r">87</td><td class="m r hide-s">$1,437</td><td class="r"><a class="open" href="cert/118973623/">Open →</a></td></tr><tr><td><a class="rowlink" href="cert/100863346/"><img src="img/100863346.jpg" alt="" loading="lazy"><span><b>Lugia V 186/195</b><small>Silver Tempest · PSA 10</small></span></a></td><td class="m hide-s">100863346</td><td class="m r"><b>$1,331</b></td><td class="m hide-s">$1,216 to $1,446</td><td class="m r">89</td><td class="m r hide-s">$607</td><td class="r"><a class="open" href="cert/100863346/">Open →</a></td></tr><tr><td><a class="rowlink" href="cert/154790134/"><img src="img/154790134.jpg" alt="" loading="lazy"><span><b>Giratina VSTAR GG69</b><small>Crown Zenith · PSA 10</small></span></a></td><td class="m hide-s">154790134</td><td class="m r"><b>$650</b></td><td class="m hide-s">$524 to $776</td><td class="m r">75</td><td class="m r hide-s">$262</td><td class="r"><a class="open" href="cert/154790134/">Open →</a></td></tr><tr><td><a class="rowlink" href="cert/153708045/"><img src="img/153708045.jpg" alt="" loading="lazy"><span><b>Rayquaza VMAX TG20</b><small>Silver Tempest TG · PSA 10</small></span></a></td><td class="m hide-s">153708045</td><td class="m r"><b>$410</b></td><td class="m hide-s">$340 to $480</td><td class="m r">78</td><td class="m r hide-s">$170</td><td class="r"><a class="open" href="cert/153708045/">Open →</a></td></tr><tr><td><a class="rowlink" href="cert/111992917/"><img src="img/111992917.jpg" alt="" loading="lazy"><span><b>Umbreon VMAX TG23</b><small>Brilliant Stars TG · PSA 10</small></span></a></td><td class="m hide-s">111992917</td><td class="m r"><b>$275</b></td><td class="m hide-s">$249 to $301</td><td class="m r">88</td><td class="m r hide-s">$124</td><td class="r"><a class="open" href="cert/111992917/">Open →</a></td></tr>
+  </table></div>
+</div></section>
+
+<main id="main"><section id="demo"><div class="container">
+  <div class="demo">
+    <div class="demo-head"><div><div class="kicker">Live demo · mainnet pilot</div><h2>Borrow against a card, the way Robinhood lets you borrow against Stock Tokens.</h2>
+      <p>Mainnet token #1 uses real USDG (6 decimals) and ETH gas. Only its holder or depositor can act. No free copies or faucet. Deposit transfers token #1 into vault custody without NFT approval. Each deposit, borrow, repayment approval, repayment and withdrawal requires its own click and wallet confirmation.</p></div>
+      <span class="st warn">Mainnet · real assets at risk</span></div>
+    <div class="model">
+      <div class="m-row m-head"><span></span><span>Robinhood Stock Tokens</span><span>Gacha Galaxy cards</span></div>
+      <div class="m-row"><span>Asset</span><span>A tokenized stock</span><span>A tokenized graded card</span></div>
+      <div class="m-row"><span>Price</span><span>Chainlink price feed</span><span>Gacha Mark (Vela, tested locally)</span></div>
+      <div class="m-row"><span>Use</span><span>Collateral to borrow</span><span>Collateral to borrow (live certificate and pilot caps)</span></div>
+      <div class="m-row"><span>Chain</span><span>Robinhood Chain</span><span>Robinhood Chain mainnet</span></div>
+      <p class="m-note">We use the same model for a new asset. We don't use Robinhood's tokens and we're not a Robinhood partner. <a href="https://docs.robinhood.com/chain/building-with-stock-tokens/" target="_blank" rel="noopener">How Stock Tokens work as collateral</a></p>
+    </div>
+    <div class="card borrow" id="borrowCard">
+      <div class="step"><div class="step-num"><span class="n">01</span></div>
+        <div class="step-body"><div class="title">Deposit card</div><div class="sub" id="dSub">…</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          <span class="status-pill" id="dStatus"><span class="d"></span><span>…</span></span>
+          <button class="btn btn-primary btn-sm" id="depositBtn" hidden>Deposit token #1 into vault</button></div></div>
+      <div class="step"><div class="step-num"><span class="n">02</span></div>
+        <div class="step-body"><div class="title">Borrow limit · per-card cap</div><div class="sub" id="lSub">…</div></div>
+        <div style="text-align:right"><div class="limit-big" id="lBig">…</div></div></div>
+      <div class="step" style="grid-template-columns:48px 1fr;align-items:flex-start"><div class="step-num"><span class="n">03</span></div>
+        <div class="step-body" style="width:100%"><div class="title" style="margin-bottom:12px">Borrow amount</div>
+          <div class="borrow-input-row">
+            <label class="borrow-input" for="amt"><span class="cur">$</span><span class="sr">Borrow amount in dollars</span>
+              <input id="amt" type="number" inputmode="decimal" min="1" step="0.000001" value="1" /><button type="button" class="max" id="maxBtn">MAX</button></label>
+            <button class="btn btn-primary borrow-btn" id="borrowBtn" hidden disabled>Connect wallet to borrow</button></div>
+          <input type="range" class="amt" id="amtRange" min="1" max="0" step="0.000001" value="1" aria-label="Borrow amount slider" />
+          <div class="slider-ends"><span>1 USDG</span><span id="rangeMax">$0</span></div>
+          <p class="demo-note" id="demoNote">Reading mainnet liquidity…</p>
+          <div class="wallet-links" id="walletLinks" hidden><span>No wallet in this browser. Open this page in:</span><a class="btn btn-sm" id="openTrust" href="#">Open in Trust Wallet</a><a class="btn btn-sm" id="openMM" href="#">Open in MetaMask</a></div>
+          <div class="actions" id="ownerActions" hidden><button class="btn btn-outline btn-sm" id="approveUsdBtn">Approve exact repayment</button><button class="btn btn-outline btn-sm" id="repayBtn">Repay all</button><button class="btn btn-outline btn-sm" id="withdrawBtn">Withdraw card</button></div>
+          <details class="recovery" id="recovery"><summary>Connection &amp; recovery</summary><div class="actions"><button class="btn btn-outline btn-sm" id="refreshBtn">Refresh live status</button><button class="btn btn-outline btn-sm" id="networkBtn" hidden>Switch / add mainnet</button><button class="btn btn-outline btn-sm" id="receiptBtn" hidden>Check transaction / recover status</button></div><label id="recoveryHashLabel" hidden>Optional transaction hash from wallet history (read-only verification)<input id="recoveryHash" type="text" spellcheck="false" autocomplete="off" placeholder="0x…" aria-label="Transaction hash from wallet history" /></label></details><div id="txMsg" role="status" aria-live="polite"></div></div></div>
+      <div class="position">
+        <div class="cell"><div class="p-label">Debt</div><div class="p-value" id="pDebt">…</div></div>
+        <div class="cell"><div class="p-label">Limit</div><div class="p-value" id="pLimit">…</div></div>
+        <div class="cell util"><div class="p-label">Utilization</div><div class="p-value" id="pUtil">…</div><div class="util-bar"><span class="u-fill" id="pUtilBar" style="width:0%"></span></div></div>
+        <div class="cell liq"><div class="p-label">If a loan isn't repaid</div><div class="p-value" id="pLiq">…</div></div>
+      </div>
+      <div class="disconnected-note" id="bNote"><span class="n-dot"></span><span id="bNoteText">…</span></div>
+    </div>
+  </div>
+  <div class="model">
+    <h3>Proposed controls — not yet implemented or funded</h3>
+    <p class="m-note">Proposed pilot controls: conservative lending limits, a first-loss reserve, and a defined default route — a loan that isn't repaid leaves the card in vault custody up to the debt owed, and resale of the card covers the debt. Custody and right-to-sell agreements are proposed and not yet signed; these controls are not yet implemented or funded and provide no guaranteed protection.</p>
+  </div>
+</div></section></main>
+
+<div class="band-foot"><div class="container band-inner">
+  <span>Private pricing by <b>Horizen Vela</b> <em>(tested locally)</em> · Settled on <b>Robinhood Chain</b></span>
+  <span class="season">Part of Horizen Acceleration Season</span>
+</div></div>
+<footer><div class="container">
+  <div class="foot-label">Contracts · Robinhood Chain mainnet</div>
+  <div class="contracts"><div class="contract"><div class="c-name">AppraisalRegistry</div><div class="c-addr"><a class="mono" href="https://robinhoodchain.blockscout.com/address/0x2A585396dd0248A060045b3f557076fB1B4Cb0eb" target="_blank" rel="noopener" data-copy="0x2A585396dd0248A060045b3f557076fB1B4Cb0eb">0x2A58…b0eb</a><button class="copy-btn" aria-label="Copy AppraisalRegistry address"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div></div><div class="contract"><div class="c-name">GradedCard</div><div class="c-addr"><a class="mono" href="https://robinhoodchain.blockscout.com/address/0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653" target="_blank" rel="noopener" data-copy="0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653">0x487F…6653</a><button class="copy-btn" aria-label="Copy GradedCard address"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div></div><div class="contract"><div class="c-name">USDG</div><div class="c-addr"><a class="mono" href="https://robinhoodchain.blockscout.com/address/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168" target="_blank" rel="noopener" data-copy="0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168">0x5fc5…d168</a><button class="copy-btn" aria-label="Copy USDG address"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div></div><div class="contract"><div class="c-name">CardLendingVault</div><div class="c-addr"><a class="mono" href="https://robinhoodchain.blockscout.com/address/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23" target="_blank" rel="noopener" data-copy="0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23">0xa4a9…8F23</a><button class="copy-btn" aria-label="Copy CardLendingVault address"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></div></div></div>
+  <div class="foot-meta"><a href="https://github.com/gachagalaxyhq/gacha-robinhood-lending" target="_blank" rel="noopener">View source on GitHub →</a><span class="mono">Chain ID 4663 · Robinhood Chain mainnet</span></div>
+  <p class="disclaimer">Values come from the Gacha Galaxy pricing engine (built for Horizen Vela, tested locally) and public marketplace asking prices, not completed sales. Gacha Galaxy is not affiliated with or endorsed by Robinhood or Horizen; a price certificate does not verify physical authenticity, custody or enforceable rights, and this mainnet pilot is not financial advice.</p>
+</div></footer>
+<script>
+// Wallet plumbing. Never overwrites window.ethereum. Builds an ordered wallet list: Trust Wallet first, then window.ethereum (the v1 path), then others.
+(() => {
+  window.GG_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const announced = [];
+  const ok = p => p && typeof p.request === 'function';
+  const isTrust = p => !!(p && (p.isTrust || p.isTrustWallet));
+  window.GG_WALLETS = () => {
+    const out = [], add = p => { if (ok(p) && !out.includes(p)) out.push(p); };
+    const eth = window.ethereum;
+    // Prefer an explicit Trust provider to an unmarked window.ethereum wrapper.
+    if (isTrust(eth)) add(eth);
+    add(window.trustwallet?.ethereum); add(window.trustwallet);
+    announced.filter(a => /trust/i.test(a.info?.rdns || '') || /trust/i.test(a.info?.name || '')).forEach(a => add(a.provider));
+    (eth?.providers || []).filter(isTrust).forEach(add);
+    add(eth);
+    (eth?.providers || []).forEach(add);
+    announced.forEach(a => add(a.provider));
+    return out;
+  };
+  window.GG_WALLET_NAME = p => !p ? 'wallet' : isTrust(p) || p === window.trustwallet || p === window.trustwallet?.ethereum ? 'Trust Wallet' : p.isCoinbaseWallet ? 'Coinbase Wallet' : p.isMetaMask ? 'MetaMask' : 'wallet';
+  const pick = () => { if (!window.GG_CONNECTED) window.GG_WALLET = window.GG_WALLETS()[0] || null; };
+  const ping = () => { pick(); window.dispatchEvent(new Event('gg:wallet')); links(); };
+  window.addEventListener('eip6963:announceProvider', e => { if (e.detail?.provider) { announced.push(e.detail); ping(); } });
+  window.addEventListener('ethereum#initialized', ping, { once: true });
+  pick();
+  try { window.dispatchEvent(new Event('eip6963:requestProvider')); } catch {}
+  let n = 0; const t = setInterval(() => { n++; const had = !!window.GG_WALLET; pick(); if (!had && window.GG_WALLET) ping(); if (window.GG_WALLET || n > 12) clearInterval(t); }, 250);
+  // Visible status banner, so a wallet error is never silent wherever the user is on the page.
+  window.ggToast = (msg, kind) => { let el = document.getElementById('ggToast');
+    if (!el) { el = document.createElement('div'); el.id = 'ggToast'; el.setAttribute('role', 'alert'); document.body.appendChild(el); }
+    if (!msg) { el.hidden = true; return; }
+    el.className = kind || ''; el.innerHTML = msg + '<button type="button" aria-label="Close" onclick="this.parentElement.hidden=true">×</button>'; el.hidden = false; };
+  function links() {
+    const box = document.getElementById('walletLinks'); if (!box) return;
+    const url = location.href.split('#')[0];
+    document.getElementById('openTrust').href = 'https://link.trustwallet.com/open_url?coin_id=60&url=' + encodeURIComponent(url);
+    document.getElementById('openMM').href = 'https://link.metamask.io/dapp/' + url.replace(/^https?:\/\//, '');
+    box.hidden = !!window.GG_WALLET || !window.GG_MOBILE;
+  }
+  document.addEventListener('DOMContentLoaded', links); setTimeout(links, 3500);
+  // Wallet extensions often refuse to connect inside an embedded frame (preview panes, chat apps). Say so and offer a new tab.
+  let framed = false; try { framed = window.top !== window.self; } catch { framed = true; }
+  window.GG_FRAMED = framed;
+  if (framed) document.addEventListener('DOMContentLoaded', () => window.ggToast(`This page is shown inside another site, so wallets may not connect here. <a href="${location.href}" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline;font-weight:700">Open it in its own tab</a> to connect.`, 'err'));
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+// Gacha Galaxy: mainnet lending on the original homepage. Verified source URLs in C.sources.
+(() => {
+  'use strict';
+  const C = {"chainId":4663,"rpc":"https://rpc.mainnet.chain.robinhood.com","explorer":"https://robinhoodchain.blockscout.com","owner":"0xD77C34899858088DE6888F36fA46e2d6468F4Ca5","vault":"0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23","cards":"0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653","registry":"0x2A585396dd0248A060045b3f557076fB1B4Cb0eb","usd":"0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168","runtimeSHA256":{"vault":"e9e012a1bc5dc65bb360584964158da67940510544233b004ae7c0836854c103","registry":"c53c4c889bd1e99c22703c41d800f732a9f028aac3b8423f8e6ddb75727c06e6","cards":"0bc66254d35cdf13d93e39c5012821ec44aee4174f8ae38f03c4800cea3bba96","usdg":"c85d18dc1e49769e01f9f88981176e213b2bc24d2f14d33a81d54bc06579f6db","implementation":"0d8203b94e33c2458a137c0c70d2491f3625837405a74fd332f4cba5a979c372"},"implementation":"0x68184C449E1a8f34fA18d289737129FD27B66f8F","implementationSlot":"0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc","sources":{"vault":"https://sourcify.dev/server/v2/contract/4663/0xa4a98F8A373E98Ce555a7F6e1FF2094C858D8F23?fields=all","cards":"https://sourcify.dev/server/v2/contract/4663/0x487F04b4BCE3f1509e11c189A44b3aFfe21C6653?fields=all","registry":"https://sourcify.dev/server/v2/contract/4663/0x2A585396dd0248A060045b3f557076fB1B4Cb0eb?fields=all","usdg":"https://sourcify.dev/server/v2/contract/4663/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168?fields=all","implementation":"https://sourcify.dev/server/v2/contract/4663/0x68184C449E1a8f34fA18d289737129FD27B66f8F?fields=all"},"abi":{"vault":[{"name":"BadParams","type":"error","inputs":[]},{"name":"CardHeld","type":"error","inputs":[]},{"name":"DemoCardNotAllowed","type":"error","inputs":[]},{"name":"EnforcedPause","type":"error","inputs":[]},{"name":"ExceedsLimit","type":"error","inputs":[{"name":"requested","type":"uint256","internalType":"uint256"},{"name":"available","type":"uint256","internalType":"uint256"}]},{"name":"ExpectedPause","type":"error","inputs":[]},{"name":"Healthy","type":"error","inputs":[]},{"name":"NotDeposited","type":"error","inputs":[]},{"name":"NotEligible","type":"error","inputs":[]},{"name":"NotGuardian","type":"error","inputs":[]},{"name":"NotOwner","type":"error","inputs":[]},{"name":"OutstandingDebt","type":"error","inputs":[]},{"name":"OwnableInvalidOwner","type":"error","inputs":[{"name":"owner","type":"address","internalType":"address"}]},{"name":"OwnableUnauthorizedAccount","type":"error","inputs":[{"name":"account","type":"address","internalType":"address"}]},{"name":"PoolLimit","type":"error","inputs":[{"name":"requested","type":"uint256","internalType":"uint256"},{"name":"available","type":"uint256","internalType":"uint256"}]},{"name":"ReentrancyGuardReentrantCall","type":"error","inputs":[]},{"name":"SafeERC20FailedOperation","type":"error","inputs":[{"name":"token","type":"address","internalType":"address"}]},{"name":"StaleAppraisal","type":"error","inputs":[]},{"name":"WrongCollection","type":"error","inputs":[]},{"name":"allowDemoCards","type":"function","inputs":[],"outputs":[{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"view"},{"name":"availableToBorrow","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"avail","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"borrow","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"},{"name":"amount","type":"uint256","internalType":"uint256"}],"outputs":[],"stateMutability":"nonpayable"},{"name":"borrowLimit","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"borrowStatus","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"status","type":"uint8","internalType":"enum CardLendingVault.Status"},{"name":"available","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"cards","type":"function","inputs":[],"outputs":[{"name":"","type":"address","internalType":"contract GradedCard"}],"stateMutability":"view"},{"name":"certHeld","type":"function","inputs":[{"name":"","type":"bytes32","internalType":"bytes32"}],"outputs":[{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"view"},{"name":"deposit","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"}],"outputs":[],"stateMutability":"nonpayable"},{"name":"liquidationThreshold","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"loanAsset","type":"function","inputs":[],"outputs":[{"name":"","type":"address","internalType":"contract IERC20"}],"stateMutability":"view"},{"name":"maxAppraisalAge","type":"function","inputs":[],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"maxLoanPerCard","type":"function","inputs":[],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"maxTotalDebt","type":"function","inputs":[],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"owner","type":"function","inputs":[],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},{"name":"paused","type":"function","inputs":[],"outputs":[{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"view"},{"name":"positions","type":"function","inputs":[{"name":"","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"owner","type":"address","internalType":"address"},{"name":"debt","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"registry","type":"function","inputs":[],"outputs":[{"name":"","type":"address","internalType":"contract AppraisalRegistry"}],"stateMutability":"view"},{"name":"repay","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"},{"name":"amount","type":"uint256","internalType":"uint256"}],"outputs":[],"stateMutability":"nonpayable"},{"name":"totalDebt","type":"function","inputs":[],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"withdraw","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"}],"outputs":[],"stateMutability":"nonpayable"}],"cards":[{"name":"AlreadyMinted","type":"error","inputs":[]},{"name":"BadDemoIndex","type":"error","inputs":[]},{"name":"DemoCooldown","type":"error","inputs":[{"name":"availableAt","type":"uint256","internalType":"uint256"}]},{"name":"ERC721IncorrectOwner","type":"error","inputs":[{"name":"sender","type":"address","internalType":"address"},{"name":"tokenId","type":"uint256","internalType":"uint256"},{"name":"owner","type":"address","internalType":"address"}]},{"name":"ERC721InsufficientApproval","type":"error","inputs":[{"name":"operator","type":"address","internalType":"address"},{"name":"tokenId","type":"uint256","internalType":"uint256"}]},{"name":"ERC721InvalidApprover","type":"error","inputs":[{"name":"approver","type":"address","internalType":"address"}]},{"name":"ERC721InvalidOperator","type":"error","inputs":[{"name":"operator","type":"address","internalType":"address"}]},{"name":"ERC721InvalidOwner","type":"error","inputs":[{"name":"owner","type":"address","internalType":"address"}]},{"name":"ERC721InvalidReceiver","type":"error","inputs":[{"name":"receiver","type":"address","internalType":"address"}]},{"name":"ERC721InvalidSender","type":"error","inputs":[{"name":"sender","type":"address","internalType":"address"}]},{"name":"ERC721NonexistentToken","type":"error","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"}]},{"name":"OwnableInvalidOwner","type":"error","inputs":[{"name":"owner","type":"address","internalType":"address"}]},{"name":"OwnableUnauthorizedAccount","type":"error","inputs":[{"name":"account","type":"address","internalType":"address"}]},{"name":"approve","type":"function","inputs":[{"name":"to","type":"address","internalType":"address"},{"name":"tokenId","type":"uint256","internalType":"uint256"}],"outputs":[],"stateMutability":"nonpayable"},{"name":"card","type":"function","inputs":[{"name":"id","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"tuple","components":[{"name":"grader","type":"string","internalType":"string"},{"name":"certId","type":"string","internalType":"string"},{"name":"grade","type":"string","internalType":"string"},{"name":"name","type":"string","internalType":"string"}],"internalType":"struct GradedCard.Card"}],"stateMutability":"view"},{"name":"certKeyOf","type":"function","inputs":[{"name":"id","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"bytes32","internalType":"bytes32"}],"stateMutability":"view"},{"name":"getApproved","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"},{"name":"isApprovedForAll","type":"function","inputs":[{"name":"owner","type":"address","internalType":"address"},{"name":"operator","type":"address","internalType":"address"}],"outputs":[{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"view"},{"name":"isDemo","type":"function","inputs":[{"name":"","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"view"},{"name":"ownerOf","type":"function","inputs":[{"name":"tokenId","type":"uint256","internalType":"uint256"}],"outputs":[{"name":"","type":"address","internalType":"address"}],"stateMutability":"view"}],"registry":[{"name":"AccessControlBadConfirmation","type":"error","inputs":[]},{"name":"AccessControlUnauthorizedAccount","type":"error","inputs":[{"name":"account","type":"address","internalType":"address"},{"name":"neededRole","type":"bytes32","internalType":"bytes32"}]},{"name":"InvalidBand","type":"error","inputs":[]},{"name":"InvalidLtv","type":"error","inputs":[]},{"name":"NotFound","type":"error","inputs":[]},{"name":"appraisalCount","type":"function","inputs":[{"name":"","type":"bytes32","internalType":"bytes32"}],"outputs":[{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"view"},{"name":"certKey","type":"function","inputs":[{"name":"grader","type":"string","internalType":"string"},{"name":"certId","type":"string","internalType":"string"}],"outputs":[{"name":"","type":"bytes32","internalType":"bytes32"}],"stateMutability":"pure"},{"name":"getAppraisal","type":"function","inputs":[{"name":"key","type":"bytes32","internalType":"bytes32"}],"outputs":[{"name":"a","type":"tuple","components":[{"name":"fmvLow","type":"uint64","internalType":"uint64"},{"name":"fmvPoint","type":"uint64","internalType":"uint64"},{"name":"fmvHigh","type":"uint64","internalType":"uint64"},{"name":"ltvBps","type":"uint16","internalType":"uint16"},{"name":"confidenceScore","type":"uint16","internalType":"uint16"},{"name":"compCount","type":"uint16","internalType":"uint16"},{"name":"confidence","type":"uint8","internalType":"enum AppraisalRegistry.Confidence"},{"name":"risk","type":"uint8","internalType":"enum AppraisalRegistry.Risk"},{"name":"eligible","type":"bool","internalType":"bool"},{"name":"appraisedAt","type":"uint40","internalType":"uint40"},{"name":"attester","type":"address","internalType":"address"}],"internalType":"struct AppraisalRegistry.Appraisal"}],"stateMutability":"view"},{"name":"getAppraisalByCert","type":"function","inputs":[{"name":"grader","type":"string","internalType":"string"},{"name":"certId","type":"string","internalType":"string"}],"outputs":[{"name":"","type":"tuple","components":[{"name":"fmvLow","type":"uint64","internalType":"uint64"},{"name":"fmvPoint","type":"uint64","internalType":"uint64"},{"name":"fmvHigh","type":"uint64","internalType":"uint64"},{"name":"ltvBps","type":"uint16","internalType":"uint16"},{"name":"confidenceScore","type":"uint16","internalType":"uint16"},{"name":"compCount","type":"uint16","internalType":"uint16"},{"name":"confidence","type":"uint8","internalType":"enum AppraisalRegistry.Confidence"},{"name":"risk","type":"uint8","internalType":"enum AppraisalRegistry.Risk"},{"name":"eligible","type":"bool","internalType":"bool"},{"name":"appraisedAt","type":"uint40","internalType":"uint40"},{"name":"attester","type":"address","internalType":"address"}],"internalType":"struct AppraisalRegistry.Appraisal"}],"stateMutability":"view"}]}};
+  const META = {"109308847": {"tok": 1, "chip": "Rayquaza VMAX 218 \u00b7 Evolving Skies", "name": "Rayquaza VMAX", "num": "218/203", "set": "Evolving Skies", "year": 2021}, "118973623": {"tok": 2, "chip": "Pikachu & Zekrom GX SM168", "name": "Pikachu & Zekrom GX", "num": "SM168", "set": "SM Black Star Promo", "year": 2019}, "100863346": {"tok": 3, "chip": "Lugia V 186 \u00b7 Silver Tempest", "name": "Lugia V", "num": "186/195", "set": "Silver Tempest", "year": 2022}, "154790134": {"tok": 4, "chip": "Giratina VSTAR GG69 \u00b7 Crown Zenith", "name": "Giratina VSTAR", "num": "GG69/GG70", "set": "Crown Zenith", "year": 2023}, "153708045": {"tok": 5, "chip": "Rayquaza VMAX TG20", "name": "Rayquaza VMAX", "num": "TG20/TG30", "set": "Silver Tempest Trainer Gallery", "year": 2022}, "111992917": {"tok": 6, "chip": "Umbreon VMAX TG23", "name": "Umbreon VMAX", "num": "TG23/TG30", "set": "Brilliant Stars Trainer Gallery", "year": 2022}};
+  const ORDER = ['109308847','118973623','100863346','154790134','153708045','111992917'], CONF = ['NONE','NARRATIVE','MODEST','REAL'], RISK = ['NONE','REJECT','C','B','A'];
+  const $ = id => document.getElementById(id), A = {registry:C.registry,cards:C.cards,usd:C.usd,vault:C.vault};
+  const EXPLORER=C.explorer, ZERO='0x'+'0'.repeat(40), CHAIN_HEX='0x1237';
+  const same=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.toLowerCase()===b.toLowerCase();
+  const short=a=>a.slice(0,6)+'…'+a.slice(-4);
+  const usd6=n=>ethers.formatUnits(n,6)+' USDG';
+  // Pool display only: hide sub-cent dust, but retain precision for tiny test balances.
+  const poolDisplay=n=>n===0n?'0 USDG':n>=10000n?(Number(n)/1000000).toLocaleString('en-US',{maximumFractionDigits:2})+' USDG':usd6(n);
+  const usdFromCents=n=>'$'+(Number(n)/100).toLocaleString('en-US',{maximumFractionDigits:2});
+  const ago=ts=>Math.max(0,Math.floor(Date.now()/1000)-Number(ts))+' seconds ago';
+  const min=(...v)=>v.reduce((a,b)=>a<b?a:b), head=(cap,debt)=>cap>debt?cap-debt:0n;
+  const actionIDs=['depositBtn','borrowBtn','approveUsdBtn','repayBtn','withdrawBtn'];
+  let account=null, wallet=null, signer=null, current=null, pos=null, epoch=0, lookupSeq=0, refreshSeq=0;
+  let busy=false, connecting=false, pending=null, bindings=[], rpcID=0, refreshing=0, activeAction=null;
+  let receiptBusy=false, pollTimer=null, pollGeneration=0, receiptFallback=false, networkNeeded=false, suspended=false;
+  const activeReads=new Set();
+  function stopPolling(){++pollGeneration;clearTimeout(pollTimer);pollTimer=null;}
+  function startPolling(){stopPolling();if(!pending||suspended)return;const generation=pollGeneration,p=pending;let delay=1500,attempts=0;
+    const tick=async()=>{pollTimer=null;if(generation!==pollGeneration||pending!==p||suspended)return;
+      await receipt();if(generation!==pollGeneration||pending!==p||suspended)return;
+      if(++attempts>=6){receiptFallback=true;lock();}delay=Math.min(delay*2,15000);pollTimer=setTimeout(tick,delay);
+    };pollTimer=setTimeout(tick,delay);
+  }
+  const ctx=()=>({epoch,lookupSeq,current,account,wallet});
+  const valid=c=>c.epoch===epoch&&c.lookupSeq===lookupSeq&&c.current===current&&c.account===account&&c.wallet===wallet;
+  const message=t=>{$('txMsg').textContent=t;};
+  const errorText=e=>e?.code===4001||e?.code==='ACTION_REJECTED'?'Cancelled in wallet.':String(e?.shortMessage||e?.message||'Request failed.');
+  async function bounded(read,ms,text,onTimeout=()=>{}){let timer;try{return await Promise.race([Promise.resolve().then(read),new Promise((_,reject)=>{timer=setTimeout(()=>{onTimeout();reject(Error(text));},ms);})]);}finally{clearTimeout(timer);}}
+  async function rpc(method,params=[]) {
+    if(!['eth_chainId','eth_blockNumber','eth_getBlockByNumber','eth_getCode','eth_getStorageAt','eth_call','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getTransactionCount','eth_getLogs'].includes(method)) throw Error('Read-only RPC method required');
+    const ctl=new AbortController(),id=++rpcID;activeReads.add(ctl);
+    try {return await bounded(async()=>{const r=await fetch(C.rpc,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',signal:ctl.signal,body:JSON.stringify({jsonrpc:'2.0',id,method,params})});
+       if(!r.ok)throw Error('RPC HTTP '+r.status);const b=await r.json();if(b.id!==id||b.jsonrpc!=='2.0'||b.error)throw Error(b.error?.message||'Malformed RPC response');return b.result;
+    },15000,'RPC timed out: '+method,()=>ctl.abort());}finally{activeReads.delete(ctl);}
+  }
+  // Contract calls must use the same bounded, cancellable, read-only transport as verification.
+  class ReadProvider extends ethers.JsonRpcProvider {
+    async _send(payload){return Promise.all((Array.isArray(payload)?payload:[payload]).map(async p=>({jsonrpc:'2.0',id:p.id,result:await rpc(p.method,p.params)})));}
+  }
+  const ro=new ReadProvider(C.rpc,4663,{staticNetwork:true,batchMaxCount:1,cacheTimeout:-1});
+  const reg=new ethers.Contract(A.registry,C.abi.registry,ro), cards=new ethers.Contract(A.cards,[...C.abi.cards,'function safeTransferFrom(address,address,uint256)'],ro), vault=new ethers.Contract(A.vault,C.abi.vault,ro);
+  const usd=new ethers.Contract(A.usd,['function decimals() view returns(uint8)','function balanceOf(address) view returns(uint256)','function allowance(address,address) view returns(uint256)','function approve(address,uint256) returns(bool)'],ro);
+  const assets=new ethers.Contract(A.usd,['function globalTransferSettings() view returns(uint40 referenceTime,uint32 maturityPeriod,bool partnerSignedRegistrationsEnabled,bytes10 __gap_remaining,bool paused)'],ro);
+  function lock(){for(const id of actionIDs)$(id).disabled=true; $('connectBtn').disabled=busy||connecting; $('networkBtn').hidden=!networkNeeded; $('networkBtn').disabled=busy||connecting||!!pending; $('receiptBtn').hidden=!pending; $('recoveryHashLabel').hidden=!pending||!!pending.hash; $('receiptBtn').textContent='Check transaction / recover status'; $('receiptBtn').disabled=receiptBusy||connecting; $('refreshBtn').disabled=busy||connecting||!!pending||receiptBusy; $('recovery').hidden=busy&&!pending; $('amt').disabled=busy||!!pending||!pos;$('amtRange').disabled=busy||!!pending||!pos;$('maxBtn').disabled=busy||!!pending||!pos;}
+  function clearPosition(text){++refreshSeq;pos=null;lock();for(const id of actionIDs)$(id).hidden=true;$('ownerActions').hidden=true;for(const id of ['pDebt','pLimit','pUtil','pLiq','lBig'])$(id).textContent='—';$('pUtilBar').style.width='0%';$('dSub').textContent=text;$('bNoteText').textContent=pending?'Updating after transaction · actions locked until verified confirmation. '+text:text;$('lSub').textContent=pending?'Updating after transaction':'Verified live reads required.';$('dStatus').lastElementChild.textContent=pending?'Updating':'Read only';$('demoNote').hidden=false;$('demoNote').textContent=text;}
+  async function runtime(address,expected,block){const code=await rpc('eth_getCode',[address,block]);if(!/^0x(?:[a-fA-F0-9]{2})+$/.test(code))throw Error('Missing contract code');const bytes=Uint8Array.from(code.slice(2).match(/../g),x=>parseInt(x,16));const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');if(hash!==expected)throw Error('Verified runtime changed; actions disabled');}
+  async function verify(block){
+    if(BigInt(await rpc('eth_chainId'))!==4663n)throw Error('Public RPC chain mismatch');
+    await Promise.all(['vault','cards','registry'].map(k=>runtime(C[k],C.runtimeSHA256[k],block)));
+    await runtime(C.usd,C.runtimeSHA256.usdg,block);
+    const slot=await rpc('eth_getStorageAt',[C.usd,C.implementationSlot,block]);if(!/^0x0{24}[a-fA-F0-9]{40}$/.test(slot)||!same('0x'+slot.slice(-40),C.implementation))throw Error('USDG implementation changed');
+    await runtime(C.implementation,C.runtimeSHA256.implementation,block);
+    const o={blockTag:block};const [r,c,u,owner,dec]=await Promise.all([vault.registry(o),vault.cards(o),vault.loanAsset(o),vault.owner(o),usd.decimals(o)]);
+    if(!same(r,A.registry)||!same(c,A.cards)||!same(u,A.usd)||!same(owner,C.owner)||dec!==6n)throw Error('Mainnet references/owner/decimals mismatch');
+  }
+  function amount(text){if(!/^(0|[1-9]\d*)(\.\d{1,6})?$/.test(text))throw Error('Use a positive USDG amount with at most six decimals.');const n=ethers.parseUnits(text,6);if(n<1000000n)throw Error('Minimum borrow amount is 1 USDG.');if(n>=(1n<<256n)-1n)throw Error('Amount out of range');return n;}
+  async function identity(c){if(!valid(c)||!wallet||!account)throw Error('Connect wallet again.');const chain=await wallet.request({method:'eth_chainId'}),accounts=await wallet.request({method:'eth_accounts'});if(!valid(c))throw Error('Session changed.');networkNeeded=BigInt(chain)!==4663n;if(networkNeeded||!same(accounts?.[0],c.account)){drop('Wallet account/network changed. Reconnect on mainnet.');throw Error('Wallet account/network changed. Reconnect on mainnet.');}}
+  function drop(text){stopPolling();for(const ctl of activeReads)ctl.abort();activeReads.clear();if(pending)receiptFallback=true;++epoch;account=null;signer=null;for(const [p,e,h]of bindings)p.removeListener?.(e,h);bindings=[];wallet=null;window.GG_CONNECTED=false;clearPosition(text);renderWallet();message(text+(pending?' Transaction outcome is being checked read-only; do not resubmit.':''));if(pending)startPolling();}
+  function hook(p,onAccounts){for(const e of ['accountsChanged','chainChanged','disconnect']){const h=value=>{if(p!==wallet)return;if(e==='accountsChanged'&&(onAccounts?.(value)||(Array.isArray(value)&&same(value[0],account))))return;if(e==='chainChanged'){try{networkNeeded=BigInt(value)!==BigInt(C.chainId);if(!networkNeeded)return;}catch{networkNeeded=true;}}drop('Wallet changed. Actions disabled; reconnect explicitly.');};p.on?.(e,h);bindings.push([p,e,h]);}}
+  function renderWallet(){$('connectBtn').textContent=account?short(account)+' · connected':'Connect wallet';$('connectBtn').setAttribute('aria-label',account?'Connected wallet '+account+'. Click to reconnect.':'Connect wallet');$('connectBtn').disabled=busy||connecting;}
+  async function connect(){
+    if(connecting||busy)return;connecting=true;drop('Connecting wallet…');lock();const ticket=epoch;
+    const p=window.GG_WALLET||window.ethereum;
+    let authorizing=true,announcedAccount=null;
+    try{if(!p)throw Error('No injected wallet. Open in a wallet browser.');wallet=p;hook(p,accounts=>{if(!authorizing||!Array.isArray(accounts)||!ethers.isAddress(accounts[0]))return false;announcedAccount=accounts[0];return true;});message('Waiting for wallet permission. Do not click again; the request remains locked until the wallet answers.');
+      const accounts=await p.request({method:'eth_requestAccounts'});authorizing=false;if(ticket!==epoch)return;
+      if(!ethers.isAddress(accounts?.[0]))throw Error('No valid wallet account');account=accounts[0];
+      if(announcedAccount&&!same(announcedAccount,account))throw Error('Wallet account changed during authorization. Reconnect explicitly.');
+      const c=ctx();await identity(c);const nextSigner=await new ethers.BrowserProvider(p).getSigner(account);if(!valid(c))return;await identity(c);if(!valid(c))return;signer=nextSigner;window.GG_CONNECTED=true;restorePending(account);message(pending?'Connected. Recovering unresolved transaction read-only; do not resubmit.':'Connected. Mainnet uses real USDG and ETH gas.');
+    }catch(e){if(ticket===epoch){drop('Connection unavailable. Select mainnet, then reconnect.');message(errorText(e));}}
+    finally{connecting=false;renderWallet();lock();if(current&&!busy)await refreshPosition();if(pending)startPolling();}
+  }
+  // Network mutation is isolated to this explicit button, never connect, refresh or transaction preflight.
+  async function network(){if(busy||connecting||pending)return;connecting=true;lock();const p=window.GG_WALLET||window.ethereum;
+    try{if(!p)throw Error('No wallet detected');await p.request({method:'wallet_switchEthereumChain',params:[{chainId:CHAIN_HEX}]});}
+    catch(e){if(e.code===4902){try{await p.request({method:'wallet_addEthereumChain',params:[{chainId:CHAIN_HEX,chainName:'Robinhood Chain mainnet',nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},rpcUrls:[C.rpc],blockExplorerUrls:[EXPLORER]}]});}catch(x){message(errorText(x));}}else message(errorText(e));}
+    finally{connecting=false;drop('Network request finished. Connect explicitly to validate.');}
+  }
+  async function lookup(cert){const seq=++lookupSeq;current=null;clearPosition('Loading mainnet certificate…');$('cert').classList.add('is-loading');$('lookupMsg').textContent='';
+    try{const a=await reg.getAppraisalByCert('PSA',cert);if(seq!==lookupSeq)return;current={cert,a,meta:META[cert]||null};renderCert();$('cLink').href=EXPLORER+'/address/'+A.registry;$('cHistory').textContent='Live mainnet appraisal · historical share pages are reference snapshots.';await refreshPosition();}
+    catch(e){if(seq===lookupSeq){current=null;clearPosition('Mainnet certificate unavailable. Actions disabled.');$('cName').textContent='Mainnet certificate unavailable';for(const id of ['cPoint','cLow','cHigh','cLtv','cMaxLoan','cUpdated','cScore','cComps','cRisk','cTier','cTierCap'])$(id).textContent='Unavailable';$('cHistory').textContent='';$('lookupMsg').textContent=errorText(e);}}
+    finally{if(seq===lookupSeq)$('cert').classList.remove('is-loading');}
+  }
+  function renderCert() {
+    const { cert, a, meta } = current;
+    const tier = CONF[Number(a.confidence)] || '?', risk = RISK[Number(a.risk)] || '?';
+    $('cCert').textContent = cert;
+    $('cName').textContent = meta ? `${meta.name} · ${meta.num}` : `PSA cert ${cert}`;
+    $('cSub').innerHTML = meta ? `PSA 10 <span class="dot">·</span> Cert ${cert} <span class="dot">·</span> ${meta.set}` : `Cert ${cert}`;
+    $('cTier').textContent = tier;
+    $('cTierCap').textContent = a.eligible ? `${tier} / ELIGIBLE` : `${tier} / NOT ELIGIBLE`;
+    $('cScore').textContent = Math.round(Number(a.confidenceScore) / 10);
+    $('cPoint').textContent = (Number(a.fmvPoint) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 });
+    $('cLow').textContent = usdFromCents(a.fmvLow);
+    $('cHigh').textContent = usdFromCents(a.fmvHigh);
+    const span = Number(a.fmvHigh - a.fmvLow);
+    $('cMid').style.left = span > 0 ? `${(Number(a.fmvPoint - a.fmvLow) / span) * 100}%` : '50%';
+    $('cRisk').textContent = risk;
+    $('cLtv').textContent = (Number(a.ltvBps) / 100).toFixed(0) + '%';
+    $('cMaxLoan').textContent = '$' + Math.floor(Number(a.fmvLow * BigInt(a.ltvBps) / 10000n) / 100).toLocaleString('en-US');
+    $('cComps').textContent = a.compCount.toString();
+    $('cUpdated').textContent = `Updated ${ago(a.appraisedAt)} · by ${short(a.attester)}`;
+    const img = $('slabImg');
+    if (meta) {
+      img.onload=()=>{img.hidden=false;$('slabLabel').hidden=true;};img.onerror=()=>{img.hidden=true;$('slabLabel').hidden=false;};
+      img.alt = `PSA 10 slab: ${meta.name} ${meta.num}, cert ${cert}`;
+      const src=`img/${cert}.jpg`;if(img.getAttribute('src')!==src){img.hidden=true;$('slabLabel').hidden=false;img.src=src;}
+      if(img.complete&&img.naturalWidth>0){img.hidden=false;$('slabLabel').hidden=true;}
+    } else { img.hidden = true; $('slabLabel').hidden = false; }
+  }
+
+
+  async function refreshPosition(minBlock=0n){
+    clearPosition('Refreshing verified mainnet snapshot…');const seq=refreshSeq,c=ctx();
+    if(!current)return false;
+    if(current.cert!=='109308847'){clearPosition('Mainnet certificate published. Lending is currently enabled only for token #1 (PSA 109308847); no deposit or borrowing is enabled for this card.');return false;}
+    ++refreshing;
+    try{return await bounded(async()=>{if(wallet&&account)await identity(c);const block=await rpc('eth_blockNumber'),header=await rpc('eth_getBlockByNumber',[block,false]);
+      if(!header||header.number!==block||!/^0x[\da-f]{64}$/i.test(header.hash)||BigInt(block)<minBlock)throw Error('Invalid or stale block header');
+      await verify(block);const o={blockTag:block};
+      const [holder,p,card,key,demo,allowDemo,paused,maxAge,perCard,totalCap,totalDebt,pool,approved,operator,status,available,limit,liq,asset]=await Promise.all([
+        cards.ownerOf(1,o),vault.positions(1,o),cards.card(1,o),cards.certKeyOf(1,o),cards.isDemo(1,o),vault.allowDemoCards(o),vault.paused(o),vault.maxAppraisalAge(o),vault.maxLoanPerCard(o),vault.maxTotalDebt(o),vault.totalDebt(o),usd.balanceOf(A.vault,o),cards.getApproved(1,o),cards.isApprovedForAll(account||C.owner,A.vault,o),vault.borrowStatus(1,o),vault.availableToBorrow(1,o),vault.borrowLimit(1,o),vault.liquidationThreshold(1,o),assets.globalTransferSettings(o)]);
+      const [a,held,balance,allowance]=await Promise.all([reg.getAppraisal(key,o),vault.certHeld(key,o),usd.balanceOf(account||C.owner,o),usd.allowance(account||C.owner,A.vault,o)]);
+      if(card.grader!=='PSA'||card.certId!==current.cert||key!==await reg.certKey('PSA',current.cert,o))throw Error('Token/certificate mismatch');
+      const inVault=same(holder,A.vault),deposited=!same(p.owner,ZERO),now=BigInt(header.timestamp);
+      if(inVault!==deposited||(!deposited&&p.debt!==0n)||a.appraisedAt>now||a.appraisedAt===0n||a.fmvLow>a.fmvPoint||a.fmvPoint>a.fmvHigh||a.ltvBps>9000n||maxAge===0n||maxAge>7776000n||perCard>totalCap)throw Error('Inconsistent snapshot');
+      const fresh=now<=a.appraisedAt+maxAge,eligible=a.eligible&&a.risk!==1n,demoBlocked=demo&&!allowDemo;
+      const rawLimit=min(a.fmvLow*10000n*a.ltvBps/10000n,perCard),cardHead=head(rawLimit,p.debt),poolHead=head(totalCap,totalDebt);
+      const restricted=paused||held||!fresh||!eligible||demoBlocked||asset.paused;
+      const expectedLimit=paused||held||!fresh||!eligible||demoBlocked?0n:rawLimit;
+      const expectedAvailable=deposited&&!restricted?min(cardHead,poolHead,pool):0n;
+      // Vault availability does not itself account for USDG's pause flag.
+      const vaultAvailable=deposited&&!(paused||held||!fresh||!eligible||demoBlocked)?min(cardHead,poolHead,pool):0n;
+      if(limit!==expectedLimit||available!==vaultAvailable||status.available!==available||status.status>10n)throw Error('Verified availability views inconsistent');
+      const final=await rpc('eth_getBlockByNumber',[block,false]);if(final?.hash!==header.hash)throw Error('Snapshot block changed');
+      if(wallet&&account)await identity(c);if(!valid(c)||seq!==refreshSeq)return false;
+      current.a=a;renderCert();pos={id:'1',holder,depositor:p.owner,debt:p.debt,inVault,fresh,eligible,paused,held,demoBlocked,assetPaused:asset.paused,limit,liq,pool,poolHead,perCard,totalCap,totalDebt,balance,allowance,approved:same(approved,A.vault)||operator,available:expectedAvailable,potential:restricted?0n:min(cardHead,poolHead,pool),restricted,block,checked:Date.now()};renderPosition();return true;
+    },25000,'Mainnet snapshot timed out. Use Refresh live status to retry.');
+    }catch(e){if(valid(c)&&seq===refreshSeq){clearPosition('Live verification failed. Actions disabled: '+errorText(e));}return false;}finally{--refreshing;}
+  }
+  function renderPosition(){if(!pos){lock();return;}lock();const own=!!signer&&same(pos.holder,account),depositor=!!signer&&pos.inVault&&same(pos.depositor,account),blocked=busy||connecting||receiptBusy||!!pending;
+    $('dSub').textContent=pos.inVault?'Token #1 deposited by '+(depositor?'you':pos.depositor):'Token #1 held by '+(own?'you':pos.holder)+'. No demo copies on mainnet.';
+    $('dStatus').lastElementChild.textContent=pos.inVault?'In vault':own?'In your wallet':'Read only';
+    $('depositBtn').hidden=!own||pos.inVault||pos.restricted||pos.potential<=0n;$('depositBtn').disabled=blocked||!own||pos.restricted||pos.potential<=0n;
+    $('lBig').textContent=usd6(pos.perCard);$('lSub').textContent='Per-card cap: certificate floor '+usdFromCents(current.a.fmvLow)+' × '+Number(current.a.ltvBps)/100+'% LTV. Your real limit is pool liquidity — live in step 03.';
+    $('amtRange').max=ethers.formatUnits(pos.inVault?pos.available:pos.potential,6);$('rangeMax').textContent=poolDisplay(pos.inVault?pos.available:pos.potential);
+    let n=0n;try{n=amount($('amt').value);}catch{}
+    $('borrowBtn').hidden=!depositor||pos.restricted||pos.available<=0n;
+    $('borrowBtn').disabled=blocked||!depositor||pos.restricted||n<=0n||n>pos.available;
+    $('borrowBtn').textContent=!account?'Connect wallet above':!depositor?'Deposit owned token first':pos.restricted?'Borrowing restricted':n>pos.available?'Insufficient liquidity / cap':n<=0n?'Enter USDG amount':'Borrow '+$('amt').value+' USDG';
+    $('ownerActions').hidden=!depositor;
+    $('approveUsdBtn').hidden=!depositor||pos.allowance>=pos.debt||pos.debt===0n||pos.assetPaused||pos.balance<pos.debt;
+    $('approveUsdBtn').disabled=blocked||!depositor||pos.debt===0n||pos.assetPaused||pos.balance<pos.debt||pos.allowance>=pos.debt;
+    $('repayBtn').hidden=!depositor||pos.debt===0n||pos.assetPaused||pos.balance<pos.debt||pos.allowance<pos.debt;
+    $('repayBtn').disabled=blocked||!depositor||pos.debt===0n||pos.assetPaused||pos.balance<pos.debt||pos.allowance<pos.debt;
+    $('withdrawBtn').hidden=!depositor||pos.debt!==0n;
+    $('withdrawBtn').disabled=blocked||!depositor||pos.debt!==0n;
+    $('pDebt').textContent=usd6(pos.debt);$('pLimit').textContent=usd6(pos.limit);$('pLiq').textContent=pos.inVault?'Card stays in vault until repaid':'No active vault position';const util=pos.limit?Number(pos.debt*10000n/pos.limit)/100:0;$('pUtil').textContent=util+'%';$('pUtilBar').style.width=Math.min(100,util)+'%';
+    const reasons=[pos.paused&&'Vault paused',pos.held&&'Certificate held',!pos.fresh&&'Certificate stale',!pos.eligible&&'Ineligible appraisal',pos.demoBlocked&&'Demo token blocked',pos.assetPaused&&'USDG paused',pos.pool===0n&&'No pool liquidity',pos.poolHead===0n&&'Pool debt cap reached'].filter(Boolean);
+    if(depositor&&pos.debt>0n&&pos.balance<pos.debt)reasons.push('Insufficient USDG balance to repay');
+    $('demoNote').hidden=false;$('demoNote').textContent='Pool liquidity: '+poolDisplay(pos.pool)+' · total debt: '+poolDisplay(pos.totalDebt)+' / '+poolDisplay(pos.totalCap)+' · available after deposit/caps: '+poolDisplay(pos.inVault?pos.available:pos.potential)+'. '+(reasons.join('; ')||'Listed borrowing prerequisites pass, not a safety guarantee.')+' Real USDG and ETH gas; minimum input 1 USDG.';
+    $('bNoteText').textContent='Read at mainnet block '+BigInt(pos.block)+'. '+(!account?'Connect to validate ownership. ':depositor?'Your deposited position. ':own?'Your token. Deposit transfers token #1 into vault custody without NFT approval. Borrowing requires a separate action. ':'This wallet cannot act on token #1. ')+'Repay and zero-debt withdrawal remain independent of borrow pause/freshness/liquidity. No physical authenticity, custody or legal rights are verified.';
+  }
+  function plan(action,text){if(!pos||!signer||!account)throw Error('Verified position and connected wallet required');const owned=same(pos.holder,account)&&!pos.inVault,depositor=pos.inVault&&same(pos.depositor,account);let contract=vault,method,args;
+    // Verified vault receiver records the NFT's `from` as depositor; no NFT allowance is needed.
+    if(action==='deposit'){if(!owned||pos.potential<=0n||pos.restricted)throw Error('Deposit prerequisites blocked: ownership, appraisal, caps or liquidity');contract=cards;method='safeTransferFrom(address,address,uint256)';args=[account,A.vault,1];}
+    else if(action==='borrow'){const n=amount(text);if(!depositor||pos.restricted||n>pos.available)throw Error('Borrow blocked: ownership, appraisal, pause, liquidity or cap');method='borrow';args=[1,n];}
+    else if(action==='approveUsd'||action==='repay'){if(!depositor||pos.debt===0n||pos.assetPaused||pos.balance<pos.debt)throw Error('Repayment unavailable: ownership, balance or USDG pause');if(action==='approveUsd'){if(pos.allowance>=pos.debt)throw Error('Allowance already sufficient');contract=usd;method='approve';args=[A.vault,pos.debt];}else{if(pos.allowance<pos.debt)throw Error('Approve exact repayment first');method='repay';args=[1,pos.debt];}}
+    else if(action==='withdraw'){if(!depositor||pos.debt!==0n)throw Error('Owned zero-debt deposited position required');method='withdraw';args=[1];}else throw Error('Unknown action');
+    return {contract,method,args,to:contract.target,data:contract.interface.encodeFunctionData(method,args)};
+  }
+  // Durable safety journal contains only public transaction context, never wallet credentials.
+  const journalKey=from=>'gg:pending:v2:'+C.chainId+':'+A.vault.toLowerCase()+':1:'+from.toLowerCase();
+  function savePending(p){localStorage.setItem(journalKey(p.from),JSON.stringify(p));}
+  function restorePending(from){if(pending)return;try{const raw=localStorage.getItem(journalKey(from));if(!raw)return;const p=JSON.parse(raw),contract=same(p.to,A.vault)?vault:same(p.to,A.cards)?cards:same(p.to,A.usd)?usd:null;
+      if(!same(p.from,from)||p.chain!==C.chainId||p.vault!==A.vault||p.token!=='1'||!contract||!/^0x[\da-f]+$/i.test(p.data)||!/^0x[\da-f]+$/i.test(p.block)||!/^0x[\da-f]{64}$/i.test(p.blockHash)||!/^\d+$/.test(p.debt)||!/^0x[\da-f]+$/i.test(p.nonce)||!(p.hash===null||/^0x[\da-f]{64}$/i.test(p.hash))||!contract.interface.parseTransaction({data:p.data}))throw Error('Invalid recovery journal');
+      p.scan=p.block;pending=p;receiptFallback=true;
+    }catch{throw Error('Recovery journal unreadable. Actions disabled; inspect wallet history before clearing browser storage.');}}
+  async function findSubmission(p){
+    if(!p.block)throw Error('Submission baseline unavailable; pending lock retained');
+    if(BigInt(await rpc('eth_chainId'))!==BigInt(C.chainId))throw Error('Recovery RPC chain mismatch');
+    const baseline=await rpc('eth_getBlockByNumber',[p.block,false]);if(!same(baseline?.hash,p.blockHash))throw Error('Submission baseline changed; pending lock retained');
+    const tip=BigInt(await rpc('eth_blockNumber')),from=BigInt(p.scan||p.block)+1n;if(from>tip)return;
+    const end=from+1999n<tip?from+1999n:tip,hex=n=>'0x'+n.toString(16);
+    const logs=await rpc('eth_getLogs',[{address:p.to,fromBlock:hex(from),toBlock:hex(end)}]);
+    if(!Array.isArray(logs))throw Error('Malformed recovery logs');
+    for(const hash of new Set(logs.filter(l=>!l.removed).map(l=>l.transactionHash))){const tx=await rpc('eth_getTransactionByHash',[hash]);
+      if(same(tx?.from,p.from)&&same(tx?.to,p.to)&&same(tx?.input,p.data)&&BigInt(tx.value)===0n&&BigInt(tx.chainId)===BigInt(C.chainId)&&BigInt(tx.nonce)===BigInt(p.nonce)&&BigInt(tx.blockNumber)>BigInt(p.block)){p.hash=hash;savePending(p);return;}}
+    // Failed transactions emit no logs. A user may supply their wallet's hash for verification.
+    p.scan=hex(end);
+  }
+  async function act(action){if(busy||connecting||pending||receiptBusy||suspended)return;const flight={};activeAction=flight;busy=true;lock();const c=ctx(),text=$('amt').value;let submission=null;
+    try{await identity(c);restorePending(account);if(pending){startPolling();throw Error('Unresolved saved submission recovered; do not resubmit.');}if(!await refreshPosition()||!valid(c))throw Error('Fresh verified snapshot required');const p=plan(action,text);await identity(c);if(!valid(c))throw Error('Session changed');
+      await p.contract.connect(signer)[p.method].staticCall(...p.args);await identity(c);if(!valid(c))throw Error('Session changed');
+      const block=await rpc('eth_blockNumber'),header=await rpc('eth_getBlockByNumber',[block,false]),nonce=await rpc('eth_getTransactionCount',[account,block]);
+      if(!/^0x[\da-f]{64}$/i.test(header?.hash)||header.number!==block)throw Error('Invalid submission baseline');
+      const baseline=await vault.positions(1,{blockTag:block});
+      if(BigInt(await rpc('eth_getTransactionCount',[account,'pending']))!==BigInt(nonce))throw Error('Wallet has an outstanding transaction or baseline advanced. Resolve wallet history, then refresh; nothing sent.');
+      await identity(c);if(!valid(c))throw Error('Session changed');
+      submission={hash:null,from:account,to:p.to,data:p.data,chain:C.chainId,vault:A.vault,token:'1',block,blockHash:header.hash,nonce,debt:baseline.debt.toString(),scan:block};
+      // Persist BEFORE sending. If storage is unavailable, fail closed without opening a transaction.
+      savePending(submission);pending=submission;receiptFallback=false;clearPosition('Awaiting wallet confirmation.');message('Awaiting wallet: confirm ONE '+action+' transaction. Read-only recovery is active; do not click again.');startPolling();
+      // Use the EIP-1193 result directly: ethers' send wrapper may wait on further provider reads.
+      let hash;try{hash=await c.wallet.request({method:'eth_sendTransaction',params:[{from:submission.from,to:p.to,data:p.data,value:'0x0'}]});}catch(e){if((e.code===4001||e.code==='ACTION_REJECTED')&&pending===submission&&!submission.hash){localStorage.removeItem(journalKey(submission.from));pending=null;stopPolling();}else if(pending===submission)throw Error('Submission outcome unknown. Do not resubmit. '+errorText(e));else return;throw e;}
+      if(pending!==submission)return; // A late wallet answer must not resurrect an already reconciled operation.
+      if(!/^0x[\da-f]{64}$/i.test(hash))throw Error('Invalid transaction hash; inspect wallet.');submission.hash=hash;savePending(submission);if(!valid(c)||suspended)return;clearPosition('Submitted · confirming automatically.');message('Submitted · confirming: '+EXPLORER+'/tx/'+hash+'. No automatic next transaction.');
+    }catch(e){if(activeAction===flight&&valid(c)){if(pending){receiptFallback=true;clearPosition('Submission outcome unknown. Read-only recovery active; do not resubmit.');}message(errorText(e));}}finally{if(activeAction===flight){activeAction=null;busy=false;if(pos)renderPosition();else lock();renderWallet();if(pending&&!suspended)startPolling();else if(valid(c)&&current)await refreshPosition();}}
+  }
+  async function receipt(){if(connecting||receiptBusy||!pending||suspended)return;receiptBusy=true;lock();const p=pending;
+    try{if(BigInt(await rpc('eth_chainId'))!==BigInt(C.chainId))throw Error('Recovery RPC chain mismatch');if(!p.hash)await findSubmission(p);if(pending!==p||suspended)return;if(!p.hash){message('Wallet response unresolved. No matching mined transaction found after the saved baseline; existing debt is not proof of success. Read-only checks continue; do not resubmit.');return;}const r=await rpc('eth_getTransactionReceipt',[p.hash]);if(pending!==p||suspended)return;if(!r){message('Submitted · confirming automatically. No resubmission. '+EXPLORER+'/tx/'+p.hash);return;}
+      const [tx,b,h]=await Promise.all([rpc('eth_getTransactionByHash',[p.hash]),rpc('eth_getBlockByNumber',[r.blockNumber,false]),rpc('eth_blockNumber')]);
+      if(pending!==p||suspended)return;
+      if(!same(r.transactionHash,p.hash)||!same(r.from,p.from)||!same(r.to,p.to)||!same(tx?.from,p.from)||!same(tx?.to,p.to)||!same(tx?.input,p.data)||BigInt(tx.value)!==0n||BigInt(tx.chainId)!==4663n||BigInt(tx.nonce)!==BigInt(p.nonce)||BigInt(r.blockNumber)<=BigInt(p.block)||!same(tx.blockNumber,r.blockNumber)||!same(tx.blockHash,r.blockHash)||!same(b?.hash,r.blockHash)||!['0x0','0x1'].includes(r.status))throw Error('Receipt verification failed; pending lock retained');
+      if(BigInt(h)<BigInt(r.blockNumber)+1n){message('Confirming · 1 of 2 confirmations. Checking automatically. '+EXPLORER+'/tx/'+p.hash);return;}
+      // Receipt resolves only this immutable submission, independent of wallet/session changes.
+      localStorage.removeItem(journalKey(p.from));pending=null;activeAction=null;busy=false;receiptFallback=false;stopPolling();
+      const outcome=(r.status==='0x1'?'Confirmed':'Reverted')+': '+EXPLORER+'/tx/'+p.hash+'. ',c=ctx();
+      message(outcome+'Refreshing verified debt/liquidity. No automatic next transaction.');
+      const refreshed=await refreshPosition(BigInt(r.blockNumber));
+      // A receipt is final independently of a follow-up read. Never leave its transient
+      // "Refreshing" message behind, or claim a failed read is a failed withdrawal.
+      if(valid(c)&&!pending)message(outcome+(refreshed&&pos?'Live status updated. '+(pos.inVault?'Token #1 is in vault custody. ':'Token #1 is back outside the vault; no active vault position. ')+'Debt: '+usd6(pos.debt)+'. ':'Live status unavailable. Actions disabled; use Refresh live status to retry. ')+(!account?'Reconnect explicitly; wallet actions remain disabled.':'Next action requires a new click.'));
+    }catch(e){if(pending===p){receiptFallback=true;message(errorText(e)+' Pending lock retained. Automatic read-only checks continue.');}}finally{receiptBusy=false;if(pos)renderPosition();else lock();renderWallet();}
+  }
+  ORDER.forEach(cert=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=META[cert].chip+' · PSA 10';b.addEventListener('click',()=>{if(busy||pending)return;$('certInput').value=cert;lookup(cert);});$('chips').appendChild(b);});
+  $('lookupForm').addEventListener('submit',e=>{e.preventDefault();if(!busy&&!pending)lookup($('certInput').value.replace(/\D/g,''));});
+  $('connectBtn').addEventListener('click',connect);$('networkBtn').addEventListener('click',network);$('refreshBtn').addEventListener('click',()=>{if(!busy&&!connecting&&!pending&&!receiptBusy){if(current)return refreshPosition();return lookup($('certInput').value.replace(/\D/g,''));}});$('receiptBtn').addEventListener('click',async()=>{if(!pending||receiptBusy||connecting)return;const hash=$('recoveryHash').value.trim();if(!pending.hash&&hash){if(!/^0x[\da-f]{64}$/i.test(hash)){message('Enter a complete transaction hash from wallet history. No transaction will be sent.');return;}pending.hash=hash;try{await receipt();}finally{if(pending?.hash===hash){pending.hash=null;lock();}}}else await receipt();});
+  for(const [id,a]of [['depositBtn','deposit'],['borrowBtn','borrow'],['approveUsdBtn','approveUsd'],['repayBtn','repay'],['withdrawBtn','withdraw']])$(id).addEventListener('click',()=>act(a));
+  $('amt').addEventListener('input',()=>{if(pos)renderPosition();});$('amtRange').addEventListener('input',e=>{if(busy||pending)return;$('amt').value=e.target.value;if(pos)renderPosition();});$('maxBtn').addEventListener('click',()=>{if(busy||pending||!pos)return;$('amt').value=ethers.formatUnits(pos.inVault?pos.available:pos.potential,6);renderPosition();});
+  document.querySelectorAll('.copy-btn').forEach(b=>b.addEventListener('click',()=>{const a=b.parentElement.querySelector('[data-copy]');if(a)navigator.clipboard?.writeText(a.dataset.copy);}));
+  window.addEventListener('pagehide',()=>{suspended=true;clearInterval(refreshTimer);drop('Page hidden. Refresh and reconnect to validate.');});
+  window.addEventListener('pageshow',e=>{if(e.persisted){suspended=false;drop('Restored page. Refresh and reconnect before using cached values.');refreshTimer=setInterval(autoRefresh,30000);}});
+  const autoRefresh=()=>{if(!suspended&&!busy&&!connecting&&!pending&&!receiptBusy&&!refreshing&&current)return refreshPosition();};
+  let refreshTimer=null;
+  // start
+  renderWallet();$('amt').value='1';$('certInput').value='109308847';lookup('109308847');
+  message('Mainnet pilot. No transaction requested. After any reload, inspect wallet history for pending transactions before acting.');
+  refreshTimer=setInterval(autoRefresh,30000);
+})();
+
+</script>
+<script>
+// Six small local references: do not leave zero-height lazy images waiting offscreen.
+document.querySelectorAll('.rowlink img').forEach(img=>{img.loading='eager';});
+(() => { const c = document.getElementById('cCert'), a = document.getElementById('cShare');
+  const ok = ["109308847","118973623","100863346","154790134","153708045","111992917"];
+  const upd = () => { const v = c.textContent.trim(); a.href = ok.includes(v) ? 'cert/' + v + '/' : 'cert/'; };
+  new MutationObserver(upd).observe(c, { childList: true, characterData: true, subtree: true }); upd(); })();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
